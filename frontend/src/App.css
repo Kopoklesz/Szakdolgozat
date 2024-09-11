@@ -1,30 +1,90 @@
-.App {
-  text-align: center;
+/* Alap stílusok a navigációs sávhoz */
+.externLinksNav {
+  background-color: #285780;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 1em 0.5em; /* Növelt padding */
 }
 
-nav {
-  background-color: #333;
-  padding: 1em;
+.interLinksNav {
+  background-color: #04b0b8;
+  display: flex;
+  justify-content: flex-end; /* Egyenletes elosztás */
+  align-items: center;
+  padding: 1em 1em; /* Növelt padding */
+  height: 30px; /* Növelt magasság */
 }
 
+/* Lista stílusok */
 nav ul {
   list-style-type: none;
+  margin: 0;
+  padding: 0;
   display: flex;
-  justify-content: space-around;
 }
 
-nav ul li {
-  display: inline;
+/* Listaelemek stílusai */
+nav li {
+  margin-right: 2em; /* Távolság a listaelemek között */
 }
 
-nav ul li a {
-  color: white;
-  text-decoration: none;
-  padding: 0.5em 1em;
-  background-color: #555;
-  border-radius: 5px;
+/* Linkek stílusai */
+nav a {
+  color: white; /* Fehér színű szöveg */
+  text-decoration: none; /* Nincs aláhúzás */
+  font-weight: bold;
+  font-size: 1.2rem; /* Növelt betűméret */
 }
 
-nav ul li a:hover {
-  background-color: #777;
+/* Linkek hover állapota */
+nav a:hover {
+  text-decoration: underline; /* Aláhúzás hover állapotban */
+}
+
+/* Media query-k a reszponzív dizájnhoz */
+@media (max-width: 768px) {
+  .externLinksNav, .interLinksNav {
+    flex-direction: column;
+    height: auto;
+    padding: 1em;
+  }
+
+  nav ul {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  nav li {
+    margin-right: 0;
+    margin-bottom: 0.5em;
+  }
+}
+
+/* Nyelvváltó gomb stílusai */
+.language-selector {
+  position: relative;
+  display: inline-block;
+}
+
+.language-selector button {
+  background-color: transparent; /* Átlátszó háttér */
+  color: white; /* Fehér szöveg */
+  border: none; /* Nincs keret */
+  padding: 0.5em 1em; /* Kényelmes padding */
+  font-size: 1rem; /* Betűméret */
+  font-weight: bold; /* Félkövér szöveg */
+  cursor: pointer; /* Mutató kurzor */
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease, color 0.3s ease; /* Sima átmenet */
+}
+
+.language-selector button:hover {
+  background-color: rgba(255, 255, 255, 0.2); /* Kivilágosodás hover állapotban */
+  color: #f0f0f0; /* Világosabb szöveg hover állapotban */
+}
+
+.language-selector .globe-icon {
+  margin-right: 0.5em; /* Távolság az ikon és a szöveg között */
 }
