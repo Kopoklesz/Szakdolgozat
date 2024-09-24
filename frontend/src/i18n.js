@@ -6,7 +6,7 @@ const resources = {
     translation: {
       "PE Főoldal": "PE Homepage",
       "Használati útmutató": "User Manual",
-      "Bolt": "Shop",
+      "Főoldal": "Homepage",
       "Bejelentkezés": "Login"
     }
   },
@@ -14,7 +14,7 @@ const resources = {
     translation: {
       "PE Főoldal": "PE Főoldal",
       "Használati útmutató": "Használati útmutató",
-      "Bolt": "Bolt",
+      "Főoldal": "Főoldal",
       "Bejelentkezés": "Bejelentkezés"
     }
   }

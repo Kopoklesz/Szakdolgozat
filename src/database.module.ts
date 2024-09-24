@@ -1,17 +1,22 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',  // A helyi gépen futtatjuk
-      port: 5432,  // PostgreSQL alapértelmezett portja
-      username: 'postgres',  // A PostgreSQL-ben megadott felhasználónév
-      password: '5060',  // A PostgreSQL-ben megadott jelszó
-      database: 'main',  // Az előbb létrehozott adatbázis neve
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],  // Entity-k automatikus beolvasása
-      synchronize: true,  // Automatikusan szinkronizálja a séma változásait (fejlesztésre alkalmas, éles környezetben állítsd false-ra)
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('DB_HOST'),
+        port: +configService.get<number>('DB_PORT'),
+        username: configService.get('DB_USERNAME'),
+        password: configService.get('DB_PASSWORD'),
+        database: configService.get('DB_NAME'),
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        synchronize: configService.get('NODE_ENV') !== 'production',
+      }),
+      inject: [ConfigService],
     }),
   ],
 })

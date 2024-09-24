@@ -1,0 +1,107 @@
+:root {
+    --external-nav-color: #285780;
+    --internal-nav-color: #04b0b8;
+    --text-color: white;
+  }
+  
+  /* Alap stílusok a navigációs sávhoz */
+  .externLinksNav {
+    background-color: var(--external-nav-color);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 1em 0.5em; /* Növelt padding */
+  }
+  
+  .interLinksNav {
+    background-color: var(--internal-nav-color);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 1em;
+    height: 30px;
+  }
+  
+  /* Lista stílusok */
+  nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+  }
+  
+  /* Listaelemek stílusai */
+  nav li {
+    margin-right: 2em; /* Távolság a listaelemek között */
+  }
+  
+  /* Linkek stílusai */
+  nav a {
+    color: white; /* Fehér színű szöveg */
+    text-decoration: none; /* Nincs aláhúzás */
+    font-weight: bold;
+    font-size: 1.2rem; /* Növelt betűméret */
+  }
+  
+  /* Linkek hover állapota */
+  nav a:hover {
+    text-decoration: underline; /* Aláhúzás hover állapotban */
+  }
+  
+  /* Media query-k a reszponzív dizájnhoz */
+  @media (max-width: 768px) {
+    .externLinksNav, .interLinksNav {
+      flex-direction: column;
+      height: auto;
+      padding: 1em;
+    }
+  
+    nav ul {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    nav li {
+      margin-right: 0;
+      margin-bottom: 0.5em;
+    }
+  }
+  
+  /* Nyelvváltó gomb stílusai */
+  .language-selector {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .language-selector button {
+    background-color: transparent; /* Átlátszó háttér */
+    color: white; /* Fehér szöveg */
+    border: none; /* Nincs keret */
+    padding: 0.5em 1em; /* Kényelmes padding */
+    font-size: 1rem; /* Betűméret */
+    font-weight: bold; /* Félkövér szöveg */
+    cursor: pointer; /* Mutató kurzor */
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease, color 0.3s ease; /* Sima átmenet */
+  }
+  
+  .language-selector button:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* Kivilágosodás hover állapotban */
+    color: #f0f0f0; /* Világosabb szöveg hover állapotban */
+  }
+  
+  .language-selector .globe-icon {
+    margin-right: 0.5em; /* Távolság az ikon és a szöveg között */
+  }
+  
+  @media (max-width: 480px) {
+    nav a {
+      font-size: 1rem;
+    }
+    
+    .language-selector button {
+      font-size: 0.9rem;
+    }
+  }
+  
