@@ -10,10 +10,10 @@
 .interLinksNav {
   background-color: #04b0b8;
   display: flex;
-  justify-content: flex-end; /* Egyenletes elosztás */
+  justify-content: flex-end;
   align-items: center;
-  padding: 1em 1em; /* Növelt padding */
-  height: 30px; /* Növelt magasság */
+  padding: 1em;
+  height: 30px;
 }
 
 /* Lista stílusok */
