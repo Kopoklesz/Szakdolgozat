@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import '../css/Nav.css';
 
-const LANGUAGES = { HU: 'hu', EN: 'en' };
+const LANGUAGES = { HU: 'hu', EN: 'en' };   
 
 function Nav({ currentLanguage, changeLanguage }) {
   const { t } = useTranslation();
