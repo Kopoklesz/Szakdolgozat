@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Webshop } from './webshop.entity';
@@ -12,6 +12,31 @@ export class WebshopService {
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
   ) {}
+
+  async createWebshop(webshopData: Partial<Webshop>): Promise<Webshop> {
+    try {
+      if (!webshopData.subject_name || !webshopData.paying_instrument || !webshopData.header_color_code) {
+        throw new BadRequestException('Missing required fields');
+      }
+
+      const newWebshopData = {
+        ...webshopData,
+        teacher_id: webshopData.teacher_id || 1, // Default teacher_id
+        status: 'active',
+        creation_date: new Date()
+      };
+
+      const newWebshop = this.webshopRepository.create(newWebshopData);
+      await this.webshopRepository.save(newWebshop);
+      return newWebshop;
+    } catch (error) {
+      console.error('Error in createWebshop:', error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to create webshop');
+    }
+  }
 
   async getWebshop(id: number): Promise<Webshop> {
     try {

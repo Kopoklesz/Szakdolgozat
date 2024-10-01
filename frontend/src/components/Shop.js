@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import '../css/Shop.css';
 
 const API_URL = 'http://localhost:3001'; // Adjust this to your NestJS server URL
 
 const Shop = () => {
+  const { t } = useTranslation();
   const { webshopId = 0 } = useParams();
   const [webshop, setWebshop] = useState(null);
   const [products, setProducts] = useState([]);
@@ -21,9 +23,9 @@ const Shop = () => {
       setError(null);
       try {
         const [webshopResponse, productsResponse, categoriesResponse] = await Promise.all([
-          axios.get(`${API_URL}/webshop${webshopId === 0 ? '' : `/${webshopId}`}`),                   // Webshop adatok lekérése
-          axios.get(`${API_URL}/webshop/${webshopId}/products`),              // Termékek lekérése a webshopId alapján
-          axios.get(`${API_URL}/webshop/${webshopId}/categories`),            // Kategóriák lekérése a webshopId alapján
+          axios.get(`${API_URL}/webshop${webshopId === 0 ? '' : `/${webshopId}`}`),
+          axios.get(`${API_URL}/webshop/${webshopId}/products`),
+          axios.get(`${API_URL}/webshop/${webshopId}/categories`),
         ]);
         
         setWebshop(webshopResponse.data);
@@ -31,78 +33,113 @@ const Shop = () => {
         setCategories(categoriesResponse.data);
       } catch (error) {
         console.error('Error fetching data:', error.response?.data || error.message);
-        setError(`Failed to load shop data. ${error.response?.data?.message || error.message}`);
+        setError(`${t('Nem sikerült betölteni a bolt adatait')}. ${error.response?.data?.message || error.message}`);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [webshopId]);
+  }, [webshopId, t]);
 
   const filteredProducts = products.filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
     (selectedCategory === '' || product.category === selectedCategory)
   );
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div>{t('Betöltés')}...</div>;
+  if (error) return <div>{t('Hiba')}: {error}</div>;
 
   return (
-    <div className="shop">
-      <header style={{ backgroundColor: webshop?.header_color_code || '#000000' }}>
+    <div className="shop-container">
+      <img 
+        src={webshop?.paying_device_image} 
+        alt={webshop?.paying_instrument || 'Paying Instrument'} 
+        className="paying-device" 
+      />
+      <div className="shop-content">
         <h1>{webshop?.subject_name}</h1>
-        <img src={webshop?.paying_device_image} alt="Paying Device" className="paying-device" />
-      </header>
-      
-      <div className="search-filter">
-        <input 
-          type="text" 
-          placeholder="Search products..." 
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <select 
-          value={selectedCategory} 
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        >
-          <option value="">All Categories</option>
-          {categories.map(category => (
-            <option key={category} value={category}>{category}</option>
-          ))}
-        </select>
-      </div>
-
-      <div className="product-grid">
-        {filteredProducts.length > 0 ? (
-          filteredProducts.map(product => (
-            <ProductCard key={product.product_id} product={product} payingInstrument={webshop?.paying_instrument} />
-          ))
-        ) : (
-          <p>No products found.</p>
-        )}
+        <div className="search-filter">
+          <input 
+            type="text" 
+            placeholder={t('Termék keresés...')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <select 
+            value={selectedCategory} 
+            onChange={(e) => setSelectedCategory(e.target.value)}
+          >
+            <option value="">{t('Minden kategória')}</option>
+            {categories.map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
+          </select>
+        </div>
+        <div className="product-grid">
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map(product => (
+              <ProductCard key={product.product_id} product={product} payingInstrument={webshop?.paying_instrument} />
+            ))
+          ) : (
+            <p>{t('Nem található termék')}</p>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
 const ProductCard = ({ product, payingInstrument }) => {
+  const { t } = useTranslation();
   const [quantity, setQuantity] = useState(0);
+
+  const handleQuantityChange = (change) => {
+    setQuantity(prevQuantity => {
+      const newQuantity = (parseInt(prevQuantity) || 0) + change;
+      return Math.max(0, Math.min(newQuantity, product.current_stock)).toString();
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    if (value === '' || (parseInt(value) >= 0 && parseInt(value) <= product.current_stock)) {
+      setQuantity(value);
+    }
+  };
+
+  const handleBlur = () => {
+    if (quantity === '') {
+      setQuantity('0');
+    }
+  };
 
   return (
     <div className="product-card">
       <img src={product.image} alt={product.name} />
-      <h3>{product.name}</h3>
-      <p>Price: {product.price} {payingInstrument}</p>
-      <p>Available: {product.current_stock}</p>
-      <input 
-        type="number" 
-        min="0" 
-        max={product.current_stock}
-        value={quantity}
-        onChange={(e) => setQuantity(Math.min(product.current_stock, Math.max(0, parseInt(e.target.value) || 0)))}
-      />
-      <button onClick={() => {/* Add to cart logic - to be implemented later */}}>Add to Cart</button>
+      <h3 className="product-name">{product.name}</h3>
+      <p className="product-price">{t('Ár')}: {product.price} {payingInstrument}</p>
+      <p className="product-stock">{t('Elérhető')}: {product.current_stock}</p>
+      <div className="quantity-control">
+        <button className="quantity-btn" onClick={() => handleQuantityChange(-1)}>-</button>
+        <input 
+          type="number" 
+          min="0" 
+          max={product.current_stock}
+          value={quantity}
+          onChange={handleInputChange}
+          onBlur={handleBlur}
+        />
+        <button className="quantity-btn" onClick={() => handleQuantityChange(1)}>+</button>
+      </div>
+      <button className="bookmarkBtn" onClick={() => {/* Kosárba helyezés logika - később implementálandó */}}>
+        <span className="IconContainer">
+          <svg viewBox="0 0 24 24" height="0.9em" className="icon">
+            <path d="M7 4h14l-1.5 9H8.5L7 4zm0 2l1.5 8h10l1.5-8H7zM4 2h2l1 2h12l1-2h2v2H4V2z"></path>
+          </svg>
+        </span>
+        <p className="text">{t('Kosárba')}</p>
+      </button>
     </div>
   );
 };

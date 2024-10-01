@@ -4,6 +4,7 @@ import { useTranslation, I18nextProvider } from 'react-i18next';
 import i18n from './i18n';
 import Shop from './components/Shop';
 import Nav from './components/Nav';
+import TeacherDashboard from './components/TeacherDashboard';
 import './App.css';
 
 const LANGUAGES = { HU: 'hu', EN: 'en' };
@@ -24,7 +25,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate replace to="/shop" />} />
           <Route path="/shop" element={<Shop />} />
-          {/* Add more routes here as you develop more features */}
+          <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
         </Routes>
       </Router>
     </I18nextProvider>
