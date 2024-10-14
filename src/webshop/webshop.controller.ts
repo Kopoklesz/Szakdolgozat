@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Param, ParseIntPipe, UseFilters, HttpException, HttpStatus } from '@nestjs/common';
 import { WebshopService } from './webshop.service';
-import { HttpExceptionFilter } from './filters/http-exception.filter';
-import { Webshop } from './webshop.entity';
+import { HttpExceptionFilter } from '../filters/http-exception.filter';
+import { CreateWebshopDto } from '../dto/create-webshop.dto';
 
 @Controller('webshop')
 @UseFilters(new HttpExceptionFilter())
@@ -9,9 +9,9 @@ export class WebshopController {
   constructor(private readonly webshopService: WebshopService) {}
 
   @Post()
-  async createWebshop(@Body() webshopData: Partial<Webshop>) {
+  async createWebshop(@Body() createWebshopDto: CreateWebshopDto) {
     try {
-      return await this.webshopService.createWebshop(webshopData);
+      return await this.webshopService.createWebshop(createWebshopDto);
     } catch (error) {
       if (error.status === HttpStatus.BAD_REQUEST) {
         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
@@ -20,20 +20,9 @@ export class WebshopController {
     }
   }
 
-  @Get()
-  getDefaultWebshop() {
-    return this.webshopService.getWebshop(0);
-  }
-
   @Get(':id')
   getWebshop(@Param('id', ParseIntPipe) id: number) {
-    console.log(`Received request for webshop with ID: ${id}`);
     return this.webshopService.getWebshop(id);
-  }
-
-  @Get(':id/products')
-  getProducts(@Param('id', ParseIntPipe) id: number) {
-    return this.webshopService.getProducts(id);
   }
 
   @Get(':id/categories')

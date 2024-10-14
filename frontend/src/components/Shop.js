@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import '../css/Shop.css';
 
-const API_URL = 'http://localhost:3001'; // Adjust this to your NestJS server URL
+const API_URL = 'http://localhost:3001';
 
 const Shop = () => {
   const { t } = useTranslation();
@@ -23,7 +23,7 @@ const Shop = () => {
       setError(null);
       try {
         const [webshopResponse, productsResponse, categoriesResponse] = await Promise.all([
-          axios.get(`${API_URL}/webshop${webshopId === 0 ? '' : `/${webshopId}`}`),
+          axios.get(`${API_URL}/webshop/${webshopId}`),
           axios.get(`${API_URL}/webshop/${webshopId}/products`),
           axios.get(`${API_URL}/webshop/${webshopId}/categories`),
         ]);
@@ -51,11 +51,11 @@ const Shop = () => {
   if (error) return <div>{t('Hiba')}: {error}</div>;
 
   return (
-    <div className="shop-container">
+    <div className="shop-container" style={{ backgroundColor: webshop?.header_color_code }}>
       <img 
-        src={webshop?.paying_device_image} 
-        alt={webshop?.paying_instrument || 'Paying Instrument'} 
-        className="paying-device" 
+        src={webshop?.currency?.icon} 
+        alt={webshop?.currency?.name || 'Currency'} 
+        className="currency-icon" 
       />
       <div className="shop-content">
         <h1>{webshop?.subject_name}</h1>
@@ -79,7 +79,7 @@ const Shop = () => {
         <div className="product-grid">
           {filteredProducts.length > 0 ? (
             filteredProducts.map(product => (
-              <ProductCard key={product.product_id} product={product} payingInstrument={webshop?.paying_instrument} />
+              <ProductCard key={product.product_id} product={product} currency={webshop?.currency?.name} />
             ))
           ) : (
             <p>{t('Nem található termék')}</p>

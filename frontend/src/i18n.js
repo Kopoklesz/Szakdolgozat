@@ -27,7 +27,17 @@ const resources = {
       "Webshop létrehozása": "Create webshop",
       "Webshopjaid": "Your webshops",
       "Szerkesztés": "Edit",
-      "Termék megtekintés": "Product view"
+      "Termék megtekintés": "Product view",
+      "Kosár": "Cart",
+      "A kosár üres": "The cart is empty",
+      "Eltávolítás": "Remove",
+      "Összesen": "Total",
+      "Fizetés": "Checkout",
+      "Profil": "Profile",
+      "Egyenleg": "Balance",
+      "Vásárlási előzmények": "Purchase history",
+      "Nem sikerült betölteni a kosár tartalmát": "Failed to load cart contents",
+      "Nem sikerült betölteni a profil adatokat": "Failed to load profile data"
     }
   },
   hu: {
@@ -55,7 +65,17 @@ const resources = {
       "Webshop létrehozása": "Webshop létrehozása",
       "Webshopjaid": "Webshopjaid",
       "Szerkesztés": "Szerkesztés",
-      "Termék megtekintés": "Termék megtekintés"
+      "Termék megtekintés": "Termék megtekintés",
+      "Kosár": "Kosár",
+      "A kosár üres": "A kosár üres",
+      "Eltávolítás": "Eltávolítás",
+      "Összesen": "Összesen",
+      "Fizetés": "Fizetés",
+      "Profil": "Profil",
+      "Egyenleg": "Egyenleg",
+      "Vásárlási előzmények": "Vásárlási előzmények",
+      "Nem sikerült betölteni a kosár tartalmát": "Nem sikerült betölteni a kosár tartalmát",
+      "Nem sikerült betölteni a profil adatokat": "Nem sikerült betölteni a profil adatokat"
     }
   }
 };
