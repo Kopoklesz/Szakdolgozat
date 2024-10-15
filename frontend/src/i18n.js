@@ -37,7 +37,11 @@ const resources = {
       "Egyenleg": "Balance",
       "Vásárlási előzmények": "Purchase history",
       "Nem sikerült betölteni a kosár tartalmát": "Failed to load cart contents",
-      "Nem sikerült betölteni a profil adatokat": "Failed to load profile data"
+      "Nem sikerült betölteni a profil adatokat": "Failed to load profile data",
+      "Webshopok": "Webshops",
+      "Elérhető Webshopok": "Available Webshops",
+      "Hiba történt a webshopok betöltése közben.": "An error occurred while loading the webshops.",
+      "Webshop keresése...": "Search webshop..."
     }
   },
   hu: {
@@ -75,7 +79,11 @@ const resources = {
       "Egyenleg": "Egyenleg",
       "Vásárlási előzmények": "Vásárlási előzmények",
       "Nem sikerült betölteni a kosár tartalmát": "Nem sikerült betölteni a kosár tartalmát",
-      "Nem sikerült betölteni a profil adatokat": "Nem sikerült betölteni a profil adatokat"
+      "Nem sikerült betölteni a profil adatokat": "Nem sikerült betölteni a profil adatokat",
+      "Webshopok": "Webshopok",
+      "Elérhető Webshopok": "Elérhető Webshopok",
+      "Hiba történt a webshopok betöltése közben.": "Hiba történt a webshopok betöltése közben.",
+      "Webshop keresése...": "Webshop keresése..."
     }
   }
 };

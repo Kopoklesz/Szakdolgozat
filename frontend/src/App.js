@@ -6,7 +6,7 @@ import Shop from './components/Shop';
 import Nav from './components/Nav';
 import TeacherDashboard from './components/TeacherDashboard';
 import Cart from './components/Cart';
-// import UserProfile from './components/UserProfile';
+import WebshopList from './components/WebshopList';
 import './App.css';
 
 const LANGUAGES = { HU: 'hu', EN: 'en' };
@@ -14,7 +14,7 @@ const LANGUAGES = { HU: 'hu', EN: 'en' };
 function App() {
   const { i18n } = useTranslation();
   const [currentLanguage, setCurrentLanguage] = useState(LANGUAGES.HU);
-  const [userId, setUserId] = useState(null); // Ez majd a bejelentkezés után állítódik be  <Route path="/profile" element={<UserProfile userId={userId} />} />
+  const [userId, setUserId] = useState(null);
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
@@ -26,7 +26,8 @@ function App() {
       <Router>
         <Nav currentLanguage={currentLanguage} changeLanguage={changeLanguage} />
         <Routes>
-          <Route path="/" element={<Navigate replace to="/shop" />} />
+          <Route path="/" element={<Navigate replace to="/webshops" />} />
+          <Route path="/webshops" element={<WebshopList />} />
           <Route path="/shop/:webshopId?" element={<Shop />} />
           <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
           <Route path="/cart/:webshopId" element={<Cart userId={userId} />} />
