@@ -17,7 +17,7 @@ const Cart = ({ userId, webshopId }) => {
       setError(null);
       try {
         const response = await axios.get(`${API_URL}/cart/${userId}/${webshopId}`);
-        setCartItems(response.data);
+        setCartItems(response.data.items || []);
       } catch (error) {
         console.error('Error fetching cart items:', error.response?.data || error.message);
         setError(`${t('Nem sikerült betölteni a kosár tartalmát')}. ${error.response?.data?.message || error.message}`);
@@ -31,25 +31,31 @@ const Cart = ({ userId, webshopId }) => {
 
   const updateQuantity = async (productId, newQuantity) => {
     try {
-      await axios.put(`${API_URL}/cart/${userId}/${webshopId}/${productId}`, { quantity: newQuantity });
+      await axios.post(`${API_URL}/cart/${userId}/${webshopId}`, { 
+        productId: productId, 
+        quantity: newQuantity 
+      });
       setCartItems(prevItems => 
         prevItems.map(item => 
-          item.product_id === productId ? { ...item, quantity: newQuantity } : item
+          item.product.product_id === productId ? { ...item, quantity: newQuantity } : item
         )
       );
     } catch (error) {
       console.error('Error updating quantity:', error);
-      // Itt kezelhetnénk a hibát, például egy hibaüzenet megjelenítésével
+      setError(t('Hiba történt a mennyiség frissítése közben.'));
     }
   };
 
   const removeItem = async (productId) => {
     try {
-      await axios.delete(`${API_URL}/cart/${userId}/${webshopId}/${productId}`);
-      setCartItems(prevItems => prevItems.filter(item => item.product_id !== productId));
+      await axios.post(`${API_URL}/cart/${userId}/${webshopId}`, { 
+        productId: productId, 
+        quantity: 0 
+      });
+      setCartItems(prevItems => prevItems.filter(item => item.product.product_id !== productId));
     } catch (error) {
       console.error('Error removing item:', error);
-      // Itt kezelhetnénk a hibát, például egy hibaüzenet megjelenítésével
+      setError(t('Hiba történt a termék eltávolítása közben.'));
     }
   };
 
@@ -60,7 +66,7 @@ const Cart = ({ userId, webshopId }) => {
       // Itt lehetne valamilyen visszajelzést adni a sikeres vásárlásról
     } catch (error) {
       console.error('Error during checkout:', error);
-      // Itt kezelhetnénk a hibát, például egy hibaüzenet megjelenítésével
+      setError(t('Hiba történt a fizetés során.'));
     }
   };
 
@@ -75,22 +81,22 @@ const Cart = ({ userId, webshopId }) => {
       ) : (
         <>
           {cartItems.map(item => (
-            <div key={item.product_id} className="cart-item">
+            <div key={item.product.product_id} className="cart-item">
               <img src={item.product.image} alt={item.product.name} />
               <div className="item-details">
                 <h3>{item.product.name}</h3>
-                <p>{t('Ár')}: {item.product.price} {item.product.webshop.currency.name}</p>
+                <p>{t('Ár')}: {item.product.price} {item.product.webshop.paying_instrument}</p>
                 <div className="quantity-control">
-                  <button onClick={() => updateQuantity(item.product_id, item.quantity - 1)} disabled={item.quantity === 1}>-</button>
+                  <button onClick={() => updateQuantity(item.product.product_id, item.quantity - 1)} disabled={item.quantity === 1}>-</button>
                   <span>{item.quantity}</span>
-                  <button onClick={() => updateQuantity(item.product_id, item.quantity + 1)}>+</button>
+                  <button onClick={() => updateQuantity(item.product.product_id, item.quantity + 1)}>+</button>
                 </div>
               </div>
-              <button onClick={() => removeItem(item.product_id)}>{t('Eltávolítás')}</button>
+              <button onClick={() => removeItem(item.product.product_id)}>{t('Eltávolítás')}</button>
             </div>
           ))}
           <div className="cart-summary">
-            <p>{t('Összesen')}: {cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0)} {cartItems[0]?.product.webshop.currency.name}</p>
+            <p>{t('Összesen')}: {cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0)} {cartItems[0]?.product.webshop.paying_instrument}</p>
             <button onClick={checkout}>{t('Fizetés')}</button>
           </div>
         </>

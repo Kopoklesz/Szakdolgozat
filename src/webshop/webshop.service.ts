@@ -11,6 +11,10 @@ export class WebshopService {
     private webshopRepository: Repository<Webshop>,
   ) {}
 
+  async getAllWebshops(): Promise<Webshop[]> {
+    return await this.webshopRepository.find();
+  }
+
   async createWebshop(createWebshopDto: CreateWebshopDto): Promise<Webshop> {
     const { subject_name, header_color_code, paying_instrument, paying_instrument_icon } = createWebshopDto;
 
@@ -20,7 +24,7 @@ export class WebshopService {
     newWebshop.paying_instrument = paying_instrument;
     newWebshop.paying_instrument_icon = paying_instrument_icon;
     newWebshop.status = WebshopStatus.ACTIVE;
-    newWebshop.teacher = { user_id: 1 } as any;
+    newWebshop.teacher_id = 0; // Beállítjuk a teacher_id-t
 
     return await this.webshopRepository.save(newWebshop);
   }

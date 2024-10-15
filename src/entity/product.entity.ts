@@ -1,10 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Webshop } from './webshop.entity';
 
 @Entity()
 export class Product {
   @PrimaryGeneratedColumn()
   product_id: number;
+
+  @ManyToOne(() => Webshop, webshop => webshop.products)
+  @JoinColumn({ name: 'webshop_id' })
+  webshop: Webshop;
+
+  @Column()
+  webshop_id: number;
 
   @Column()
   name: string;
@@ -32,7 +39,4 @@ export class Product {
 
   @Column({ default: 'available' })
   status: 'available' | 'unavailable';
-
-  @ManyToOne(() => Webshop, webshop => webshop.products)
-  webshop: Webshop;
 }

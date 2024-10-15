@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { Product } from './product.entity';
 import { User } from './user.entity';
 
@@ -13,19 +13,23 @@ export class Webshop {
   webshop_id: number;
 
   @ManyToOne(() => User, user => user.webshops)
+  @JoinColumn({ name: 'teacher_id' })
   teacher: User;
 
   @Column()
-  subject_name: string;
+  teacher_id: number;
 
   @Column()
-  header_color_code: string;
+  subject_name: string;
 
   @Column()
   paying_instrument: string;
 
   @Column()
   paying_instrument_icon: string;
+
+  @Column()
+  header_color_code: string;
 
   @Column({ type: 'date', default: () => 'CURRENT_DATE' })
   creation_date: Date;

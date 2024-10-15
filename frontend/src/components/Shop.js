@@ -24,8 +24,8 @@ const Shop = () => {
       try {
         const [webshopResponse, productsResponse, categoriesResponse] = await Promise.all([
           axios.get(`${API_URL}/webshop/${webshopId}`),
-          axios.get(`${API_URL}/webshop/${webshopId}/products`),
-          axios.get(`${API_URL}/webshop/${webshopId}/categories`),
+          axios.get(`${API_URL}/product/webshop/${webshopId}`),
+          axios.get(`${API_URL}/webshop/${webshopId}/categories`)
         ]);
         
         setWebshop(webshopResponse.data);
@@ -51,11 +51,11 @@ const Shop = () => {
   if (error) return <div>{t('Hiba')}: {error}</div>;
 
   return (
-    <div className="shop-container" style={{ backgroundColor: webshop?.header_color_code }}>
+    <div className="shop-container">
       <img 
-        src={webshop?.currency?.icon} 
-        alt={webshop?.currency?.name || 'Currency'} 
-        className="currency-icon" 
+        src={webshop?.paying_instrument_icon} 
+        alt={webshop?.paying_instrument || 'Currency'} 
+        className="paying-device" 
       />
       <div className="shop-content">
         <h1>{webshop?.subject_name}</h1>
@@ -79,7 +79,7 @@ const Shop = () => {
         <div className="product-grid">
           {filteredProducts.length > 0 ? (
             filteredProducts.map(product => (
-              <ProductCard key={product.product_id} product={product} currency={webshop?.currency?.name} />
+              <ProductCard key={product.product_id} product={product} payingInstrument={webshop?.paying_instrument} />
             ))
           ) : (
             <p>{t('Nem található termék')}</p>

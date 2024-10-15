@@ -41,15 +41,15 @@
   flex-wrap: wrap;
   gap: 20px;
   padding: 0 10px;
-  justify-content: center; /* Center the content */
-  max-width: 1400px; /* Limit the maximum width */
-  margin: 0 auto; /* Center the grid itself */
+  justify-content: center;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .product-card {
   width: calc(20% - 16px);
   min-width: 200px;
-  max-width: 250px; /* Limit the maximum width of each card */
+  max-width: 250px;
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 10px;

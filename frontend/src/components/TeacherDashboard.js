@@ -12,7 +12,7 @@ const TeacherDashboard = () => {
     subject_name: '',
     paying_instrument: '',
     header_color_code: '#000000',
-    paying_device_image: ''
+    paying_instrument_icon: ''
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -46,7 +46,7 @@ const TeacherDashboard = () => {
         subject_name: '',
         paying_instrument: '',
         header_color_code: '#000000',
-        paying_device_image: ''
+        paying_instrument_icon: ''
       });
       setSuccess(t('Webshop sikeresen létrehozva!'));
       fetchWebshops();
@@ -95,11 +95,11 @@ const TeacherDashboard = () => {
             />
           </div>
           <div>
-            <label htmlFor="paying_device_image">{t('Pénznem Kép URL-je')}</label>
+            <label htmlFor="paying_instrument_icon">{t('Pénznem Kép URL-je')}</label>
             <input
-              id="paying_device_image"
-              name="paying_device_image"
-              value={newWebshop.paying_device_image}
+              id="paying_instrument_icon"
+              name="paying_instrument_icon"
+              value={newWebshop.paying_instrument_icon}
               onChange={handleInputChange}
             />
           </div>
@@ -109,12 +109,12 @@ const TeacherDashboard = () => {
 
       <h2>{t('Webshopjaid')}</h2>
       <div className="webshops-list">
-        {webshops.map((webshop, index) => (
-          <div key={index} className="webshop-card">
+        {webshops.map((webshop) => (
+          <div key={webshop.webshop_id} className="webshop-card">
             <h3>{webshop.subject_name}</h3>
-            <p>{t('Paying Instrument')}: {webshop.paying_instrument}</p>
+            <p>{t('Pénznem')}: {webshop.paying_instrument}</p>
             <div className="color-preview">
-              <span>{t('Header Color')}:</span>
+              <span>{t('Fejléc színe')}:</span>
               <div
                 className="color-box"
                 style={{ backgroundColor: webshop.header_color_code }}

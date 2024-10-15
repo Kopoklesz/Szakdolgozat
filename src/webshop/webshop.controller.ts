@@ -8,6 +8,15 @@ import { CreateWebshopDto } from '../dto/create-webshop.dto';
 export class WebshopController {
   constructor(private readonly webshopService: WebshopService) {}
 
+  @Get()
+  async getAllWebshops() {
+    try {
+      return await this.webshopService.getAllWebshops();
+    } catch (error) {
+      throw new HttpException('Failed to fetch webshops', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   @Post()
   async createWebshop(@Body() createWebshopDto: CreateWebshopDto) {
     try {
