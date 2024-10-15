@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import '../css/TeacherDashboard.css';
 
@@ -121,7 +122,9 @@ const TeacherDashboard = () => {
               ></div>
             </div>
             <button>{t('Szerkesztés')}</button>
-            <button>{t('Termék megtekintés')}</button>
+            <Link to={`/manage-products/${webshop.webshop_id}`}>
+              <button>{t('Termékek kezelése')}</button>
+            </Link>
           </div>
         ))}
       </div>

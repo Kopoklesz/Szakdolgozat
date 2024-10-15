@@ -7,6 +7,7 @@ import Nav from './components/Nav';
 import TeacherDashboard from './components/TeacherDashboard';
 import Cart from './components/Cart';
 import WebshopList from './components/WebshopList';
+import ManageProducts from './components/ManageProducts';
 import './App.css';
 
 const LANGUAGES = { HU: 'hu', EN: 'en' };
@@ -31,6 +32,7 @@ function App() {
           <Route path="/shop/:webshopId?" element={<Shop />} />
           <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
           <Route path="/cart/:webshopId" element={<Cart userId={userId} />} />
+          <Route path="/manage-products/:webshopId" element={<ManageProducts />} />
         </Routes>
       </Router>
     </I18nextProvider>

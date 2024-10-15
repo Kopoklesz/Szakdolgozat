@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, ParseIntPipe, UseFilters, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, ParseIntPipe, UseFilters, HttpException, HttpStatus, BadRequestException, NotFoundException } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { HttpExceptionFilter } from '../filters/http-exception.filter';
 import { CreateProductDto } from '../dto/create-product.dto';
@@ -10,10 +10,23 @@ export class ProductController {
 
   @Post()
   async createProduct(@Body() createProductDto: CreateProductDto) {
+    console.log('Received create product request:', createProductDto);
     try {
-      return await this.productService.createProduct(createProductDto);
+      const result = await this.productService.createProduct(createProductDto);
+      console.log('Product created successfully:', result);
+      return result;
     } catch (error) {
-      throw new HttpException('Failed to create product', HttpStatus.INTERNAL_SERVER_ERROR);
+      console.error('Error in createProduct:', error);
+      if (error instanceof BadRequestException) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      } else if (error instanceof NotFoundException) {
+        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+      } else {
+        throw new HttpException(
+          'There was a problem creating the product: ' + error.message,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
   }
 
