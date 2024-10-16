@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Param, ParseIntPipe, UseFilters, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, ParseIntPipe, UseFilters, HttpException, HttpStatus } from '@nestjs/common';
 import { WebshopService } from './webshop.service';
 import { HttpExceptionFilter } from '../filters/http-exception.filter';
 import { CreateWebshopDto } from '../dto/create-webshop.dto';
+import { UpdateWebshopDto } from '../dto/update-webshop.dto';
 
 @Controller('webshop')
 @UseFilters(new HttpExceptionFilter())
@@ -37,5 +38,20 @@ export class WebshopController {
   @Get(':id/categories')
   getCategories(@Param('id', ParseIntPipe) id: number) {
     return this.webshopService.getCategories(id);
+  }
+
+  @Put(':id')
+  async updateWebshop(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateWebshopDto: UpdateWebshopDto
+  ) {
+    try {
+      return await this.webshopService.updateWebshop(id, updateWebshopDto);
+    } catch (error) {
+      if (error.status === HttpStatus.BAD_REQUEST) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      }
+      throw new HttpException('Failed to update webshop', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

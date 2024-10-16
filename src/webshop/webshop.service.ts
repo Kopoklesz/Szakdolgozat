@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Webshop, WebshopStatus } from '../entity/webshop.entity';
 import { CreateWebshopDto } from '../dto/create-webshop.dto';
+import { UpdateWebshopDto } from '../dto/update-webshop.dto';
 
 @Injectable()
 export class WebshopService {
@@ -16,14 +17,14 @@ export class WebshopService {
   }
 
   async createWebshop(createWebshopDto: CreateWebshopDto): Promise<Webshop> {
-    const { subject_name, header_color_code, paying_instrument, paying_instrument_icon } = createWebshopDto;
+    const { subject_name, header_color_code, paying_instrument, paying_instrument_icon, status } = createWebshopDto;
 
     const newWebshop = new Webshop();
     newWebshop.subject_name = subject_name;
     newWebshop.header_color_code = header_color_code;
     newWebshop.paying_instrument = paying_instrument;
     newWebshop.paying_instrument_icon = paying_instrument_icon;
-    newWebshop.status = WebshopStatus.ACTIVE;
+    newWebshop.status = status as WebshopStatus;
     newWebshop.teacher_id = 0; // Beállítjuk a teacher_id-t
 
     return await this.webshopRepository.save(newWebshop);
@@ -57,5 +58,16 @@ export class WebshopService {
       .map(product => product.category);
 
     return [...new Set(categories)];
+  }
+
+  async updateWebshop(id: number, updateWebshopDto: UpdateWebshopDto): Promise<Webshop> {
+    const webshop = await this.webshopRepository.findOne({ where: { webshop_id: id } });
+    if (!webshop) {
+      throw new NotFoundException(`Webshop with ID ${id} not found`);
+    }
+
+    Object.assign(webshop, updateWebshopDto);
+
+    return await this.webshopRepository.save(webshop);
   }
 }

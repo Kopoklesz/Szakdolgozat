@@ -41,7 +41,26 @@ const resources = {
       "Webshopok": "Webshops",
       "Elérhető Webshopok": "Available Webshops",
       "Hiba történt a webshopok betöltése közben.": "An error occurred while loading the webshops.",
-      "Webshop keresése...": "Search webshop..."
+      "Webshop keresése...": "Search webshop...",
+      "Termék neve": "Product name",
+      "Kategória": "Category",
+      "Kép URL": "Picture URL",
+      "Leírás": "Description",
+      "Maximális készlet": "Maximum stock",
+      "Jelenlegi készlet": "Curent stock",
+      "Nem elérhető": "Not available",
+      "Termék hozzáadása": "Product addition",
+      "Meglévő termékek": "Curent products",
+      "Státusz": "Status",
+      "Készlet": "Stock",
+      "Új termék hozzáadása": "New product addition",
+      "Termékek kezelése": "Product management",
+      "Már létezik webshop ezzel a tantárgy névvel.": "A webshop with this subject name already exists.",
+      "Már létezik webshop ezzel a pénznemmel.": "A webshop with this currency already exists.",
+      "A pénznem maximum 3 karakter hosszú lehet.": "The currency can be a maximum of 3 characters long.",
+      "Aktív": "Active",
+      "Inaktív": "Inactive",
+      "Webshop sikeresen frissítve!": "Webshop successfully updated!"
     }
   },
   hu: {
@@ -83,7 +102,26 @@ const resources = {
       "Webshopok": "Webshopok",
       "Elérhető Webshopok": "Elérhető Webshopok",
       "Hiba történt a webshopok betöltése közben.": "Hiba történt a webshopok betöltése közben.",
-      "Webshop keresése...": "Webshop keresése..."
+      "Webshop keresése...": "Webshop keresése...",
+      "Termék neve": "Termék neve",
+      "Kategória": "Kategória",
+      "Kép URL": "Kép URL",
+      "Leírás": "Leírás",
+      "Maximális készlet": "Maximális készlet",
+      "Jelenlegi készlet": "Jelenlegi készlet",
+      "Nem elérhető": "Nem elérhető",
+      "Termék hozzáadása": "Termék hozzáadása",
+      "Meglévő termékek": "Meglévő termékek",
+      "Státusz": "Státusz",
+      "Készlet": "Készlet",
+      "Új termék hozzáadása": "Új termék hozzáadása",
+      "Termékek kezelése": "Termékek kezelése",
+      "Már létezik webshop ezzel a tantárgy névvel.": "Már létezik webshop ezzel a tantárgy névvel.",
+      "Már létezik webshop ezzel a pénznemmel.": "Már létezik webshop ezzel a pénznemmel.",
+      "A pénznem maximum 3 karakter hosszú lehet.": "A pénznem maximum 3 karakter hosszú lehet.",
+      "Aktív": "Aktív",
+      "Inaktív": "Inaktív",
+      "Webshop sikeresen frissítve!": "Webshop sikeresen frissítve!"
     }
   }
 };
