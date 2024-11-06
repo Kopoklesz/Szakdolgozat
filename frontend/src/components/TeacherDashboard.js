@@ -44,31 +44,52 @@ const TeacherDashboard = () => {
     }
   };
 
+  const handleDelete = async (webshopId) => {
+    if (window.confirm(t('Biztosan törölni szeretnéd ezt a webshopot és minden termékét?'))) {
+      try {
+        await axios.delete(`${API_URL}/webshop/${webshopId}`);
+        setSuccess(t('Webshop sikeresen törölve!'));
+        setIsEditModalOpen(false);
+        fetchWebshops();
+      } catch (error) {
+        console.error('Error deleting webshop:', error);
+        setError(t('Hiba történt a webshop törlése közben.'));
+      }
+    }
+  };
+
   const validateWebshop = (webshop, isEditing = false) => {
     const otherWebshops = isEditing 
       ? webshops.filter(shop => shop.webshop_id !== editingWebshop.webshop_id)
       : webshops;
-
-    if (otherWebshops.some(shop => shop.subject_name === webshop.subject_name)) {
-      setError(t('Már létezik webshop ezzel a tantárgy névvel.'));
-      return false;
-    }
-    if (otherWebshops.some(shop => shop.paying_instrument === webshop.paying_instrument)) {
-      setError(t('Már létezik webshop ezzel a pénznemmel.'));
-      return false;
-    }
+      if (!isEditing || (isEditing && webshop.subject_name !== editingWebshop.subject_name)) {
+        if (otherWebshops.some(shop => shop.subject_name === webshop.subject_name)) {
+          setError(t('Már létezik webshop ezzel a tantárgy névvel.'));
+          return false;
+        }
+      }
+      if (!isEditing || (isEditing && webshop.paying_instrument !== editingWebshop.paying_instrument)) {
+        if (otherWebshops.some(shop => shop.paying_instrument === webshop.paying_instrument)) {
+          setError(t('Már létezik webshop ezzel a pénznemmel.'));
+          return false;
+        }
+      }
     return true;
-  };
+};
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  setSuccess('');
+  
+  try {
     if (!validateWebshop(newWebshop)) {
       return;
     }
-    try {
-      await axios.post(`${API_URL}/webshop`, newWebshop);
+
+    const response = await axios.post(`${API_URL}/webshop`, newWebshop);
+    
+    if (response.data) {
       setNewWebshop({
         subject_name: '',
         paying_instrument: '',
@@ -77,12 +98,13 @@ const TeacherDashboard = () => {
         status: 'active'
       });
       setSuccess(t('Webshop sikeresen létrehozva!'));
-      fetchWebshops();
-    } catch (error) {
-      console.error('Error creating webshop:', error.response?.data || error.message);
-      setError(t('Hiba történt a webshop létrehozása közben.'));
+      await fetchWebshops();
     }
-  };
+  } catch (error) {
+    console.error('Error creating webshop:', error);
+    setError(error.response?.data?.message || t('Hiba történt a webshop létrehozása közben.'));
+  }
+};
 
   const handleEdit = (webshop) => {
     setEditingWebshop({ ...webshop });
@@ -122,7 +144,7 @@ const TeacherDashboard = () => {
               id="subject_name"
               name="subject_name"
               value={newWebshop.subject_name}
-              onChange={handleInputChange}
+              onChange={(e) => handleInputChange(e, 'new')}
               required
             />
           </div>
@@ -132,7 +154,7 @@ const TeacherDashboard = () => {
               id="paying_instrument"
               name="paying_instrument"
               value={newWebshop.paying_instrument}
-              onChange={handleInputChange}
+              onChange={(e) => handleInputChange(e, 'new')}
               required
             />
           </div>
@@ -142,7 +164,7 @@ const TeacherDashboard = () => {
               id="paying_instrument_icon"
               name="paying_instrument_icon"
               value={newWebshop.paying_instrument_icon}
-              onChange={handleInputChange}
+              onChange={(e) => handleInputChange(e, 'new')}
             />
           </div>
           <div className="color-picker-container">
@@ -153,7 +175,7 @@ const TeacherDashboard = () => {
               id="header_color_code"
               name="header_color_code"
               value={newWebshop.header_color_code}
-              onChange={handleInputChange}
+              onChange={(e) => handleInputChange(e, 'new')}
               required
             />
             <div className="color-preview" style={{ backgroundColor: newWebshop.header_color_code }}>
@@ -167,7 +189,7 @@ const TeacherDashboard = () => {
               id="status"
               name="status"
               value={newWebshop.status}
-              onChange={handleInputChange}
+              onChange={(e) => handleInputChange(e, 'new')}
             >
               <option value="active">{t('Aktív')}</option>
               <option value="inactive">{t('Inaktív')}</option>
@@ -264,8 +286,11 @@ const TeacherDashboard = () => {
                     <option value="inactive">{t('Inaktív')}</option>
                   </select>
                 </div>
-                <button type="submit">{t('Frissítés')}</button>
-                <button type="button" onClick={() => setIsEditModalOpen(false)}>{t('Mégse')}</button>
+                <div className="modal-button-group">
+                  <button type="submit"> {t('Frissítés')} </button>
+                  <button type="button" onClick={() => setIsEditModalOpen(false)}> {t('Mégse')} </button>
+                  <button type="button" className="delete-button" onClick={() => handleDelete(editingWebshop.webshop_id)}> {t('Webshop törlése')} </button>
+                </div>
               </form>
             </div>
           </div>

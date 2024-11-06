@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Body, Param, ParseIntPipe, UseFilters, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Delete, Get, Post, Put, Body, Param, ParseIntPipe, UseFilters, HttpException, HttpStatus } from '@nestjs/common';
 import { WebshopService } from './webshop.service';
 import { HttpExceptionFilter } from '../filters/http-exception.filter';
 import { CreateWebshopDto } from '../dto/create-webshop.dto';
@@ -52,6 +52,15 @@ export class WebshopController {
         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       }
       throw new HttpException('Failed to update webshop', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Delete(':id')
+  async deleteWebshop(@Param('id', ParseIntPipe) id: number) {
+    try {
+      return await this.webshopService.deleteWebshop(id);
+    } catch (error) {
+      throw new HttpException('Failed to delete webshop', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

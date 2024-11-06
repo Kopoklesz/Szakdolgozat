@@ -60,7 +60,10 @@ const resources = {
       "A pénznem maximum 3 karakter hosszú lehet.": "The currency can be a maximum of 3 characters long.",
       "Aktív": "Active",
       "Inaktív": "Inactive",
-      "Webshop sikeresen frissítve!": "Webshop successfully updated!"
+      "Webshop sikeresen frissítve!": "Webshop successfully updated!",
+      "Webshop törlése": "Delete webshop",
+      "Biztosan törölni szeretnéd ezt a webshopot és minden termékét?": "Are you sure you want to delete this webshop and all its products?",
+      "Webshop sikeresen törölve!": "Webshop successfully deleted!"
     }
   },
   hu: {
@@ -121,7 +124,10 @@ const resources = {
       "A pénznem maximum 3 karakter hosszú lehet.": "A pénznem maximum 3 karakter hosszú lehet.",
       "Aktív": "Aktív",
       "Inaktív": "Inaktív",
-      "Webshop sikeresen frissítve!": "Webshop sikeresen frissítve!"
+      "Webshop sikeresen frissítve!": "Webshop sikeresen frissítve!",
+      "Webshop törlése": "Webshop törlése",
+      "Biztosan törölni szeretnéd ezt a webshopot és minden termékét?": "Biztosan törölni szeretnéd ezt a webshopot és minden termékét?",
+      "Webshop sikeresen törölve!": "Webshop sikeresen törölve!"
     }
   }
 };

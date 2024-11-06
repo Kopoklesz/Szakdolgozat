@@ -70,4 +70,16 @@ export class WebshopService {
 
     return await this.webshopRepository.save(webshop);
   }
+
+  async deleteWebshop(id: number): Promise<void> {
+    const webshop = await this.webshopRepository.findOne({
+      where: { webshop_id: id }
+    });
+    
+    if (!webshop) {
+      throw new NotFoundException(`Webshop with ID ${id} not found`);
+    }
+  
+    await this.webshopRepository.remove(webshop);
+  }
 }
