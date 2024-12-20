@@ -1,0 +1,139 @@
+.generated-codes {
+  margin-top: 30px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.code-event {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.code-event:last-child {
+  border-bottom: none;
+}
+
+.event-header {
+  display: grid;
+  grid-template-columns: auto 100px 150px 150px 40px;
+  padding: 15px;
+  background: #f8f8f8;
+  cursor: pointer;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.event-header:hover {
+  background: #f0f0f0;
+}
+
+.event-header.active {
+  background: #e8f4f4;
+  border-bottom: 2px solid #04b0b8;
+}
+
+.event-name {
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.event-count {
+  color: #04b0b8;
+  font-weight: bold;
+}
+
+.event-details {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  background: white;
+}
+
+.event-details.open {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.codes-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.codes-table th,
+.codes-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.codes-table th {
+  background: #f5f5f5;
+  font-weight: 600;
+}
+
+.code-status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.code-status.used {
+  background: #ffebee;
+  color: #d32f2f;
+}
+
+.code-status.unused {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.expiry-date {
+  font-weight: 500;
+}
+
+.expiry-date.expired {
+  color: #d32f2f;
+}
+
+.expiry-date.valid {
+  color: #2e7d32;
+}
+
+.chevron-icon {
+  transition: transform 0.3s;
+}
+
+.chevron-icon.open {
+  transform: rotate(180deg);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 30px;
+  color: #666;
+}
+
+.empty-state.error {
+  color: #d32f2f;
+}
+
+@media (max-width: 768px) {
+  .event-header {
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+  }
+
+  .event-header > div:nth-child(3),
+  .event-header > div:nth-child(4) {
+    display: none;
+  }
+
+  .codes-table {
+    display: block;
+    overflow-x: auto;
+  }
+}
