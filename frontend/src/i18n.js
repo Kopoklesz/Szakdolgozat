@@ -63,7 +63,20 @@ const resources = {
       "Webshop sikeresen frissítve!": "Webshop successfully updated!",
       "Webshop törlése": "Delete webshop",
       "Biztosan törölni szeretnéd ezt a webshopot és minden termékét?": "Are you sure you want to delete this webshop and all its products?",
-      "Webshop sikeresen törölve!": "Webshop successfully deleted!"
+      "Webshop sikeresen törölve!": "Webshop successfully deleted!",
+      "Aláírás generálás": "Signature generation",
+      "Kód Generálás": "Generate Code",
+      "QR Kód": "QR Code",
+      "Azonnali Hozzáadás": "Instant Add",
+      "Generáljon egyedi kódokat, amiket a hallgatók beválthatnak.": "Generate a unique code that students can redeem.",
+      "Kód Generálása": "Generate Code",
+      "Generált Kód": "Generated Code",
+      "Generáljon QR kódot, amit a hallgatók beolvashatnak.": "Generate a QR code that students can scan.",
+      "QR Kód Generálása": "Generate QR Code",
+      "QR Kód helye": "QR Code placeholder",
+      "Adjon hozzá azonnal pénzt a hallgató egyenlegéhez.": "Add money instantly to student's balance.",
+      "Összeg": "Amount",
+      "Hozzáadás": "Add"
     }
   },
   hu: {
@@ -127,7 +140,20 @@ const resources = {
       "Webshop sikeresen frissítve!": "Webshop sikeresen frissítve!",
       "Webshop törlése": "Webshop törlése",
       "Biztosan törölni szeretnéd ezt a webshopot és minden termékét?": "Biztosan törölni szeretnéd ezt a webshopot és minden termékét?",
-      "Webshop sikeresen törölve!": "Webshop sikeresen törölve!"
+      "Webshop sikeresen törölve!": "Webshop sikeresen törölve!",
+      "Aláírás Generálás": "Aláírás Generálás",
+      "Kód generálás": "Kód Ggnerálás",
+      "QR Kód": "QR Kód",
+      "Azonnali Hozzáadás": "Azonnali Hozzáadás",
+      "Generáljon egyedi kódokat, amiket a hallgatók beválthatnak.": "Generáljon egyedi kódokat, amiket a hallgatók beválthatnak.",
+      "Kód Generálása": "Kód Generálása",
+      "Generált Kód": "Generált Kód",
+      "Generáljon QR kódot, amit a hallgatók beolvashatnak.": "Generáljon QR kódot, amit a hallgatók beolvashatnak.",
+      "QR Kód Generálása": "QR Kód Generálása",
+      "QR Kód helye": "QR Kód helye",
+      "Adjon hozzá azonnal pénzt a hallgató egyenlegéhez.": "Adjon hozzá azonnal pénzt a hallgató egyenlegéhez.",
+      "Összeg": "Összeg",
+      "Hozzáadás": "Hozzáadás"
     }
   }
 };
@@ -136,11 +162,14 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'hu', // Kezdő nyelv
-    fallbackLng: 'hu', // Biztonsági nyelv
+    lng: 'hu',
+    fallbackLng: 'hu',
     interpolation: {
       escapeValue: false
+    },
+    react: {
+      useSuspense: true,  // Ez fontos!
+      wait: true
     }
   });
-
 export default i18n;

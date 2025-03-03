@@ -21,6 +21,7 @@ function Nav({ currentLanguage, changeLanguage }) {
         <ul>
           <li><Link to="/webshops">{t('Főoldal')}</Link></li>
           <li><Link to="/teacher-dashboard">{t('Előadói')}</Link></li>
+          <li><Link to="/signature-generator">{t('Aláírás generálás')}</Link></li>
           <li><Link to="/login">{t('Bejelentkezés')}</Link></li>
         </ul>
         <div className="language-selector">

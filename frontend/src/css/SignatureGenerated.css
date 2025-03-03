@@ -1,0 +1,64 @@
+.signature-generator {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.success-message {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.method-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.method-button {
+  padding: 10px 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.method-button.active {
+  background: #04b0b8;
+  color: white;
+  border-color: #04b0b8;
+}
+
+.method-button:hover {
+  background: #f0f0f0;
+}
+
+.method-button.active:hover {
+  background: #038e95;
+}
+
+.generator-content {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.code-generator-section,
+.qr-generator-section,
+.instant-generator-section {
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .method-selector {
+    flex-direction: column;
+  }
+
+  .method-button {
+    width: 100%;
+  }
+}

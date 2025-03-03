@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
+// 1. Külső könyvtárak
+import React, { useState, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useTranslation, I18nextProvider } from 'react-i18next';
-import i18n from './i18n';
+import { useTranslation } from 'react-i18next';
+import './i18n';
+
+// 2. Komponensek
 import Shop from './components/Shop';
 import Nav from './components/Nav';
 import TeacherDashboard from './components/TeacherDashboard';
 import Cart from './components/Cart';
 import WebshopList from './components/WebshopList';
 import ManageProducts from './components/ManageProducts';
+import SignatureGenerated from './components/SignatureGenerated';
+
+// 3. Stílusok
 import './App.css';
 
 const LANGUAGES = { HU: 'hu', EN: 'en' };
@@ -23,7 +29,7 @@ function App() {
   };
 
   return (
-    <I18nextProvider i18n={i18n}>
+    <Suspense fallback="Loading...">
       <Router>
         <Nav currentLanguage={currentLanguage} changeLanguage={changeLanguage} />
         <Routes>
@@ -33,9 +39,10 @@ function App() {
           <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
           <Route path="/cart/:webshopId" element={<Cart userId={userId} />} />
           <Route path="/manage-products/:webshopId" element={<ManageProducts />} />
+          <Route path="/signature-generator" element={<SignatureGenerated />} />
         </Routes>
       </Router>
-    </I18nextProvider>
+    </Suspense>
   );
 }
 
