@@ -131,7 +131,7 @@ const handleSubmit = async (e) => {
 
   return (
     <div className="teacher-dashboard">
-      <h1>{t('Tanári Irányítópult')}</h1>
+      <h1>{t('Előadói Irányítópult')}</h1>
       
       <div className="create-webshop-form">
         <h2>{t('Új Webshop Létrehozása')}</h2>

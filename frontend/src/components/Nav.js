@@ -20,7 +20,7 @@ function Nav({ currentLanguage, changeLanguage }) {
       <nav className='interLinksNav'>
         <ul>
           <li><Link to="/webshops">{t('Főoldal')}</Link></li>
-          <li><Link to="/teacher-dashboard">{t('Tanári')}</Link></li>
+          <li><Link to="/teacher-dashboard">{t('Előadói')}</Link></li>
           <li><Link to="/login">{t('Bejelentkezés')}</Link></li>
         </ul>
         <div className="language-selector">
