@@ -86,4 +86,4 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 
 ## Version
 
-0.1.2
+0.2.2
