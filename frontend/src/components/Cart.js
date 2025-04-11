@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import '../css/Cart.css';
 
-const API_URL = 'http://localhost:3001';
+const API_URL = 'http://api.pannon-shop.hu';
 
 const Cart = ({ userId, webshopId }) => {
   const { t } = useTranslation();

@@ -1,16 +1,10 @@
-<<<<<<< Updated upstream:src/migrations/consolidated-migration.ts
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class ConsolidatedMigration1727512345678 implements MigrationInterface {
-    name = 'ConsolidatedMigration1727512345678'
-=======
-import { MigrationInterface, QueryRunner, TableColumn, TableIndex } from "typeorm";
->>>>>>> Stashed changes:src/migrations/final_database_migration.ts
+export class InitialSchemaMigration1727289291818 implements MigrationInterface {
+    name = 'InitialSchemaMigration1727289291818'
 
-export class RevertProductVersioning1234567890124 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
-<<<<<<< Updated upstream:src/migrations/consolidated-migration.ts
-        // Enum típusok létrehozása
+        // Enum típusok létrehozása, ha még nem léteznek
         await queryRunner.query(`
             DO $$
             BEGIN
@@ -26,15 +20,16 @@ export class RevertProductVersioning1234567890124 implements MigrationInterface 
             END
             $$;
         `);
-=======
-        // Eltávolítjuk a "product_version" oszlopot a "purchase" táblából
-        await queryRunner.dropColumn("purchase", "product_version");
->>>>>>> Stashed changes:src/migrations/final_database_migration.ts
 
-        // Eltávolítjuk az indexet a "product" táblából
-        await queryRunner.dropIndex("product", "IDX_PRODUCT_VERSION");
+        // USER tábla
+        await queryRunner.query(`
+            CREATE TABLE IF NOT EXISTS "user" (
+                "user_id" SERIAL PRIMARY KEY,
+                "email" VARCHAR(255) UNIQUE NOT NULL,
+                "role" "public"."user_role" NOT NULL
+            )
+        `);
 
-<<<<<<< Updated upstream:src/migrations/consolidated-migration.ts
         // WEBSHOP tábla
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS "webshop" (
@@ -64,7 +59,7 @@ export class RevertProductVersioning1234567890124 implements MigrationInterface 
             )
         `);
 
-        // PRODUCT tábla - Már nem használunk verzió-kezelést
+        // PRODUCT tábla
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS "product" (
                 "product_id" SERIAL PRIMARY KEY,
@@ -108,7 +103,7 @@ export class RevertProductVersioning1234567890124 implements MigrationInterface 
             )
         `);
 
-        // PURCHASE tábla - Már nem használunk verzió-kezelést a termékeknél
+        // PURCHASE tábla
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS "purchase" (
                 "purchase_id" SERIAL PRIMARY KEY,
@@ -155,31 +150,21 @@ export class RevertProductVersioning1234567890124 implements MigrationInterface 
             FROM "user" u
             ON CONFLICT (user_id, webshop_id) DO NOTHING
         `);
-=======
-        // Eltávolítjuk a "version" oszlopot a "product" táblából
-        await queryRunner.dropColumn("product", "version");
->>>>>>> Stashed changes:src/migrations/final_database_migration.ts
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        // Visszaállítjuk a "version" oszlopot a "product" táblában
-        await queryRunner.addColumn("product", new TableColumn({
-            name: "version",
-            type: "int",
-            default: 1
-        }));
+        // Táblák törlése fordított sorrendben
+        await queryRunner.query(`DROP TABLE IF EXISTS "purchase"`);
+        await queryRunner.query(`DROP TABLE IF EXISTS "cart_item"`);
+        await queryRunner.query(`DROP TABLE IF EXISTS "cart"`);
+        await queryRunner.query(`DROP TABLE IF EXISTS "product"`);
+        await queryRunner.query(`DROP TABLE IF EXISTS "user_balance"`);
+        await queryRunner.query(`DROP TABLE IF EXISTS "webshop"`);
+        await queryRunner.query(`DROP TABLE IF EXISTS "user"`);
 
-        // Visszaállítjuk az indexet a "product" táblában
-        await queryRunner.createIndex("product", new TableIndex({
-            name: "IDX_PRODUCT_VERSION",
-            columnNames: ["product_id", "version"]
-        }));
-
-        // Visszaállítjuk a "product_version" oszlopot a "purchase" táblában
-        await queryRunner.addColumn("purchase", new TableColumn({
-            name: "product_version",
-            type: "int",
-            default: 1
-        }));
+        // Enum típusok törlése
+        await queryRunner.query(`DROP TYPE IF EXISTS "public"."product_status"`);
+        await queryRunner.query(`DROP TYPE IF EXISTS "public"."webshop_status"`);
+        await queryRunner.query(`DROP TYPE IF EXISTS "public"."user_role"`);
     }
 }
