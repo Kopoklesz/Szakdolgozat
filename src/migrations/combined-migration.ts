@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class InitialSchemaMigration1727289291818 implements MigrationInterface {
-    name = 'InitialSchemaMigration1727289291818'
+export class CombinedMigration1727512345678 implements MigrationInterface {
+    name = 'CombinedMigration1727512345678'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         // Enum típusok létrehozása, ha még nem léteznek
@@ -59,7 +59,7 @@ export class InitialSchemaMigration1727289291818 implements MigrationInterface {
             )
         `);
 
-        // PRODUCT tábla
+        // PRODUCT tábla - verziókezelés nélkül (második migráció hatása)
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS "product" (
                 "product_id" SERIAL PRIMARY KEY,
@@ -103,7 +103,7 @@ export class InitialSchemaMigration1727289291818 implements MigrationInterface {
             )
         `);
 
-        // PURCHASE tábla
+        // PURCHASE tábla - verzió-kezelés nélkül (második migráció hatása)
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS "purchase" (
                 "purchase_id" SERIAL PRIMARY KEY,
@@ -136,6 +136,11 @@ export class InitialSchemaMigration1727289291818 implements MigrationInterface {
             ON CONFLICT (user_id) DO NOTHING
         `);
 
+        // Helyreállítjuk a szekvenciát, hogy a következő ID 1 legyen
+        await queryRunner.query(`
+            SELECT setval('user_user_id_seq', COALESCE((SELECT MAX(user_id) FROM "user"), 0), true)
+        `);
+
         // Alapértelmezett globális webshop beszúrása
         await queryRunner.query(`
             INSERT INTO webshop (webshop_id, teacher_id, subject_name, paying_instrument, paying_instrument_icon, header_color_code, status)
@@ -143,28 +148,41 @@ export class InitialSchemaMigration1727289291818 implements MigrationInterface {
             ON CONFLICT (webshop_id) DO NOTHING
         `);
 
+        // Helyreállítjuk a szekvenciát, hogy a következő ID 1 legyen
+        await queryRunner.query(`
+            SELECT setval('webshop_webshop_id_seq', COALESCE((SELECT MAX(webshop_id) FROM "webshop"), 0), true)
+        `);
+
         // Minden létező felhasználóhoz hozzáadjuk a globális webshop egyenleget
         await queryRunner.query(`
             INSERT INTO user_balance (user_id, webshop_id, amount)
             SELECT u.user_id, 0, 0
             FROM "user" u
-            ON CONFLICT (user_id, webshop_id) DO NOTHING
+            WHERE NOT EXISTS (
+                SELECT 1 FROM user_balance 
+                WHERE user_id = u.user_id AND webshop_id = 0
+            )
         `);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        // Táblák törlése fordított sorrendben
-        await queryRunner.query(`DROP TABLE IF EXISTS "purchase"`);
-        await queryRunner.query(`DROP TABLE IF EXISTS "cart_item"`);
-        await queryRunner.query(`DROP TABLE IF EXISTS "cart"`);
-        await queryRunner.query(`DROP TABLE IF EXISTS "product"`);
-        await queryRunner.query(`DROP TABLE IF EXISTS "user_balance"`);
-        await queryRunner.query(`DROP TABLE IF EXISTS "webshop"`);
-        await queryRunner.query(`DROP TABLE IF EXISTS "user"`);
+        try {
+            // Táblák törlése fordított sorrendben a függőségek miatt
+            await queryRunner.query(`DROP TABLE IF EXISTS "purchase" CASCADE`);
+            await queryRunner.query(`DROP TABLE IF EXISTS "cart_item" CASCADE`);
+            await queryRunner.query(`DROP TABLE IF EXISTS "cart" CASCADE`);
+            await queryRunner.query(`DROP TABLE IF EXISTS "product" CASCADE`);
+            await queryRunner.query(`DROP TABLE IF EXISTS "user_balance" CASCADE`);
+            await queryRunner.query(`DROP TABLE IF EXISTS "webshop" CASCADE`);
+            await queryRunner.query(`DROP TABLE IF EXISTS "user" CASCADE`);
 
-        // Enum típusok törlése
-        await queryRunner.query(`DROP TYPE IF EXISTS "public"."product_status"`);
-        await queryRunner.query(`DROP TYPE IF EXISTS "public"."webshop_status"`);
-        await queryRunner.query(`DROP TYPE IF EXISTS "public"."user_role"`);
+            // Enum típusok törlése
+            await queryRunner.query(`DROP TYPE IF EXISTS "public"."product_status" CASCADE`);
+            await queryRunner.query(`DROP TYPE IF EXISTS "public"."webshop_status" CASCADE`);
+            await queryRunner.query(`DROP TYPE IF EXISTS "public"."user_role" CASCADE`);
+        } catch (error) {
+            console.error('Error during migration down process:', error);
+            throw error;
+        }
     }
 }
