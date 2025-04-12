@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class ConsolidatedMigration1727512345678 implements MigrationInterface {
-    name = 'ConsolidatedMigration1727512345678'
+export class InitialSchemaMigration1727289291818 implements MigrationInterface {
+    name = 'InitialSchemaMigration1727289291818'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        // Enum típusok létrehozása
+        // Enum típusok létrehozása, ha még nem léteznek
         await queryRunner.query(`
             DO $$
             BEGIN
@@ -59,7 +59,7 @@ export class ConsolidatedMigration1727512345678 implements MigrationInterface {
             )
         `);
 
-        // PRODUCT tábla - Már nem használunk verzió-kezelést
+        // PRODUCT tábla
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS "product" (
                 "product_id" SERIAL PRIMARY KEY,
@@ -103,7 +103,7 @@ export class ConsolidatedMigration1727512345678 implements MigrationInterface {
             )
         `);
 
-        // PURCHASE tábla - Már nem használunk verzió-kezelést a termékeknél
+        // PURCHASE tábla
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS "purchase" (
                 "purchase_id" SERIAL PRIMARY KEY,
