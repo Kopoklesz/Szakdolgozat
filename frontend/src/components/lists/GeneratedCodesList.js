@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import '../../css/lists/GeneratedCodesList.css';
 
-const API_URL = 'http://localhost:3001';
+const API_URL = 'https://api.pannon-shop.hu';
 
 const GeneratedCodesList = forwardRef((props, ref) => {
   const { t } = useTranslation();

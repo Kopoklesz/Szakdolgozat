@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import '../css/Shop.css';
 
-const API_URL = 'http://api.pannon-shop.hu';
+const API_URL = 'https://api.pannon-shop.hu';
 
 const Shop = () => {
   const { t } = useTranslation();

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import '../css/TeacherDashboard.css';
 
-const API_URL = 'http://api.pannon-shop.hu';
+const API_URL = 'https://api.pannon-shop.hu';
 
 const TeacherDashboard = () => {
   const { t } = useTranslation();
