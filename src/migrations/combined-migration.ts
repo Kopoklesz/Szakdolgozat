@@ -129,28 +129,54 @@ export class CombinedMigration1727512345678 implements MigrationInterface {
         await queryRunner.query(`CREATE INDEX IF NOT EXISTS "idx_purchase_user" ON "purchase" ("user_id")`);
         await queryRunner.query(`CREATE INDEX IF NOT EXISTS "idx_purchase_product" ON "purchase" ("product_id")`);
 
-        // Alapértelmezett admin felhasználó beszúrása
-        await queryRunner.query(`
-            INSERT INTO "user" (user_id, email, role)
-            VALUES (0, 'teszt@gmail.com', 'admin')
-            ON CONFLICT (user_id) DO NOTHING
+        // Először ellenőrizzük, hogy a user_id=0 admin felhasználó már létezik-e
+        const userExists = await queryRunner.query(`
+            SELECT COUNT(*) FROM "user" WHERE user_id = 0
         `);
 
-        // Helyreállítjuk a szekvenciát, hogy a következő ID 1 legyen
+        // Ha még nem létezik, beszúrjuk és igazítjuk a szekvenciát
+        if (userExists[0].count === '0') {
+            // Módosítjuk a sorozatot, hogy a 0-t is elfogadja
+            await queryRunner.query(`
+                ALTER SEQUENCE user_user_id_seq MINVALUE 0 START WITH 0;
+                SELECT setval('user_user_id_seq', 0, false);
+            `);
+
+            // Alapértelmezett admin felhasználó beszúrása
+            await queryRunner.query(`
+                INSERT INTO "user" (user_id, email, role)
+                VALUES (0, 'teszt@gmail.com', 'admin')
+            `);
+        }
+
+        // Beállítjuk a szekvenciát újra a megfelelő értékre
         await queryRunner.query(`
-            SELECT setval('user_user_id_seq', COALESCE((SELECT MAX(user_id) FROM "user"), 0), true)
+            SELECT setval('user_user_id_seq', (SELECT MAX(user_id) FROM "user"), true);
         `);
 
-        // Alapértelmezett globális webshop beszúrása
-        await queryRunner.query(`
-            INSERT INTO webshop (webshop_id, teacher_id, subject_name, paying_instrument, paying_instrument_icon, header_color_code, status)
-            VALUES (0, 0, 'Globális Webshop', 'PP', 'default_icon_url', '#000000', 'active')
-            ON CONFLICT (webshop_id) DO NOTHING
+        // Ellenőrizzük, hogy a webshop_id=0 globális webshop már létezik-e
+        const webshopExists = await queryRunner.query(`
+            SELECT COUNT(*) FROM "webshop" WHERE webshop_id = 0
         `);
 
-        // Helyreállítjuk a szekvenciát, hogy a következő ID 1 legyen
+        // Ha még nem létezik, beszúrjuk és igazítjuk a szekvenciát
+        if (webshopExists[0].count === '0') {
+            // Módosítjuk a sorozatot, hogy a 0-t is elfogadja
+            await queryRunner.query(`
+                ALTER SEQUENCE webshop_webshop_id_seq MINVALUE 0 START WITH 0;
+                SELECT setval('webshop_webshop_id_seq', 0, false);
+            `);
+
+            // Alapértelmezett globális webshop beszúrása
+            await queryRunner.query(`
+                INSERT INTO webshop (webshop_id, teacher_id, subject_name, paying_instrument, paying_instrument_icon, header_color_code, status)
+                VALUES (0, 0, 'Globális Webshop', 'PP', 'default_icon_url', '#000000', 'active')
+            `);
+        }
+
+        // Beállítjuk a szekvenciát újra a megfelelő értékre
         await queryRunner.query(`
-            SELECT setval('webshop_webshop_id_seq', COALESCE((SELECT MAX(webshop_id) FROM "webshop"), 0), true)
+            SELECT setval('webshop_webshop_id_seq', (SELECT MAX(webshop_id) FROM "webshop"), true);
         `);
 
         // Minden létező felhasználóhoz hozzáadjuk a globális webshop egyenleget
