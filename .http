@@ -1,0 +1,62 @@
+### Alap health check
+GET http://localhost:3000
+
+### Admin bejelentkezés
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "admin"
+}
+
+### Diák bejelentkezés
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "identifier": "diak", 
+  "password": "diak"
+}
+
+### Tanár bejelentkezés
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "identifier": "tanar",
+  "password": "tanar"
+}
+
+### Új felhasználó regisztráció
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "TEST01",
+  "email": "test01@student.uni-pannon.hu",
+  "password": "Test123."
+}
+
+### Profil lekérése (cseréld ki a tokent!)
+GET http://localhost:3000/auth/profile
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+Content-Type: application/json
+
+### Webshopok lekérése (publikus)
+GET http://localhost:3000/webshop
+
+### Összes felhasználó (admin token kell!)
+GET http://localhost:3000/auth/users
+Authorization: Bearer ADMIN_JWT_TOKEN_HERE
+Content-Type: application/json
+
+### Hibás jelszó teszt
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "TEST02",
+  "email": "test02@student.uni-pannon.hu",
+  "password": "weak"
+}
