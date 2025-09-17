@@ -8,6 +8,7 @@ import { ProductModule } from './product/product.module';
 import { CartModule } from './cart/cart.module';
 import { PurchaseModule } from './purchase/purchase.module';
 import { DatabaseModule } from './database.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { DatabaseModule } from './database.module';
       isGlobal: true,
     }),
     DatabaseModule,
+    AuthModule,
     WebshopModule,
     UserModule,
     ProductModule,

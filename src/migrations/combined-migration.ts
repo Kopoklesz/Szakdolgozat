@@ -21,12 +21,15 @@ export class CombinedMigration1727512345678 implements MigrationInterface {
             $$;
         `);
 
-        // USER tábla
+        // USER tábla - kibővítve username és password mezőkkel
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS "user" (
                 "user_id" SERIAL PRIMARY KEY,
+                "username" VARCHAR(6) UNIQUE NOT NULL,
                 "email" VARCHAR(255) UNIQUE NOT NULL,
-                "role" "public"."user_role" NOT NULL
+                "password" VARCHAR(255) NOT NULL,
+                "role" "public"."user_role" NOT NULL,
+                "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
             )
         `);
 
@@ -59,7 +62,7 @@ export class CombinedMigration1727512345678 implements MigrationInterface {
             )
         `);
 
-        // PRODUCT tábla - verziókezelés nélkül (második migráció hatása)
+        // PRODUCT tábla
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS "product" (
                 "product_id" SERIAL PRIMARY KEY,
@@ -103,7 +106,7 @@ export class CombinedMigration1727512345678 implements MigrationInterface {
             )
         `);
 
-        // PURCHASE tábla - verzió-kezelés nélkül (második migráció hatása)
+        // PURCHASE tábla
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS "purchase" (
                 "purchase_id" SERIAL PRIMARY KEY,
@@ -118,6 +121,8 @@ export class CombinedMigration1727512345678 implements MigrationInterface {
         `);
 
         // Indexek létrehozása
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "idx_user_email" ON "user" ("email")`);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "idx_user_username" ON "user" ("username")`);
         await queryRunner.query(`CREATE INDEX IF NOT EXISTS "idx_webshop_teacher" ON "webshop" ("teacher_id")`);
         await queryRunner.query(`CREATE INDEX IF NOT EXISTS "idx_product_webshop" ON "product" ("webshop_id")`);
         await queryRunner.query(`CREATE INDEX IF NOT EXISTS "idx_user_balance_user" ON "user_balance" ("user_id")`);
@@ -129,29 +134,16 @@ export class CombinedMigration1727512345678 implements MigrationInterface {
         await queryRunner.query(`CREATE INDEX IF NOT EXISTS "idx_purchase_user" ON "purchase" ("user_id")`);
         await queryRunner.query(`CREATE INDEX IF NOT EXISTS "idx_purchase_product" ON "purchase" ("product_id")`);
 
-        // Először ellenőrizzük, hogy a user_id=0 admin felhasználó már létezik-e
-        const userExists = await queryRunner.query(`
-            SELECT COUNT(*) FROM "user" WHERE user_id = 0
-        `);
-
-        // Ha még nem létezik, beszúrjuk és igazítjuk a szekvenciát
-        if (userExists[0].count === '0') {
-            // Módosítjuk a sorozatot, hogy a 0-t is elfogadja
-            await queryRunner.query(`
-                ALTER SEQUENCE user_user_id_seq MINVALUE 0 START WITH 0;
-                SELECT setval('user_user_id_seq', 0, false);
-            `);
-
-            // Alapértelmezett admin felhasználó beszúrása
-            await queryRunner.query(`
-                INSERT INTO "user" (user_id, email, role)
-                VALUES (0, 'teszt@gmail.com', 'admin')
-            `);
-        }
-
-        // Beállítjuk a szekvenciát újra a megfelelő értékre
+        // Teszt felhasználók beszúrása (jelszavak: bcrypt hash-elt formában)
+        // Jelszó hash generálás: bcrypt.hashSync('password', 10)
+        // admin jelszó: $2b$10$K6yV.eL8L5YLFzj1q9qNLuXKXfTtV.M8.U2V8V8V8V8V8V8V8V8Ve (placeholder)
+        
         await queryRunner.query(`
-            SELECT setval('user_user_id_seq', (SELECT MAX(user_id) FROM "user"), true);
+            INSERT INTO "user" (username, email, password, role) VALUES
+            ('admin', 'admin@admin.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin'),
+            ('diak', 'diak@student.uni-pannon.hu', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student'),
+            ('tanar', 'tanar@teacher.uni-pannon.hu', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'teacher')
+            ON CONFLICT (username) DO NOTHING
         `);
 
         // Ellenőrizzük, hogy a webshop_id=0 globális webshop már létezik-e
@@ -167,22 +159,28 @@ export class CombinedMigration1727512345678 implements MigrationInterface {
                 SELECT setval('webshop_webshop_id_seq', 0, false);
             `);
 
-            // Alapértelmezett globális webshop beszúrása
-            await queryRunner.query(`
-                INSERT INTO webshop (webshop_id, teacher_id, subject_name, paying_instrument, paying_instrument_icon, header_color_code, status)
-                VALUES (0, 0, 'Globális Webshop', 'PP', 'default_icon_url', '#000000', 'active')
+            // Alapértelmezett globális webshop beszúrása (admin felhasználó teacher_id-jával)
+            const adminUser = await queryRunner.query(`
+                SELECT user_id FROM "user" WHERE username = 'admin' LIMIT 1
             `);
+            
+            if (adminUser.length > 0) {
+                await queryRunner.query(`
+                    INSERT INTO webshop (webshop_id, teacher_id, subject_name, paying_instrument, paying_instrument_icon, header_color_code, status)
+                    VALUES (0, ${adminUser[0].user_id}, 'Globális Webshop', 'PP', 'default_icon_url', '#000000', 'active')
+                `);
+            }
         }
 
         // Beállítjuk a szekvenciát újra a megfelelő értékre
         await queryRunner.query(`
-            SELECT setval('webshop_webshop_id_seq', (SELECT MAX(webshop_id) FROM "webshop"), true);
+            SELECT setval('webshop_webshop_id_seq', (SELECT COALESCE(MAX(webshop_id), 0) FROM "webshop"), true);
         `);
 
         // Minden létező felhasználóhoz hozzáadjuk a globális webshop egyenleget
         await queryRunner.query(`
             INSERT INTO user_balance (user_id, webshop_id, amount)
-            SELECT u.user_id, 0, 0
+            SELECT u.user_id, 0, 100.00
             FROM "user" u
             WHERE NOT EXISTS (
                 SELECT 1 FROM user_balance 
