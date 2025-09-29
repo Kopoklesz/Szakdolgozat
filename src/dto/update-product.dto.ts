@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber, IsPositive, IsUrl, IsEnum } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsEnum, Min } from 'class-validator';
 
 export class UpdateProductDto {
   @IsOptional()
@@ -10,7 +10,7 @@ export class UpdateProductDto {
   category?: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsString()
   image?: string;
 
   @IsOptional()
@@ -19,17 +19,17 @@ export class UpdateProductDto {
 
   @IsOptional()
   @IsNumber()
-  @IsPositive()
+  @Min(0, { message: 'Az ár nem lehet negatív' })
   price?: number;
 
   @IsOptional()
   @IsNumber()
-  @IsPositive()
+  @Min(0, { message: 'A maximális készlet nem lehet negatív' })
   max_stock?: number;
 
   @IsOptional()
   @IsNumber()
-  @IsPositive()
+  @Min(0, { message: 'A jelenlegi készlet nem lehet negatív' })
   current_stock?: number;
 
   @IsOptional()
