@@ -1,5 +1,10 @@
 import { IsOptional, IsString, IsNumber, IsEnum, Min } from 'class-validator';
 
+export enum ProductStatus {
+  AVAILABLE = 'available',
+  UNAVAILABLE = 'unavailable'
+}
+
 export class UpdateProductDto {
   @IsOptional()
   @IsString()
@@ -19,20 +24,20 @@ export class UpdateProductDto {
 
   @IsOptional()
   @IsNumber()
-  @Min(0, { message: 'Az ár nem lehet negatív' })
+  @Min(0)
   price?: number;
 
   @IsOptional()
   @IsNumber()
-  @Min(0, { message: 'A maximális készlet nem lehet negatív' })
+  @Min(0)
   max_stock?: number;
 
   @IsOptional()
   @IsNumber()
-  @Min(0, { message: 'A jelenlegi készlet nem lehet negatív' })
+  @Min(0)
   current_stock?: number;
 
   @IsOptional()
-  @IsEnum(['available', 'unavailable'])
-  status?: 'available' | 'unavailable';
+  @IsEnum(ProductStatus)
+  status?: ProductStatus;
 }
