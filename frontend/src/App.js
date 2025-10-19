@@ -27,7 +27,6 @@ const LANGUAGES = { HU: 'hu', EN: 'en' };
 function App() {
   const { i18n } = useTranslation();
   const [currentLanguage, setCurrentLanguage] = useState(LANGUAGES.HU);
-  const [userId, setUserId] = useState(null);
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
@@ -60,7 +59,7 @@ function App() {
               path="/cart/:webshopId" 
               element={
                 <ProtectedRoute>
-                  <Cart userId={userId} />
+                  <Cart />
                 </ProtectedRoute>
               } 
             />
@@ -77,6 +76,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <SignatureGenerated />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <div>Profil oldal (hamarosan)</div>
                 </ProtectedRoute>
               } 
             />

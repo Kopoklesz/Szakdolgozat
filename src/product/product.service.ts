@@ -5,6 +5,11 @@ import { Product } from '../entity/product.entity';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { Webshop } from '../entity/webshop.entity';
+<<<<<<< HEAD
+=======
+import { CreateProductDto } from '../dto/create-product.dto';
+import { UpdateProductDto } from '../dto/update-product.dto';
+>>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
 import { UserRole } from '../entity/user.entity';
 
 @Injectable()
@@ -147,6 +152,44 @@ export class ProductService {
   }
 
   /**
+<<<<<<< HEAD
+=======
+   * Termék frissítése
+   */
+  async updateProduct(id: number, updateProductDto: UpdateProductDto): Promise<Product> {
+    const product = await this.getProduct(id);
+
+    // Ellenőrizzük a készlet konzisztenciát
+    if (updateProductDto.current_stock !== undefined && updateProductDto.max_stock !== undefined) {
+      if (updateProductDto.current_stock > updateProductDto.max_stock) {
+        throw new BadRequestException('A jelenlegi készlet nem lehet nagyobb, mint a maximális készlet');
+      }
+    } else if (updateProductDto.current_stock !== undefined) {
+      if (updateProductDto.current_stock > product.max_stock) {
+        throw new BadRequestException('A jelenlegi készlet nem lehet nagyobb, mint a maximális készlet');
+      }
+    } else if (updateProductDto.max_stock !== undefined) {
+      if (product.current_stock > updateProductDto.max_stock) {
+        throw new BadRequestException('A maximális készlet nem lehet kisebb, mint a jelenlegi készlet');
+      }
+    }
+
+    Object.assign(product, updateProductDto);
+
+    return await this.productRepository.save(product);
+  }
+
+  /**
+   * Termék törlése
+   */
+  async deleteProduct(id: number): Promise<{ message: string }> {
+    const product = await this.getProduct(id);
+    await this.productRepository.remove(product);
+    return { message: `Product with ID ${id} has been deleted` };
+  }
+
+  /**
+>>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
    * Készlet csökkentése vásárlás során
    */
   async decreaseStock(productId: number, quantity: number): Promise<Product> {
@@ -196,6 +239,7 @@ export class ProductService {
     }
     return true;
   }
+<<<<<<< HEAD
 
   /**
    * HELPER: Ownership ellenőrzés
@@ -225,4 +269,6 @@ export class ProductService {
       throw new ForbiddenException('Csak a saját webshopod termékeit módosíthatod/törölheted');
     }
   }
+=======
+>>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
 }
