@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_ENDPOINTS } from './config/api';
+import { API_ENDPOINTS } from '../config/api';
 
 const API_URL = API_ENDPOINTS.AUTH;
 
