@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -13,7 +13,7 @@ export class AuthService {
     private userRepository: Repository<User>,
     private passwordService: PasswordService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   /**
    * Felhasználó regisztráció
@@ -128,7 +128,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Felhasználó nem található');
+      throw new NotFoundException('Felhasználó nem található');
     }
 
     return this.transformToResponseDto(user);
@@ -145,7 +145,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Felhasználó nem található');
+      throw new NotFoundException('Felhasználó nem található');
     }
 
     // Jelenlegi jelszó ellenőrzése
@@ -188,7 +188,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Felhasználó nem található');
+      throw new NotFoundException('Felhasználó nem található');
     }
 
     if (user.role === UserRole.ADMIN) {
@@ -208,7 +208,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Felhasználó nem található');
+      throw new NotFoundException('Felhasználó nem található');
     }
 
     user.role = newRole;
@@ -247,13 +247,5 @@ export class AuthService {
       role: user.role as 'student' | 'teacher' | 'admin',
       created_at: user.created_at,
     };
-  }
-
-  /**
-   * Email domain alapú automatikus szerepkör-beállítás ellenőrzése
-   */
-  private validateEmailRoleConsistency(email: string, role: UserRole): boolean {
-    const determinedRole = this.passwordService.determineRoleFromEmail(email);
-    return determinedRole === role;
   }
 }
