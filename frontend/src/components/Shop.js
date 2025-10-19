@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import API_BASE_URL from '../config/api';
 import '../css/Shop.css';
 
-const API_URL = 'https://api.pannon-shop.hu';
+const API_URL = API_BASE_URL;
 
 const Shop = () => {
   const { t } = useTranslation();

@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api';
 
-const API_URL = 'http://localhost:3000/auth';
+const API_URL = API_ENDPOINTS.AUTH;
 
 // Token és user mentése localStorage-ba
 const setAuthData = (token, user, rememberMe = false) => {
@@ -134,40 +135,12 @@ const validatePassword = (password) => {
   };
 };
 
-// Neptune kód validáció
-const validateNeptuneCode = (code) => {
-  if (code.length !== 6) {
-    return { isValid: false, error: 'Pontosan 6 karakter hosszú legyen' };
-  }
-  if (!/^[A-Z0-9]{6}$/.test(code)) {
-    return { isValid: false, error: 'Csak nagybetűk és számok használhatók' };
-  }
-  return { isValid: true };
-};
-
-// Email domain validáció
-const validateEmailDomain = (email) => {
-  const validDomains = ['@student.uni-pannon.hu', '@teacher.uni-pannon.hu', '@admin.uni-pannon.hu'];
-  const hasValidDomain = validDomains.some(domain => email.endsWith(domain));
-  
-  if (!hasValidDomain) {
-    return {
-      isValid: false,
-      error: 'Csak @student.uni-pannon.hu, @teacher.uni-pannon.hu vagy @admin.uni-pannon.hu domain engedélyezett'
-    };
-  }
-  return { isValid: true };
-};
-
-const authService = {
+export {
   register,
   login,
   logout,
   getProfile,
-  getAuthData,
   validatePassword,
-  validateNeptuneCode,
-  validateEmailDomain
+  getAuthData,
+  clearAuthData
 };
-
-export default authService;

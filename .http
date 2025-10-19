@@ -1,8 +1,8 @@
 ### Alap health check
-GET http://localhost:3000
+GET http://localhost:3001
 
 ### Admin bejelentkezés
-POST http://localhost:3000/auth/login
+POST http://localhost:3001/auth/login
 Content-Type: application/json
 
 {
@@ -11,7 +11,7 @@ Content-Type: application/json
 }
 
 ### Diák bejelentkezés
-POST http://localhost:3000/auth/login
+POST http://localhost:3001/auth/login
 Content-Type: application/json
 
 {
@@ -20,7 +20,7 @@ Content-Type: application/json
 }
 
 ### Tanár bejelentkezés
-POST http://localhost:3000/auth/login
+POST http://localhost:3001/auth/login
 Content-Type: application/json
 
 {
@@ -29,7 +29,7 @@ Content-Type: application/json
 }
 
 ### Új felhasználó regisztráció
-POST http://localhost:3000/auth/register
+POST http://localhost:3001/auth/register
 Content-Type: application/json
 
 {
@@ -39,20 +39,20 @@ Content-Type: application/json
 }
 
 ### Profil lekérése (cseréld ki a tokent!)
-GET http://localhost:3000/auth/profile
+GET http://localhost:3001/auth/profile
 Authorization: Bearer YOUR_JWT_TOKEN_HERE
 Content-Type: application/json
 
 ### Webshopok lekérése (publikus)
-GET http://localhost:3000/webshop
+GET http://localhost:3001/webshop
 
 ### Összes felhasználó (admin token kell!)
-GET http://localhost:3000/auth/users
+GET http://localhost:3001/auth/users
 Authorization: Bearer ADMIN_JWT_TOKEN_HERE
 Content-Type: application/json
 
 ### Hibás jelszó teszt
-POST http://localhost:3000/auth/register
+POST http://localhost:3001/auth/register
 Content-Type: application/json
 
 {
