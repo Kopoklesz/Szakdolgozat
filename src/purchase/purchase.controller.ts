@@ -18,9 +18,15 @@ export class PurchaseController {
   @Post(':userId/:webshopId')
   @UseGuards(JwtAuthGuard)
   async createPurchase(
+    @Request() req,
     @Param('userId', ParseIntPipe) userId: number,
     @Param('webshopId', ParseIntPipe) webshopId: number,
   ) {
+    // Ellenőrzés: csak saját kosarából vásárolhat (kivéve ADMIN)
+    if (req.user.role !== UserRole.ADMIN && req.user.sub !== userId) {
+      throw new ForbiddenException('Csak a saját kosaradból vásárolhatsz');
+    }
+
     try {
       const result = await this.purchaseService.createPurchase(userId, webshopId);
       return {

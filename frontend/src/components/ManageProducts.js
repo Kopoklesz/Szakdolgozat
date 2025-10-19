@@ -5,6 +5,8 @@ import axios from 'axios';
 import { API_URL } from '../config';
 import '../css/ManageProducts.css';
 
+const API_URL = process.env.REACT_APP_API_URL || 'https://api.pannon-shop.hu';
+
 const ManageProducts = () => {
   const { t } = useTranslation();
   const { webshopId } = useParams();

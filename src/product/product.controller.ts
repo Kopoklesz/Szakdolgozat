@@ -14,10 +14,17 @@ export class ProductController {
    * POST /product
    */
   @Post()
-  async createProduct(@Body() createProductDto: CreateProductDto) {
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.TEACHER, UserRole.ADMIN)
+  async createProduct(
+    @Request() req,
+    @Body() createProductDto: CreateProductDto
+  ) {
     console.log('Received create product request:', createProductDto);
     try {
-      const result = await this.productService.createProduct(createProductDto);
+      const userId = req.user.sub;
+      const userRole = req.user.role;
+      const result = await this.productService.createProduct(userId, userRole, createProductDto);
       console.log('Product created successfully:', result);
       return result;
     } catch (error) {
@@ -26,6 +33,8 @@ export class ProductController {
         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       } else if (error instanceof NotFoundException) {
         throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+      } else if (error.status === HttpStatus.FORBIDDEN) {
+        throw new HttpException(error.message, HttpStatus.FORBIDDEN);
       } else {
         throw new HttpException(
           'There was a problem creating the product: ' + error.message,

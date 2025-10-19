@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, UserRole } from '../entity/user.entity';
 import { UserBalance } from '../entity/user-balance.entity';
+import { Webshop } from '../entity/webshop.entity';
 import { CreateUserDto, UserResponseDto } from '../dto/auth.dto';
 
 @Injectable()
@@ -12,36 +13,45 @@ export class UserService {
     private userRepository: Repository<User>,
     @InjectRepository(UserBalance)
     private userBalanceRepository: Repository<UserBalance>,
+    @InjectRepository(Webshop)
+    private webshopRepository: Repository<Webshop>,
   ) {}
 
   /**
-   * Felhasználó létrehozása (belső használatra)
+   * Felhasználó létrehozása
    */
   async createUser(createUserDto: CreateUserDto): Promise<UserResponseDto> {
-    // ✅ Explicit típus konverzió
-    const userEntity = this.userRepository.create({
-      username: createUserDto.username,
-      email: createUserDto.email,
-      password: createUserDto.password,
-      role: createUserDto.role as UserRole || UserRole.STUDENT,
+    const { username, email, password, role } = createUserDto;
+
+    const existingUser = await this.userRepository.findOne({
+      where: [{ username }, { email }],
     });
-    
-    const savedUser = await this.userRepository.save(userEntity);
-    
+
+    if (existingUser) {
+      throw new BadRequestException('A felhasználó már létezik');
+    }
+
+    const newUser = this.userRepository.create({
+      username,
+      email,
+      password,
+      role: role as UserRole || UserRole.STUDENT,
+    });
+
+    const savedUser = await this.userRepository.save(newUser);
     return this.transformToResponseDto(savedUser);
   }
 
   /**
-   * Felhasználó lekérése ID alapján (kapcsolatokkal együtt)
+   * Felhasználó lekérése ID alapján
    */
   async getUser(id: number): Promise<UserResponseDto> {
     const user = await this.userRepository.findOne({
       where: { user_id: id },
-      relations: ['balances', 'balances.webshop', 'webshops', 'carts', 'purchases'],
     });
 
     if (!user) {
-      throw new NotFoundException(`Felhasználó ${id} ID-val nem található`);
+      throw new NotFoundException(`User with ID ${id} not found`);
     }
 
     return this.transformToResponseDto(user);
@@ -52,15 +62,14 @@ export class UserService {
    */
   async getAllUsers(): Promise<UserResponseDto[]> {
     const users = await this.userRepository.find({
-      relations: ['balances'],
-      order: { created_at: 'DESC' },
+      order: { username: 'ASC' },
     });
 
     return users.map(user => this.transformToResponseDto(user));
   }
 
   /**
-   * Felhasználó egyenlegének lekérése adott webshopban
+   * Felhasználó egyenlegének lekérése
    */
   async getUserBalance(userId: number, webshopId: number): Promise<number> {
     const balance = await this.userBalanceRepository.findOne({
@@ -99,6 +108,52 @@ export class UserService {
   }
 
   /**
+   * Egyenleg módosítás ownership ellenőrzéssel
+   * TEACHER csak saját webshopjához tartozó egyenlegeket módosíthat
+   */
+  async updateBalance(
+    teacherId: number,
+    teacherRole: UserRole,
+    studentId: number,
+    webshopId: number,
+    amount: number
+  ): Promise<{ message: string; newBalance: number }> {
+    // Webshop létezésének ellenőrzése
+    const webshop = await this.webshopRepository.findOne({
+      where: { webshop_id: webshopId }
+    });
+
+    if (!webshop) {
+      throw new NotFoundException('Webshop nem található');
+    }
+
+    // Admin mindenkinek módosíthatja az egyenlegét bármely webshopban
+    if (teacherRole !== UserRole.ADMIN) {
+      // Teacher csak saját webshopjához tartozó egyenlegeket módosíthatja
+      if (webshop.teacher_id !== teacherId) {
+        throw new ForbiddenException('Csak a saját webshopodhoz tartozó egyenlegeket módosíthatod');
+      }
+    }
+
+    // Hallgató létezésének ellenőrzése
+    const student = await this.userRepository.findOne({
+      where: { user_id: studentId }
+    });
+
+    if (!student) {
+      throw new NotFoundException('Hallgató nem található');
+    }
+
+    // Egyenleg módosítás
+    const updatedBalance = await this.updateUserBalance(studentId, webshopId, amount);
+
+    return {
+      message: 'Egyenleg sikeresen módosítva',
+      newBalance: Number(updatedBalance.amount)
+    };
+  }
+
+  /**
    * Egyenleg hozzáadása/levonása
    */
   async adjustUserBalance(userId: number, webshopId: number, amountChange: number): Promise<UserBalance> {
@@ -127,7 +182,6 @@ export class UserService {
    * Felhasználók keresése szerepkör alapján
    */
   async getUsersByRole(role: 'student' | 'teacher' | 'admin'): Promise<UserResponseDto[]> {
-    // ✅ Explicit enum konverzió
     const userRole = role === 'student' ? UserRole.STUDENT : 
                      role === 'teacher' ? UserRole.TEACHER : UserRole.ADMIN;
     

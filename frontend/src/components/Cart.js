@@ -6,7 +6,9 @@ import axios from 'axios';
 import { API_URL } from '../config';
 import '../css/Cart.css';
 
-const Cart = () => {
+const API_URL = process.env.REACT_APP_API_URL || 'https://api.pannon-shop.hu';
+
+const Cart = ({ userId, webshopId }) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { webshopId } = useParams();
