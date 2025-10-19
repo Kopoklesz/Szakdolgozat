@@ -2,7 +2,7 @@ server {
     listen 80;
     server_name pannon-shop.hu www.pannon-shop.hu;
 
-    root /root/Szakdolgozat/frontend/build;
+    root /var/www/pannon-shop/frontend/build;
     index index.html;
 
     add_header X-Frame-Options "SAMEORIGIN" always;
