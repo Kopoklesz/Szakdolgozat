@@ -5,8 +5,6 @@ import axios from 'axios';
 import { API_URL } from '../config';
 import '../css/ManageProducts.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://api.pannon-shop.hu';
-
 const ManageProducts = () => {
   const { t } = useTranslation();
   const { webshopId } = useParams();
@@ -66,7 +64,7 @@ const ManageProducts = () => {
     return null;
   };
 
-  const handleSubmit = async (e) => {
+  const handleCreateProduct = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -80,14 +78,15 @@ const ManageProducts = () => {
     setIsSubmitting(true);
 
     try {
-      await axios.post(`${API_URL}/product`, {
+      const productData = {
         ...newProduct,
-        webshop_id: parseInt(webshopId),
         price: parseFloat(newProduct.price),
         max_stock: parseInt(newProduct.max_stock),
         current_stock: parseInt(newProduct.current_stock),
-      });
+        webshop_id: parseInt(webshopId)
+      };
 
+      await axios.post(`${API_URL}/product`, productData);
       setSuccess(t('Termék sikeresen létrehozva!'));
       setNewProduct({
         name: '',
@@ -108,14 +107,7 @@ const ManageProducts = () => {
     }
   };
 
-  const handleEdit = (product) => {
-    setEditingProduct({ ...product });
-    setIsEditModalOpen(true);
-    setError('');
-    setSuccess('');
-  };
-
-  const handleUpdate = async (e) => {
+  const handleUpdateProduct = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -129,7 +121,7 @@ const ManageProducts = () => {
     setIsSubmitting(true);
 
     try {
-      await axios.put(`${API_URL}/product/${editingProduct.product_id}`, {
+      const productData = {
         name: editingProduct.name,
         category: editingProduct.category,
         image: editingProduct.image,
@@ -137,9 +129,10 @@ const ManageProducts = () => {
         price: parseFloat(editingProduct.price),
         max_stock: parseInt(editingProduct.max_stock),
         current_stock: parseInt(editingProduct.current_stock),
-        status: editingProduct.status,
-      });
+        status: editingProduct.status
+      };
 
+      await axios.put(`${API_URL}/product/${editingProduct.product_id}`, productData);
       setSuccess(t('Termék sikeresen frissítve!'));
       setIsEditModalOpen(false);
       setEditingProduct(null);
@@ -176,234 +169,206 @@ const ManageProducts = () => {
     }
   };
 
+  const openEditModal = (product) => {
+    setEditingProduct({ ...product });
+    setIsEditModalOpen(true);
+    setError('');
+    setSuccess('');
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingProduct(null);
+    setError('');
+    setSuccess('');
+  };
+
   return (
-    <div className="manage-products">
-      <h1>{t('Termékek kezelése')}</h1>
-      
+    <div className="manage-products-container">
+      <h2>{t('Termékek kezelése')}</h2>
+
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
-      
-      {/* Új termék hozzáadása */}
-      <div className="add-product-form">
-        <h2>{t('Új termék hozzáadása')}</h2>
-        <form onSubmit={handleSubmit}>
+
+      {/* Új termék létrehozása form */}
+      <div className="create-product-section">
+        <h3>{t('Új termék hozzáadása')}</h3>
+        <form onSubmit={handleCreateProduct} className="product-form">
+          {/* Form mezők... */}
           <input
+            type="text"
             name="name"
+            placeholder={t('Termék neve')}
             value={newProduct.name}
             onChange={(e) => handleInputChange(e, 'new')}
-            placeholder={t('Termék neve')}
             required
-            disabled={isSubmitting}
           />
           <input
+            type="text"
             name="category"
+            placeholder={t('Kategória')}
             value={newProduct.category}
             onChange={(e) => handleInputChange(e, 'new')}
-            placeholder={t('Kategória')}
             required
-            disabled={isSubmitting}
           />
           <input
+            type="url"
             name="image"
+            placeholder={t('Kép URL')}
             value={newProduct.image}
             onChange={(e) => handleInputChange(e, 'new')}
-            placeholder={t('Kép URL')}
             required
-            disabled={isSubmitting}
           />
           <textarea
             name="description"
+            placeholder={t('Leírás')}
             value={newProduct.description}
             onChange={(e) => handleInputChange(e, 'new')}
-            placeholder={t('Leírás')}
             required
-            disabled={isSubmitting}
           />
           <input
             type="number"
             name="price"
+            placeholder={t('Ár')}
             value={newProduct.price}
             onChange={(e) => handleInputChange(e, 'new')}
-            placeholder={t('Ár')}
-            required
-            min="0"
             step="0.01"
-            disabled={isSubmitting}
+            min="0"
+            required
           />
           <input
             type="number"
             name="max_stock"
+            placeholder={t('Maximális készlet')}
             value={newProduct.max_stock}
             onChange={(e) => handleInputChange(e, 'new')}
-            placeholder={t('Maximális készlet')}
-            required
             min="0"
-            disabled={isSubmitting}
+            required
           />
           <input
             type="number"
             name="current_stock"
+            placeholder={t('Jelenlegi készlet')}
             value={newProduct.current_stock}
             onChange={(e) => handleInputChange(e, 'new')}
-            placeholder={t('Jelenlegi készlet')}
-            required
             min="0"
-            disabled={isSubmitting}
+            required
           />
           <select
             name="status"
             value={newProduct.status}
             onChange={(e) => handleInputChange(e, 'new')}
-            required
-            disabled={isSubmitting}
           >
             <option value="available">{t('Elérhető')}</option>
             <option value="unavailable">{t('Nem elérhető')}</option>
           </select>
           <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? t('Mentés...') : t('Termék hozzáadása')}
+            {isSubmitting ? t('Létrehozás...') : t('Termék hozzáadása')}
           </button>
         </form>
       </div>
 
-      {/* Meglévő termékek */}
-      <h2>{t('Meglévő termékek')}</h2>
+      {/* Termékek listája */}
       <div className="products-list">
-        {products.map((product) => (
-          <div key={product.product_id} className="product-item">
-            <img 
-              src={product.image} 
-              alt={product.name}
-              onError={(e) => e.target.src = 'https://via.placeholder.com/150'}
-            />
-            <h3>{product.name}</h3>
-            <p><strong>{t('Kategória')}:</strong> {product.category}</p>
-            <p><strong>{t('Ár')}:</strong> {product.price}</p>
-            <p><strong>{t('Készlet')}:</strong> {product.current_stock} / {product.max_stock}</p>
-            <p><strong>{t('Státusz')}:</strong> {product.status === 'available' ? t('Elérhető') : t('Nem elérhető')}</p>
-            <div className="product-actions">
-              <button 
-                className="edit-button"
-                onClick={() => handleEdit(product)}
-              >
-                {t('Szerkesztés')}
-              </button>
-              <button 
-                className="delete-button"
-                onClick={() => handleDelete(product.product_id)}
-              >
-                {t('Törlés')}
-              </button>
-            </div>
+        <h3>{t('Meglévő termékek')}</h3>
+        {products.length === 0 ? (
+          <p>{t('Még nincsenek termékek.')}</p>
+        ) : (
+          <div className="products-grid">
+            {products.map(product => (
+              <div key={product.product_id} className="product-card">
+                <img src={product.image} alt={product.name} />
+                <h4>{product.name}</h4>
+                <p>{product.category}</p>
+                <p>{product.price} Ft</p>
+                <p>{t('Készlet')}: {product.current_stock}/{product.max_stock}</p>
+                <p className={`status ${product.status}`}>
+                  {product.status === 'available' ? t('Elérhető') : t('Nem elérhető')}
+                </p>
+                <div className="product-actions">
+                  <button onClick={() => openEditModal(product)}>{t('Szerkesztés')}</button>
+                  <button onClick={() => handleDelete(product.product_id)} className="delete-btn">
+                    {t('Törlés')}
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
 
-      {/* Szerkesztés Modal */}
+      {/* Szerkesztési modal */}
       {isEditModalOpen && editingProduct && (
-        <div className="edit-modal">
-          <div className="edit-modal-content">
-            <h2>{t('Termék szerkesztése')}</h2>
-            <form onSubmit={handleUpdate}>
+        <div className="modal-overlay" onClick={closeEditModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>{t('Termék szerkesztése')}</h3>
+            <form onSubmit={handleUpdateProduct} className="product-form">
               <input
+                type="text"
                 name="name"
                 value={editingProduct.name}
                 onChange={(e) => handleInputChange(e, 'edit')}
-                placeholder={t('Termék neve')}
                 required
-                disabled={isSubmitting}
               />
               <input
+                type="text"
                 name="category"
                 value={editingProduct.category}
                 onChange={(e) => handleInputChange(e, 'edit')}
-                placeholder={t('Kategória')}
                 required
-                disabled={isSubmitting}
               />
               <input
+                type="url"
                 name="image"
                 value={editingProduct.image}
                 onChange={(e) => handleInputChange(e, 'edit')}
-                placeholder={t('Kép URL')}
                 required
-                disabled={isSubmitting}
               />
               <textarea
                 name="description"
                 value={editingProduct.description}
                 onChange={(e) => handleInputChange(e, 'edit')}
-                placeholder={t('Leírás')}
                 required
-                disabled={isSubmitting}
               />
               <input
                 type="number"
                 name="price"
                 value={editingProduct.price}
                 onChange={(e) => handleInputChange(e, 'edit')}
-                placeholder={t('Ár')}
-                required
-                min="0"
                 step="0.01"
-                disabled={isSubmitting}
+                min="0"
+                required
               />
               <input
                 type="number"
                 name="max_stock"
                 value={editingProduct.max_stock}
                 onChange={(e) => handleInputChange(e, 'edit')}
-                placeholder={t('Maximális készlet')}
-                required
                 min="0"
-                disabled={isSubmitting}
+                required
               />
               <input
                 type="number"
                 name="current_stock"
                 value={editingProduct.current_stock}
                 onChange={(e) => handleInputChange(e, 'edit')}
-                placeholder={t('Jelenlegi készlet')}
-                required
                 min="0"
-                disabled={isSubmitting}
+                required
               />
               <select
                 name="status"
                 value={editingProduct.status}
                 onChange={(e) => handleInputChange(e, 'edit')}
-                required
-                disabled={isSubmitting}
               >
                 <option value="available">{t('Elérhető')}</option>
                 <option value="unavailable">{t('Nem elérhető')}</option>
               </select>
-              
-              <div className="modal-button-group">
-                <button 
-                  type="button" 
-                  onClick={() => {
-                    setIsEditModalOpen(false);
-                    setEditingProduct(null);
-                    setError('');
-                  }}
-                  disabled={isSubmitting}
-                >
+              <div className="modal-actions">
+                <button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? t('Mentés...') : t('Módosítások mentése')}
+                </button>
+                <button type="button" onClick={closeEditModal}>
                   {t('Mégse')}
-                </button>
-                <button 
-                  type="submit"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? t('Mentés...') : t('Mentés')}
-                </button>
-                <button 
-                  type="button"
-                  className="delete-button"
-                  onClick={() => handleDelete(editingProduct.product_id)}
-                  disabled={isSubmitting}
-                >
-                  {t('Törlés')}
                 </button>
               </div>
             </form>

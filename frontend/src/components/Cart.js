@@ -6,9 +6,7 @@ import axios from 'axios';
 import { API_URL } from '../config';
 import '../css/Cart.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://api.pannon-shop.hu';
-
-const Cart = ({ userId, webshopId }) => {
+const Cart = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { webshopId } = useParams();
@@ -98,19 +96,14 @@ const Cart = ({ userId, webshopId }) => {
     }
   };
 
-  // Összeg számítás
   const calculateTotal = () => {
-    return cartItems.reduce((total, item) => 
-      total + (item.product.price * item.quantity), 0
-    ).toFixed(2);
+    return cartItems.reduce((total, item) => {
+      return total + (item.product.price * item.quantity);
+    }, 0).toFixed(2);
   };
 
   if (loading) {
-    return (
-      <div className="cart-container">
-        <div className="loading-message">{t('Betöltés')}...</div>
-      </div>
-    );
+    return <div className="cart-loading">{t('Betöltés...')}</div>;
   }
 
   return (
