@@ -109,6 +109,50 @@ const getProfile = async () => {
   }
 };
 
+// Neptune kód validáció
+const validateNeptuneCode = (neptuneCode) => {
+  const neptunRegex = /^[A-Z0-9]{6}$/;
+  
+  if (!neptuneCode || neptuneCode.trim() === '') {
+    return {
+      isValid: false,
+      error: 'A Neptune kód megadása kötelező'
+    };
+  }
+  
+  if (!neptunRegex.test(neptuneCode.toUpperCase())) {
+    return {
+      isValid: false,
+      error: 'A Neptune kód formátuma érvénytelen (6 karakter: betűk és számok)'
+    };
+  }
+  
+  return { isValid: true };
+};
+
+// Email domain validáció
+const validateEmailDomain = (email) => {
+  const allowedDomains = ['student.uni-pannon.hu', 'uni-pannon.hu'];
+  
+  if (!email || email.trim() === '') {
+    return {
+      isValid: false,
+      error: 'Az email cím megadása kötelező'
+    };
+  }
+  
+  const emailDomain = email.split('@')[1];
+  
+  if (!allowedDomains.includes(emailDomain)) {
+    return {
+      isValid: false,
+      error: 'Csak @student.uni-pannon.hu vagy @uni-pannon.hu domain engedélyezett'
+    };
+  }
+  
+  return { isValid: true };
+};
+
 // Jelszó komplexitás validáció (frontend segédlet)
 const validatePassword = (password) => {
   const errors = [];
@@ -135,24 +179,28 @@ const validatePassword = (password) => {
   };
 };
 
+// Named exports
 export {
   register,
   login,
   logout,
   getProfile,
   validatePassword,
+  validateNeptuneCode,
+  validateEmailDomain,
   getAuthData,
   clearAuthData
 };
 
-const authService = {
+// Default export az egész service objektumként
+export default {
   register,
   login,
   logout,
   getProfile,
   validatePassword,
+  validateNeptuneCode,
+  validateEmailDomain,
   getAuthData,
   clearAuthData
 };
-
-export default authService;
