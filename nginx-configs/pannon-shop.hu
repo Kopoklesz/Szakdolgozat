@@ -1,5 +1,5 @@
 server {
-    listen 80;
+    listen 443 ssl;
     server_name pannon-shop.hu www.pannon-shop.hu;
 
     root /var/www/pannon-shop/frontend/build;
@@ -24,4 +24,17 @@ server {
 
     access_log /var/log/nginx/pannon-shop.access.log;
     error_log /var/log/nginx/pannon-shop.error.log;
+
+    ssl_certificate /etc/letsencrypt/live/pannon-shop.hu/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/pannon-shop.hu/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+}
+
+server {
+    listen 80;
+    server_name pannon-shop.hu www.pannon-shop.hu;
+
+    # HTTP -> HTTPS redirect
+    return 301 https://$host$request_uri;
 }
