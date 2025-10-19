@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_ENDPOINTS } from '../config/api';
+import { API_ENDPOINTS } from './config/api';
 
 const API_URL = API_ENDPOINTS.AUTH;
 
@@ -144,3 +144,15 @@ export {
   getAuthData,
   clearAuthData
 };
+
+const authService = {
+  register,
+  login,
+  logout,
+  getProfile,
+  validatePassword,
+  getAuthData,
+  clearAuthData
+};
+
+export default authService;
