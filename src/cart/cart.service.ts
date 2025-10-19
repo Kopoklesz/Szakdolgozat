@@ -62,15 +62,9 @@ export class CartService {
 
     // Meglévő cart item keresése
     const existingCartItem = await this.cartItemRepository.findOne({
-<<<<<<< HEAD
       where: {
         cart: { cart_id: cart.cart_id },
         product: { product_id: productId }
-=======
-      where: {
-        cart: { cart_id: cart.cart_id },
-        product: { product_id: productId }
->>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
       },
     });
 
