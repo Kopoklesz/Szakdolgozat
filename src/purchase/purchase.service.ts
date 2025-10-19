@@ -15,11 +15,7 @@ export class PurchaseService {
     private userService: UserService,
     private productService: ProductService,
     private dataSource: DataSource,
-<<<<<<< HEAD
   ) { }
-=======
-  ) {}
->>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
 
   /**
    * Vásárlás létrehozása - TELJES IMPLEMENTÁCIÓ
@@ -45,11 +41,7 @@ export class PurchaseService {
     try {
       // 1. Kosár lekérése
       const cart = await this.cartService.getCart(userId, webshopId);
-<<<<<<< HEAD
 
-=======
-      
->>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
       if (!cart || cart.items.length === 0) {
         throw new NotFoundException('A kosár üres');
       }
@@ -61,11 +53,7 @@ export class PurchaseService {
 
       // 3. Egyenleg ellenőrzése
       const currentBalance = await this.userService.getUserBalance(userId, webshopId);
-<<<<<<< HEAD
 
-=======
-      
->>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
       if (currentBalance < totalAmount) {
         throw new BadRequestException(
           `Nincs elég egyenleged. Szükséges: ${totalAmount.toFixed(2)}, Elérhető: ${currentBalance.toFixed(2)}`
@@ -75,11 +63,7 @@ export class PurchaseService {
       // 4. Készlet ellenőrzése minden termékre
       for (const item of cart.items) {
         const product = await this.productService.getProduct(item.product.product_id);
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
         if (product.current_stock < item.quantity) {
           throw new BadRequestException(
             `Nincs elég készlet a termékből: ${product.name}. Elérhető: ${product.current_stock}, kért: ${item.quantity}`
@@ -95,22 +79,14 @@ export class PurchaseService {
 
       // 5. Purchase rekordok létrehozása
       const purchases: Purchase[] = [];
-<<<<<<< HEAD
 
-=======
-      
->>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
       for (const item of cart.items) {
         const purchase = this.purchaseRepository.create({
           user: { user_id: userId },
           product: item.product,
           quantity: item.quantity,
         });
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
         const savedPurchase = await queryRunner.manager.save(purchase);
         purchases.push(savedPurchase);
       }
@@ -146,11 +122,7 @@ export class PurchaseService {
   }
 
   /**
-<<<<<<< HEAD
    * Felhasználó összes vásárlási előzményének lekérése
-=======
-   * Felhasználó vásárlási előzményeinek lekérése
->>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
    */
   async getUserPurchases(userId: number): Promise<Purchase[]> {
     return await this.purchaseRepository.find({
@@ -161,19 +133,11 @@ export class PurchaseService {
   }
 
   /**
-<<<<<<< HEAD
    * Felhasználó vásárlási előzményei egy adott webshopban
    */
   async getUserPurchasesByWebshop(userId: number, webshopId: number): Promise<Purchase[]> {
     return await this.purchaseRepository.find({
       where: {
-=======
-   * Vásárlási előzmények webshop szerint
-   */
-  async getUserPurchasesByWebshop(userId: number, webshopId: number): Promise<Purchase[]> {
-    return await this.purchaseRepository.find({
-      where: { 
->>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
         user: { user_id: userId },
         product: { webshop: { webshop_id: webshopId } }
       },
@@ -183,19 +147,11 @@ export class PurchaseService {
   }
 
   /**
-<<<<<<< HEAD
    * Webshop összes vásárlásának lekérése (admin/teacher funkció)
    */
   async getWebshopPurchases(webshopId: number): Promise<Purchase[]> {
     return await this.purchaseRepository.find({
       where: {
-=======
-   * Összes vásárlás egy webshopban (admin/teacher funkció)
-   */
-  async getWebshopPurchases(webshopId: number): Promise<Purchase[]> {
-    return await this.purchaseRepository.find({
-      where: { 
->>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
         product: { webshop: { webshop_id: webshopId } }
       },
       relations: ['user', 'product'],
@@ -204,11 +160,7 @@ export class PurchaseService {
   }
 
   /**
-<<<<<<< HEAD
    * Vásárlási statisztika egy webshophoz
-=======
-   * Vásárlás statisztika
->>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
    */
   async getPurchaseStats(webshopId: number): Promise<{
     totalPurchases: number;

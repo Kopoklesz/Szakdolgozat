@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import {
   Controller,
   Get,
@@ -17,20 +16,14 @@ import {
   NotFoundException,
   ForbiddenException
 } from '@nestjs/common';
-=======
-import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, UseFilters, HttpException, HttpStatus, BadRequestException, NotFoundException } from '@nestjs/common';
->>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
 import { ProductService } from './product.service';
 import { HttpExceptionFilter } from '../filters/http-exception.filter';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
-<<<<<<< HEAD
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../entity/user.entity';
-=======
->>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
 
 @Controller('product')
 @UseFilters(new HttpExceptionFilter())
@@ -61,11 +54,7 @@ export class ProductController {
         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       } else if (error instanceof NotFoundException) {
         throw new HttpException(error.message, HttpStatus.NOT_FOUND);
-<<<<<<< HEAD
       } else if (error instanceof ForbiddenException) {
-=======
-      } else if (error.status === HttpStatus.FORBIDDEN) {
->>>>>>> 8ac748c51e8db03a8a4458b3a6651a03fa29682b
         throw new HttpException(error.message, HttpStatus.FORBIDDEN);
       } else {
         throw new HttpException(
