@@ -21,16 +21,33 @@ export class CombinedMigration1727512345678 implements MigrationInterface {
             $$;
         `);
 
-        // USER tábla - kibővítve username és password mezőkkel
+        // USER tábla - kibővítve username és password mezőkkel, valamint comment-ekkel
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS "user" (
                 "user_id" SERIAL PRIMARY KEY,
                 "username" VARCHAR(6) UNIQUE NOT NULL,
                 "email" VARCHAR(255) UNIQUE NOT NULL,
                 "password" VARCHAR(255) NOT NULL,
-                "role" "public"."user_role" NOT NULL,
+                "role" "public"."user_role" NOT NULL DEFAULT 'student',
                 "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
             )
+        `);
+
+        // Comment-ek hozzáadása a user tábla oszlopaihoz
+        await queryRunner.query(`
+            COMMENT ON COLUMN "user"."username" IS 'Neptune kód (pl. HMF6XL)'
+        `);
+        await queryRunner.query(`
+            COMMENT ON COLUMN "user"."email" IS 'Email cím - szerepkör meghatározásához'
+        `);
+        await queryRunner.query(`
+            COMMENT ON COLUMN "user"."password" IS 'Bcrypt hash-elt jelszó'
+        `);
+        await queryRunner.query(`
+            COMMENT ON COLUMN "user"."role" IS 'Felhasználói szerepkör - email domain alapján automatikusan beállítva'
+        `);
+        await queryRunner.query(`
+            COMMENT ON COLUMN "user"."created_at" IS 'Regisztráció időpontja'
         `);
 
         // WEBSHOP tábla
@@ -137,7 +154,7 @@ export class CombinedMigration1727512345678 implements MigrationInterface {
         // Teszt felhasználók beszúrása (jelszavak: bcrypt hash-elt formában)
         // Jelszó hash generálás: bcrypt.hashSync('password', 10)
         // admin jelszó: $2b$10$K6yV.eL8L5YLFzj1q9qNLuXKXfTtV.M8.U2V8V8V8V8V8V8V8V8Ve (placeholder)
-        
+
         await queryRunner.query(`
             INSERT INTO "user" (username, email, password, role) VALUES
             ('admin', 'admin@admin.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin'),
@@ -163,7 +180,7 @@ export class CombinedMigration1727512345678 implements MigrationInterface {
             const adminUser = await queryRunner.query(`
                 SELECT user_id FROM "user" WHERE username = 'admin' LIMIT 1
             `);
-            
+
             if (adminUser.length > 0) {
                 await queryRunner.query(`
                     INSERT INTO webshop (webshop_id, teacher_id, subject_name, paying_instrument, paying_instrument_icon, header_color_code, status)

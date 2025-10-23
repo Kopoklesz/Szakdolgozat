@@ -17,7 +17,7 @@ export class User {
   @PrimaryGeneratedColumn()
   user_id: number;
 
-  @Column({ unique: true, length: 6, comment: 'Neptune kód (pl. HMF6XL)' })
+  @Column({ unique: true, comment: 'Felhasználónév - bármi lehet' })
   username: string;
 
   @Column({ unique: true, comment: 'Email cím - szerepkör meghatározásához' })
@@ -34,8 +34,8 @@ export class User {
   })
   role: UserRole;
 
-  @Column({ 
-    type: 'timestamp', 
+  @Column({
+    type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
     comment: 'Regisztráció időpontja'
   })
@@ -55,13 +55,15 @@ export class User {
 
   /**
    * Email domain alapján automatikus szerepkör meghatározás
+   * FIGYELEM: Ez a statikus metódus már elavult!
+   * Használd a PasswordService.determineRoleFromEmail() metódust helyette.
    */
   static determineRoleFromEmail(email: string): UserRole {
     if (email.endsWith('@student.uni-pannon.hu')) {
       return UserRole.STUDENT;
     } else if (email.endsWith('@teacher.uni-pannon.hu')) {
       return UserRole.TEACHER;
-    } else if (email === 'admin@admin.com') {
+    } else if (email === 'admin@uni-pannon.hu') {
       return UserRole.ADMIN;
     }
     // Alapértelmezett diák szerepkör
