@@ -1,19 +1,22 @@
-import { IsNotEmpty, IsEmail, IsString, Length, Matches } from 'class-validator';
+import { IsNotEmpty, IsEmail, IsString, Matches, MinLength } from 'class-validator';
 
 // Regisztrációs DTO
 export class RegisterDto {
-  @IsNotEmpty({ message: 'A Neptune kód megadása kötelező' })
+  @IsNotEmpty({ message: 'A felhasználónév megadása kötelező' })
   @IsString()
-  @Length(6, 6, { message: 'A Neptune kódnak pontosan 6 karakter hosszúnak kell lennie' })
-  @Matches(/^[A-Z0-9]{6}$/, { message: 'A Neptune kód csak nagybetűket és számokat tartalmazhat' })
-  username: string;
+  username: string; // MÓDOSÍTVA: Bármi lehet, nincs hossz megkötés
 
   @IsNotEmpty({ message: 'Az email cím megadása kötelező' })
   @IsEmail({}, { message: 'Érvényes email címet adj meg' })
-  email: string;
+  @Matches(
+    /@(student|teacher)\.uni-pannon\.hu$|^admin@uni-pannon\.hu$/,
+    { message: 'Csak @student.uni-pannon.hu vagy @teacher.uni-pannon.hu email címmel lehet regisztrálni' }
+  )
+  email: string; // MÓDOSÍTVA: Csak egyetemi domaineket fogadunk el
 
   @IsNotEmpty({ message: 'A jelszó megadása kötelező' })
   @IsString()
+  @MinLength(8, { message: 'A jelszónak legalább 8 karakter hosszúnak kell lennie' })
   password: string;
 }
 
@@ -32,7 +35,6 @@ export class LoginDto {
 export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
-  @Length(6, 6)
   username: string;
 
   @IsNotEmpty()

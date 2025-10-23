@@ -18,37 +18,39 @@ export class AuthService {
   async register(registerDto: RegisterDto): Promise<LoginResponseDto> {
     const { username, email, password } = registerDto;
 
-    const neptuneValidation = this.passwordService.validateNeptuneCode(username);
-    if (!neptuneValidation.isValid) {
-      throw new BadRequestException(neptuneValidation.error);
-    }
+    // ELTÁVOLÍTVA: Neptune kód validáció (username már bármi lehet)
 
+    // Email domain validáció
     const emailValidation = this.passwordService.validateEmailDomain(email);
     if (!emailValidation.isValid) {
       throw new BadRequestException(emailValidation.error);
     }
 
+    // Jelszó komplexitás validáció
     const passwordValidation = this.passwordService.validatePasswordComplexity(password);
     if (!passwordValidation.isValid) {
       throw new BadRequestException(passwordValidation.errors.join(', '));
     }
 
+    // Létező felhasználó ellenőrzése
     const existingUser = await this.userRepository.findOne({
       where: [{ username }, { email }]
     });
 
     if (existingUser) {
       if (existingUser.username === username) {
-        throw new ConflictException('Ez a Neptune kód már regisztrálva van');
+        throw new ConflictException('Ez a felhasználónév már regisztrálva van');
       }
       if (existingUser.email === email) {
         throw new ConflictException('Ez az email cím már regisztrálva van');
       }
     }
 
+    // Szerepkör meghatározása email alapján
     const role = this.passwordService.determineRoleFromEmail(email);
     const hashedPassword = await this.passwordService.hashPassword(password);
 
+    // Új felhasználó létrehozása
     const newUser = this.userRepository.create({
       username,
       email,
@@ -116,7 +118,7 @@ export class AuthService {
 
     const isCurrentPasswordValid = await this.passwordService.comparePassword(currentPassword, user.password);
     if (!isCurrentPasswordValid) {
-      throw new UnauthorizedException('Helytelen jelenlegi jelszó');
+      throw new BadRequestException('A jelenlegi jelszó helytelen');
     }
 
     const passwordValidation = this.passwordService.validatePasswordComplexity(newPassword);
@@ -124,8 +126,7 @@ export class AuthService {
       throw new BadRequestException(passwordValidation.errors.join(', '));
     }
 
-    const hashedNewPassword = await this.passwordService.hashPassword(newPassword);
-    user.password = hashedNewPassword;
+    user.password = await this.passwordService.hashPassword(newPassword);
     await this.userRepository.save(user);
 
     return { message: 'Jelszó sikeresen megváltoztatva' };

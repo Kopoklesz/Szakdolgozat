@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -53,53 +53,49 @@ export class PasswordService {
   }
 
   /**
-   * Neptune kód validáció
-   * Pontosan 6 karakter, nagybetűk és számok
-   */
-  validateNeptuneCode(neptuneCode: string): { isValid: boolean; error?: string } {
-    if (neptuneCode.length !== 6) {
-      return { isValid: false, error: 'A Neptune kódnak pontosan 6 karakter hosszúnak kell lennie' };
-    }
-
-    if (!/^[A-Z0-9]{6}$/.test(neptuneCode)) {
-      return { isValid: false, error: 'A Neptune kód csak nagybetűket és számokat tartalmazhat' };
-    }
-
-    return { isValid: true };
-  }
-
-  /**
    * Email domain alapú szerepkör meghatározás
+   * MÓDOSÍTVA: Csak @student.uni-pannon.hu, @teacher.uni-pannon.hu és admin@uni-pannon.hu engedélyezett
    */
   determineRoleFromEmail(email: string): 'student' | 'teacher' | 'admin' {
-    if (email.endsWith('@student.uni-pannon.hu')) {
-      return 'student';
-    } else if (email.endsWith('@teacher.uni-pannon.hu') || email.endsWith('@uni-pannon.hu')) {
-      return 'teacher';
-    } else if (email === 'admin@admin.com') {
+    // Speciális admin eset
+    if (email === 'admin@uni-pannon.hu') {
       return 'admin';
     }
-    // Alapértelmezett diák szerepkör
-    return 'student';
+
+    // Hallgató
+    if (email.endsWith('@student.uni-pannon.hu')) {
+      return 'student';
+    }
+
+    // Tanár
+    if (email.endsWith('@teacher.uni-pannon.hu')) {
+      return 'teacher';
+    }
+
+    // Minden más email elutasítása
+    throw new BadRequestException(
+      'Csak @student.uni-pannon.hu vagy @teacher.uni-pannon.hu email címmel lehet regisztrálni'
+    );
   }
 
   /**
    * Email domain validáció - SZINKRONIZÁLVA A FRONTEND-DEL
+   * MÓDOSÍTVA: Csak egyetemi domaineket fogadunk el
    */
   validateEmailDomain(email: string): { isValid: boolean; error?: string } {
-    const validDomains = [
-      '@student.uni-pannon.hu',
-      '@teacher.uni-pannon.hu',
-      '@uni-pannon.hu',
-      '@admin.com' // Admin email kivétel
-    ];
+    // Admin email engedélyezése
+    if (email === 'admin@uni-pannon.hu') {
+      return { isValid: true };
+    }
 
-    const isValidDomain = validDomains.some(domain => email.endsWith(domain));
+    // Csak student és teacher domaineket fogadunk el
+    const validDomains = ['@student.uni-pannon.hu', '@teacher.uni-pannon.hu'];
+    const isValid = validDomains.some(domain => email.endsWith(domain));
 
-    if (!isValidDomain) {
+    if (!isValid) {
       return {
         isValid: false,
-        error: 'Csak egyetemi email címekkel lehet regisztrálni (@student.uni-pannon.hu, @teacher.uni-pannon.hu vagy @uni-pannon.hu)'
+        error: 'Csak @student.uni-pannon.hu vagy @teacher.uni-pannon.hu email címmel lehet regisztrálni'
       };
     }
 

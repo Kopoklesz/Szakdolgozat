@@ -43,25 +43,26 @@ function Register() {
       [name]: type === 'checkbox' ? checked : value
     });
     
-    // Mező specifikus hiba törlése
+    // Hibák törlése amikor a felhasználó változtat
     if (errors[name]) {
-      setErrors({ ...errors, [name]: '' });
+      setErrors({
+        ...errors,
+        [name]: ''
+      });
     }
-    setError('');
   };
 
   const validateForm = () => {
     const newErrors = {};
 
-    // Neptune kód validáció
-    const neptuneValidation = authService.validateNeptuneCode(formData.username);
-    if (!neptuneValidation.isValid) {
-      newErrors.username = neptuneValidation.error;
+    // Felhasználónév - egyszerűsített validáció (bármi lehet)
+    if (!formData.username.trim()) {
+      newErrors.username = t('A felhasználónév nem lehet üres');
     }
 
-    // Email validáció
+    // Email validáció - csak egyetemi domaineket fogadunk el
     if (!formData.email) {
-      newErrors.email = 'Az email cím megadása kötelező';
+      newErrors.email = t('Az email cím kötelező');
     } else {
       const emailValidation = authService.validateEmailDomain(formData.email);
       if (!emailValidation.isValid) {
@@ -70,32 +71,30 @@ function Register() {
     }
 
     // Jelszó validáció
-    if (!formData.password) {
-      newErrors.password = 'A jelszó megadása kötelező';
-    } else if (!passwordValidation.isValid) {
-      newErrors.password = 'A jelszó nem felel meg a követelményeknek';
+    if (!passwordValidation.isValid) {
+      newErrors.password = t('A jelszó nem felel meg a követelményeknek');
     }
 
     // Jelszó megerősítés
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'A jelszavak nem egyeznek';
+      newErrors.confirmPassword = t('A jelszavak nem egyeznek');
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (!validateForm()) {
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
 
     setLoading(true);
 
-    // Regisztráció
     const result = await register(
       formData.username,
       formData.email,
@@ -103,26 +102,25 @@ function Register() {
       formData.rememberMe
     );
 
+    setLoading(false);
+
     if (result.success) {
-      // Sikeres regisztráció - átirányítás
       navigate('/webshops');
     } else {
       setError(result.error);
     }
-
-    setLoading(false);
   };
 
   return (
     <div className="auth-container">
       <h2>{t('Regisztráció')}</h2>
-
+      
       {error && <div className="error-message">{error}</div>}
-
-      <form className="auth-form" onSubmit={handleSubmit}>
+      
+      <form onSubmit={handleSubmit} className="auth-form">
         <div className="form-group">
           <label htmlFor="username">
-            {t('Neptune kód')}
+            {t('Felhasználónév')}
           </label>
           <input
             type="text"
@@ -130,8 +128,7 @@ function Register() {
             name="username"
             value={formData.username}
             onChange={handleChange}
-            placeholder="ABC123"
-            maxLength={6}
+            placeholder={t('Felhasználónév')}
             className={errors.username ? 'error' : ''}
             disabled={loading}
           />
@@ -148,11 +145,14 @@ function Register() {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="neptun@student.uni-pannon.hu"
+            placeholder="pelda@student.uni-pannon.hu"
             className={errors.email ? 'error' : ''}
             disabled={loading}
           />
           {errors.email && <div className="field-error">{errors.email}</div>}
+          <div className="field-hint" style={{ fontSize: '0.85em', color: '#666', marginTop: '4px' }}>
+            Csak @student.uni-pannon.hu vagy @teacher.uni-pannon.hu email cím használható
+          </div>
         </div>
 
         <div className="form-group">
@@ -173,10 +173,12 @@ function Register() {
           
           {formData.password && (
             <div className="password-requirements">
-              <strong>{t('Jelszó követelmények:')}</strong>
+              <p style={{ margin: '5px 0', fontSize: '0.9em', fontWeight: 'bold' }}>
+                {t('Jelszó követelmények')}:
+              </p>
               <ul>
                 <li className={formData.password.length >= 8 ? 'valid' : ''}>
-                  {t('Legalább 8 karakter')}
+                  {t('Legalább 8 karakter hosszú')}
                 </li>
                 <li className={/[A-Z]/.test(formData.password) ? 'valid' : ''}>
                   {t('Legalább egy nagybetű')}

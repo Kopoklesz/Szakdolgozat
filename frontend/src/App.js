@@ -42,11 +42,20 @@ function App() {
             {/* Publikus route-ok */}
             <Route path="/" element={<Navigate replace to="/webshops" />} />
             <Route path="/webshops" element={<WebshopList />} />
-            <Route path="/shop/:webshopId?" element={<Shop />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
             {/* Védett route-ok */}
+            {/* Shop route - bejelentkezés szükséges */}
+            <Route 
+              path="/shop/:webshopId" 
+              element={
+                <ProtectedRoute>
+                  <Shop />
+                </ProtectedRoute>
+              } 
+            />
+            
             <Route 
               path="/teacher-dashboard" 
               element={
@@ -55,6 +64,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            
             <Route 
               path="/cart/:webshopId" 
               element={
@@ -63,6 +73,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            
             <Route 
               path="/manage-products/:webshopId" 
               element={
@@ -71,14 +82,17 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            
+            {/* Aláírás generálás - CSAK tanárok és adminok */}
             <Route 
               path="/signature-generator" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['teacher', 'admin']}>
                   <SignatureGenerated />
                 </ProtectedRoute>
               } 
             />
+            
             <Route 
               path="/profile" 
               element={

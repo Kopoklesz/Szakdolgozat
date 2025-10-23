@@ -16,14 +16,9 @@ function Nav({ currentLanguage, changeLanguage }) {
     navigate('/webshops');
   };
 
-  // Szerepkör fordítása
+  // Szerepkör fordítása - többnyelvű
   const getRoleLabel = (role) => {
-    const roleLabels = {
-      'student': t('Diák'),
-      'teacher': t('Tanár'),
-      'admin': t('Admin')
-    };
-    return roleLabels[role] || role;
+    return t(`role_${role}`);
   };
 
   return (
@@ -39,30 +34,31 @@ function Nav({ currentLanguage, changeLanguage }) {
         <ul>
           <li><Link to="/webshops">{t('Főoldal')}</Link></li>
           
-          {/* Csak tanárok és adminok láthatják */}
+          {/* Csak tanárok és adminok láthatják az Előadói dashboardot */}
           {isAuthenticated && (user.role === 'teacher' || user.role === 'admin') && (
             <li><Link to="/teacher-dashboard">{t('Előadói')}</Link></li>
           )}
           
-          {/* Csak bejelentkezett felhasználók láthatják */}
-          {isAuthenticated && (
+          {/* Aláírás generálás - CSAK tanárok és adminok látják */}
+          {isAuthenticated && (user.role === 'teacher' || user.role === 'admin') && (
             <li><Link to="/signature-generator">{t('Aláírás generálás')}</Link></li>
           )}
-          
-          {/* Auth linkek */}
+        </ul>
+
+        {/* Auth szekció - jobb oldal */}
+        <div className="auth-section">
           {!isAuthenticated ? (
-            <li><Link to="/login">{t('Bejelentkezés')}</Link></li>
+            <Link to="/login" className="login-link">{t('Bejelentkezés')}</Link>
           ) : (
-            <li className="user-info">
-              <span className="username">
-                {user.username} ({getRoleLabel(user.role)})
-              </span>
+            <div className="user-display">
+              <span className="username">{user.username}</span>
+              <span className="user-role">({getRoleLabel(user.role)})</span>
               <button className="logout-button" onClick={handleLogout}>
                 {t('Kijelentkezés')}
               </button>
-            </li>
+            </div>
           )}
-        </ul>
+        </div>
         
         <div className="language-selector">
           <button onClick={() => changeLanguage(currentLanguage === LANGUAGES.HU ? LANGUAGES.EN : LANGUAGES.HU)}>

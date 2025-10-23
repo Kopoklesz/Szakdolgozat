@@ -31,11 +31,9 @@ const clearAuthData = () => {
 // Regisztráció
 const register = async (username, email, password, rememberMe = false) => {
   try {
-    // Nagybetűre konvertáljuk a Neptune kódot a frontend oldalon is
-    const uppercaseUsername = username.toUpperCase();
-    
+    // ELTÁVOLÍTVA: nagybetűsítés - a username már bármi lehet
     const response = await apiClient.post('/auth/register', {
-      username: uppercaseUsername,
+      username,  // változatlan formában
       email,
       password
     });
@@ -56,11 +54,9 @@ const register = async (username, email, password, rememberMe = false) => {
 // Bejelentkezés
 const login = async (identifier, password, rememberMe = false) => {
   try {
-    // Ha 6 karakter hosszú, valószínűleg Neptune kód - nagybetűre konvertáljuk
-    const processedIdentifier = identifier.length === 6 ? identifier.toUpperCase() : identifier;
-    
+    // ELTÁVOLÍTVA: nagybetűsítés - már nem csak Neptune kód lehet
     const response = await apiClient.post('/auth/login', {
-      identifier: processedIdentifier,
+      identifier,  // változatlan formában
       password
     });
     
@@ -80,88 +76,49 @@ const login = async (identifier, password, rememberMe = false) => {
 // Kijelentkezés
 const logout = async () => {
   try {
-    await apiClient.post('/auth/logout');
-    clearAuthData();
-    return { success: true };
+    const { token } = getAuthData();
+    if (token) {
+      await apiClient.post('/auth/logout');
+    }
   } catch (error) {
-    // Még hiba esetén is töröljük a helyi adatokat
+    console.error('Logout error:', error);
+  } finally {
     clearAuthData();
-    return { success: false, error: error.response?.data?.message };
   }
 };
 
-// Profil lekérése (token validálás)
+// Profil lekérése
 const getProfile = async () => {
   try {
     const response = await apiClient.get('/auth/profile');
     return { success: true, user: response.data };
   } catch (error) {
+    console.error('Get profile error:', error);
     clearAuthData();
-    return { success: false, error: error.response?.data?.message };
+    return { success: false, error: 'Profil lekérése sikertelen' };
   }
 };
 
-// Neptune kód validáció
-const validateNeptuneCode = (neptuneCode) => {
-  const neptunRegex = /^[A-Z0-9]{6}$/;
-  
-  if (!neptuneCode || neptuneCode.trim() === '') {
-    return {
-      isValid: false,
-      error: 'A Neptune kód megadása kötelező'
-    };
-  }
-  
-  // Nagybetűre konvertáljuk a validációhoz
-  if (!neptunRegex.test(neptuneCode.toUpperCase())) {
-    return {
-      isValid: false,
-      error: 'A Neptune kód formátuma érvénytelen (6 karakter: betűk és számok)'
-    };
-  }
-  
-  return { isValid: true };
-};
-
-// Email domain validáció - FRISSÍTVE
-const validateEmailDomain = (email) => {
-  const allowedDomains = ['student.uni-pannon.hu', 'teacher.uni-pannon.hu', 'uni-pannon.hu'];
-  
-  if (!email || email.trim() === '') {
-    return {
-      isValid: false,
-      error: 'Az email cím megadása kötelező'
-    };
-  }
-  
-  const emailDomain = email.split('@')[1];
-  
-  if (!allowedDomains.includes(emailDomain)) {
-    return {
-      isValid: false,
-      error: 'Csak @student.uni-pannon.hu, @teacher.uni-pannon.hu vagy @uni-pannon.hu domain engedélyezett'
-    };
-  }
-  
-  return { isValid: true };
-};
-
-// Jelszó komplexitás validáció
+// Jelszó validáció
 const validatePassword = (password) => {
   const errors = [];
   
   if (password.length < 8) {
-    errors.push('Legalább 8 karakter');
+    errors.push('Legalább 8 karakter hosszú');
   }
+  
   if (!/[A-Z]/.test(password)) {
     errors.push('Legalább egy nagybetű');
   }
+  
   if (!/[a-z]/.test(password)) {
     errors.push('Legalább egy kisbetű');
   }
+  
   if (!/[0-9]/.test(password)) {
     errors.push('Legalább egy szám');
   }
+  
   if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
     errors.push('Legalább egy speciális karakter (!@#$%^&*...)');
   }
@@ -172,6 +129,27 @@ const validatePassword = (password) => {
   };
 };
 
+// Email domain validáció - ÚJ
+const validateEmailDomain = (email) => {
+  // Admin email
+  if (email === 'admin@uni-pannon.hu') {
+    return { isValid: true };
+  }
+
+  // Csak student és teacher domaineket fogadunk el
+  const validDomains = ['@student.uni-pannon.hu', '@teacher.uni-pannon.hu'];
+  const isValid = validDomains.some(domain => email.endsWith(domain));
+
+  if (!isValid) {
+    return {
+      isValid: false,
+      error: 'Csak @student.uni-pannon.hu vagy @teacher.uni-pannon.hu email címmel lehet regisztrálni'
+    };
+  }
+
+  return { isValid: true };
+};
+
 // Named exports
 export {
   register,
@@ -179,7 +157,6 @@ export {
   logout,
   getProfile,
   validatePassword,
-  validateNeptuneCode,
   validateEmailDomain,
   getAuthData,
   clearAuthData
@@ -192,7 +169,6 @@ export default {
   logout,
   getProfile,
   validatePassword,
-  validateNeptuneCode,
   validateEmailDomain,
   getAuthData,
   clearAuthData
