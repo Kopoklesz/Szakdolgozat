@@ -1,7 +1,5 @@
-import axios from 'axios';
+import apiClient from '../config/axios';
 import { API_ENDPOINTS } from '../config/api';
-
-const API_URL = API_ENDPOINTS.AUTH;
 
 // Token és user mentése localStorage-ba
 const setAuthData = (token, user, rememberMe = false) => {
@@ -30,25 +28,14 @@ const clearAuthData = () => {
   sessionStorage.removeItem('pannon_shop_user');
 };
 
-// Axios interceptor - automatikus token hozzáadása
-axios.interceptors.request.use(
-  (config) => {
-    const { token } = getAuthData();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
 // Regisztráció
 const register = async (username, email, password, rememberMe = false) => {
   try {
-    const response = await axios.post(`${API_URL}/register`, {
-      username,
+    // Nagybetűre konvertáljuk a Neptune kódot a frontend oldalon is
+    const uppercaseUsername = username.toUpperCase();
+    
+    const response = await apiClient.post('/auth/register', {
+      username: uppercaseUsername,
       email,
       password
     });
@@ -58,6 +45,7 @@ const register = async (username, email, password, rememberMe = false) => {
     
     return { success: true, user };
   } catch (error) {
+    console.error('Registration error:', error);
     return {
       success: false,
       error: error.response?.data?.message || 'Regisztráció sikertelen'
@@ -68,8 +56,11 @@ const register = async (username, email, password, rememberMe = false) => {
 // Bejelentkezés
 const login = async (identifier, password, rememberMe = false) => {
   try {
-    const response = await axios.post(`${API_URL}/login`, {
-      identifier,
+    // Ha 6 karakter hosszú, valószínűleg Neptune kód - nagybetűre konvertáljuk
+    const processedIdentifier = identifier.length === 6 ? identifier.toUpperCase() : identifier;
+    
+    const response = await apiClient.post('/auth/login', {
+      identifier: processedIdentifier,
       password
     });
     
@@ -78,6 +69,7 @@ const login = async (identifier, password, rememberMe = false) => {
     
     return { success: true, user };
   } catch (error) {
+    console.error('Login error:', error);
     return {
       success: false,
       error: error.response?.data?.message || 'Bejelentkezés sikertelen'
@@ -88,7 +80,7 @@ const login = async (identifier, password, rememberMe = false) => {
 // Kijelentkezés
 const logout = async () => {
   try {
-    await axios.post(`${API_URL}/logout`);
+    await apiClient.post('/auth/logout');
     clearAuthData();
     return { success: true };
   } catch (error) {
@@ -101,7 +93,7 @@ const logout = async () => {
 // Profil lekérése (token validálás)
 const getProfile = async () => {
   try {
-    const response = await axios.get(`${API_URL}/profile`);
+    const response = await apiClient.get('/auth/profile');
     return { success: true, user: response.data };
   } catch (error) {
     clearAuthData();
@@ -120,6 +112,7 @@ const validateNeptuneCode = (neptuneCode) => {
     };
   }
   
+  // Nagybetűre konvertáljuk a validációhoz
   if (!neptunRegex.test(neptuneCode.toUpperCase())) {
     return {
       isValid: false,
@@ -130,7 +123,7 @@ const validateNeptuneCode = (neptuneCode) => {
   return { isValid: true };
 };
 
-// Email domain validáció
+// Email domain validáció - FRISSÍTVE
 const validateEmailDomain = (email) => {
   const allowedDomains = ['student.uni-pannon.hu', 'teacher.uni-pannon.hu', 'uni-pannon.hu'];
   
@@ -153,7 +146,7 @@ const validateEmailDomain = (email) => {
   return { isValid: true };
 };
 
-// Jelszó komplexitás validáció (frontend segédlet)
+// Jelszó komplexitás validáció
 const validatePassword = (password) => {
   const errors = [];
   
@@ -192,7 +185,7 @@ export {
   clearAuthData
 };
 
-// Default export az egész service objektumként
+// Default export
 export default {
   register,
   login,
