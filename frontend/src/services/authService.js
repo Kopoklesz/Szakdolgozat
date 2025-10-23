@@ -132,7 +132,7 @@ const validateNeptuneCode = (neptuneCode) => {
 
 // Email domain validáció
 const validateEmailDomain = (email) => {
-  const allowedDomains = ['student.uni-pannon.hu', 'uni-pannon.hu'];
+  const allowedDomains = ['student.uni-pannon.hu', 'teacher.uni-pannon.hu', 'uni-pannon.hu'];
   
   if (!email || email.trim() === '') {
     return {
@@ -146,7 +146,7 @@ const validateEmailDomain = (email) => {
   if (!allowedDomains.includes(emailDomain)) {
     return {
       isValid: false,
-      error: 'Csak @student.uni-pannon.hu vagy @uni-pannon.hu domain engedélyezett'
+      error: 'Csak @student.uni-pannon.hu, @teacher.uni-pannon.hu vagy @uni-pannon.hu domain engedélyezett'
     };
   }
   
