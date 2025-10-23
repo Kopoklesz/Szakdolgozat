@@ -1,4 +1,9 @@
-import { IsOptional, IsString, IsNumber, IsPositive, IsUrl, IsEnum } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsEnum, Min } from 'class-validator';
+
+export enum ProductStatus {
+  AVAILABLE = 'available',
+  UNAVAILABLE = 'unavailable'
+}
 
 export class UpdateProductDto {
   @IsOptional()
@@ -10,7 +15,7 @@ export class UpdateProductDto {
   category?: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsString()
   image?: string;
 
   @IsOptional()
@@ -19,20 +24,20 @@ export class UpdateProductDto {
 
   @IsOptional()
   @IsNumber()
-  @IsPositive()
+  @Min(0)
   price?: number;
 
   @IsOptional()
   @IsNumber()
-  @IsPositive()
+  @Min(0)
   max_stock?: number;
 
   @IsOptional()
   @IsNumber()
-  @IsPositive()
+  @Min(0)
   current_stock?: number;
 
   @IsOptional()
-  @IsEnum(['available', 'unavailable'])
-  status?: 'available' | 'unavailable';
+  @IsEnum(ProductStatus)
+  status?: ProductStatus;
 }

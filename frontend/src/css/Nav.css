@@ -1,107 +1,200 @@
 :root {
-    --external-nav-color: #285780;
-    --internal-nav-color: #04b0b8;
-    --text-color: white;
-  }
-  
-  /* Alap stílusok a navigációs sávhoz */
-  .externLinksNav {
-    background-color: var(--external-nav-color);
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 1em 0.5em; /* Növelt padding */
-  }
-  
+  --external-nav-color: #285780;
+  --internal-nav-color: #04b0b8;
+  --text-color: white;
+}
+
+/* Alap stílusok a navigációs sávhoz */
+.externLinksNav {
+  background-color: var(--external-nav-color);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 1em 0.5em;
+}
+
+.interLinksNav {
+  background-color: var(--internal-nav-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1em;
+  min-height: 30px;
+}
+
+/* Lista stílusok */
+nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Listaelemek stílusai */
+nav li {
+  margin-right: 2em;
+}
+
+/* Linkek stílusai */
+nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+/* Linkek hover állapota */
+nav a:hover {
+  text-decoration: underline;
+}
+
+/* ========== ÚJ: Auth szekció - jobb oldal ========== */
+.auth-section {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  margin-right: 1em;
+}
+
+.login-link {
+  padding: 8px 20px;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.login-link:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  text-decoration: none;
+}
+
+.user-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.username {
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.user-role {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+/* Kijelentkezés gomb */
+.logout-button {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Nyelvváltó gomb stílusai */
+.language-selector {
+  position: relative;
+  display: inline-block;
+}
+
+.language-selector button {
+  background-color: transparent;
+  color: white;
+  border: none;
+  padding: 0.5em 1em;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.language-selector button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #f0f0f0;
+}
+
+.language-selector .globe-icon {
+  margin-right: 0.5em;
+}
+
+/* Media query-k a reszponzív dizájnhoz */
+@media (max-width: 768px) {
+
+  .externLinksNav,
   .interLinksNav {
-    background-color: var(--internal-nav-color);
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
+    flex-direction: column;
+    height: auto;
     padding: 1em;
-    height: 30px;
   }
-  
-  /* Lista stílusok */
+
   nav ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
   }
-  
-  /* Listaelemek stílusai */
+
   nav li {
-    margin-right: 2em; /* Távolság a listaelemek között */
+    margin-right: 0;
+    margin-bottom: 0.5em;
+    width: 100%;
   }
-  
-  /* Linkek stílusai */
-  nav a {
-    color: white; /* Fehér színű szöveg */
-    text-decoration: none; /* Nincs aláhúzás */
-    font-weight: bold;
-    font-size: 1.2rem; /* Növelt betűméret */
+
+  .auth-section {
+    margin-left: 0;
+    margin-top: 1em;
+    width: 100%;
   }
-  
-  /* Linkek hover állapota */
-  nav a:hover {
-    text-decoration: underline; /* Aláhúzás hover állapotban */
+
+  .user-display {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
   }
-  
-  /* Media query-k a reszponzív dizájnhoz */
-  @media (max-width: 768px) {
-    .externLinksNav, .interLinksNav {
-      flex-direction: column;
-      height: auto;
-      padding: 1em;
-    }
-  
-    nav ul {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-  
-    nav li {
-      margin-right: 0;
-      margin-bottom: 0.5em;
-    }
+
+  .logout-button {
+    width: 100%;
   }
-  
-  /* Nyelvváltó gomb stílusai */
+
   .language-selector {
-    position: relative;
-    display: inline-block;
+    margin-top: 10px;
   }
-  
+}
+
+@media (max-width: 480px) {
+  nav a {
+    font-size: 1rem;
+  }
+
   .language-selector button {
-    background-color: transparent; /* Átlátszó háttér */
-    color: white; /* Fehér szöveg */
-    border: none; /* Nincs keret */
-    padding: 0.5em 1em; /* Kényelmes padding */
-    font-size: 1rem; /* Betűméret */
-    font-weight: bold; /* Félkövér szöveg */
-    cursor: pointer; /* Mutató kurzor */
-    display: flex;
-    align-items: center;
-    transition: background-color 0.3s ease, color 0.3s ease; /* Sima átmenet */
+    font-size: 0.9rem;
   }
-  
-  .language-selector button:hover {
-    background-color: rgba(255, 255, 255, 0.2); /* Kivilágosodás hover állapotban */
-    color: #f0f0f0; /* Világosabb szöveg hover állapotban */
+
+  .username {
+    font-size: 0.9rem;
   }
-  
-  .language-selector .globe-icon {
-    margin-right: 0.5em; /* Távolság az ikon és a szöveg között */
+
+  .user-role {
+    font-size: 0.85rem;
   }
-  
-  @media (max-width: 480px) {
-    nav a {
-      font-size: 1rem;
-    }
-    
-    .language-selector button {
-      font-size: 0.9rem;
-    }
-  }
-  
+}

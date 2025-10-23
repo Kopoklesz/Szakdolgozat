@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { API_URL } from '../config/api';
 import '../css/ManageProducts.css';
-
-const API_URL = 'https://api.pannon-shop.hu';
 
 const ManageProducts = () => {
   const { t } = useTranslation();
@@ -20,6 +19,8 @@ const ManageProducts = () => {
     current_stock: '',
     status: 'available'
   });
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,29 +39,37 @@ const ManageProducts = () => {
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e, type = 'new') => {
     const { name, value } = e.target;
-    setNewProduct(prev => ({ ...prev, [name]: value }));
+    if (type === 'new') {
+      setNewProduct(prev => ({ ...prev, [name]: value }));
+    } else {
+      setEditingProduct(prev => ({ ...prev, [name]: value }));
+    }
   };
 
-  const validateForm = () => {
-    if (!newProduct.name.trim()) return t('A termék neve kötelező.');
-    if (!newProduct.category.trim()) return t('A kategória kötelező.');
-    if (!newProduct.image.trim()) return t('A kép URL kötelező.');
-    if (!newProduct.description.trim()) return t('A leírás kötelező.');
-    if (isNaN(parseFloat(newProduct.price)) || parseFloat(newProduct.price) <= 0) return t('Érvényes árat adjon meg.');
-    if (isNaN(parseInt(newProduct.max_stock)) || parseInt(newProduct.max_stock) < 0) return t('Érvényes maximális készletet adjon meg.');
-    if (isNaN(parseInt(newProduct.current_stock)) || parseInt(newProduct.current_stock) < 0) return t('Érvényes jelenlegi készletet adjon meg.');
-    if (parseInt(newProduct.current_stock) > parseInt(newProduct.max_stock)) return t('A jelenlegi készlet nem lehet nagyobb, mint a maximális készlet.');
+  const validateForm = (productData) => {
+    if (!productData.name.trim()) return t('A termék neve kötelező.');
+    if (!productData.category.trim()) return t('A kategória kötelező.');
+    if (!productData.image.trim()) return t('A kép URL kötelező.');
+    if (!productData.description.trim()) return t('A leírás kötelező.');
+    if (isNaN(parseFloat(productData.price)) || parseFloat(productData.price) <= 0) 
+      return t('Érvényes árat adjon meg.');
+    if (isNaN(parseInt(productData.max_stock)) || parseInt(productData.max_stock) < 0) 
+      return t('Érvényes maximális készletet adjon meg.');
+    if (isNaN(parseInt(productData.current_stock)) || parseInt(productData.current_stock) < 0) 
+      return t('Érvényes jelenlegi készletet adjon meg.');
+    if (parseInt(productData.current_stock) > parseInt(productData.max_stock)) 
+      return t('A jelenlegi készlet nem lehet nagyobb, mint a maximális készlet.');
     return null;
   };
 
-  const handleSubmit = async (e) => {
+  const handleCreateProduct = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    const validationError = validateForm();
+    const validationError = validateForm(newProduct);
     if (validationError) {
       setError(validationError);
       return;
@@ -71,18 +80,14 @@ const ManageProducts = () => {
     try {
       const productData = {
         ...newProduct,
-        webshop_id: parseInt(webshopId),
         price: parseFloat(newProduct.price),
         max_stock: parseInt(newProduct.max_stock),
-        current_stock: parseInt(newProduct.current_stock)
+        current_stock: parseInt(newProduct.current_stock),
+        webshop_id: parseInt(webshopId)
       };
-      
-      console.log('Sending product data:', productData);
-    
-      const response = await axios.post(`${API_URL}/product`, productData);
-      
-      console.log('Server response:', response.data);
-      
+
+      await axios.post(`${API_URL}/product`, productData);
+      setSuccess(t('Termék sikeresen létrehozva!'));
       setNewProduct({
         name: '',
         category: '',
@@ -93,108 +98,283 @@ const ManageProducts = () => {
         current_stock: '',
         status: 'available'
       });
-      setSuccess(t('Termék sikeresen hozzáadva!'));
       fetchProducts();
     } catch (error) {
-      console.error('Error creating product:', error.response?.data || error.message);
-      setError(t('Hiba történt a termék létrehozása közben.') + ' ' + (error.response?.data?.message || error.message));
+      console.error('Error creating product:', error);
+      setError(t('Hiba történt a termék létrehozása közben.'));
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  return (
-    <div className="manage-products">
-      <h1>{t('Termékek kezelése')}</h1>
+  const handleUpdateProduct = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    const validationError = validateForm(editingProduct);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const productData = {
+        name: editingProduct.name,
+        category: editingProduct.category,
+        image: editingProduct.image,
+        description: editingProduct.description,
+        price: parseFloat(editingProduct.price),
+        max_stock: parseInt(editingProduct.max_stock),
+        current_stock: parseInt(editingProduct.current_stock),
+        status: editingProduct.status
+      };
+
+      await axios.put(`${API_URL}/product/${editingProduct.product_id}`, productData);
+      setSuccess(t('Termék sikeresen frissítve!'));
+      setIsEditModalOpen(false);
+      setEditingProduct(null);
+      fetchProducts();
+    } catch (error) {
+      console.error('Error updating product:', error);
+      setError(t('Hiba történt a termék frissítése közben.'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (productId) => {
+    if (!window.confirm(t('Biztosan törölni szeretnéd ezt a terméket?'))) {
+      return;
+    }
+
+    setError('');
+    setSuccess('');
+
+    try {
+      await axios.delete(`${API_URL}/product/${productId}`);
+      setSuccess(t('Termék sikeresen törölve!'));
       
-      <div className="add-product-form">
-        <h2>{t('Új termék hozzáadása')}</h2>
-        {error && <div className="error-message">{error}</div>}
-        {success && <div className="success-message">{success}</div>}
-        <form onSubmit={handleSubmit}>
+      if (isEditModalOpen) {
+        setIsEditModalOpen(false);
+        setEditingProduct(null);
+      }
+      
+      fetchProducts();
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      setError(t('Hiba történt a termék törlése közben.'));
+    }
+  };
+
+  const openEditModal = (product) => {
+    setEditingProduct({ ...product });
+    setIsEditModalOpen(true);
+    setError('');
+    setSuccess('');
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingProduct(null);
+    setError('');
+    setSuccess('');
+  };
+
+  return (
+    <div className="manage-products-container">
+      <h2>{t('Termékek kezelése')}</h2>
+
+      {error && <div className="error-message">{error}</div>}
+      {success && <div className="success-message">{success}</div>}
+
+      {/* Új termék létrehozása form */}
+      <div className="create-product-section">
+        <h3>{t('Új termék hozzáadása')}</h3>
+        <form onSubmit={handleCreateProduct} className="product-form">
+          {/* Form mezők... */}
           <input
+            type="text"
             name="name"
-            value={newProduct.name}
-            onChange={handleInputChange}
             placeholder={t('Termék neve')}
+            value={newProduct.name}
+            onChange={(e) => handleInputChange(e, 'new')}
             required
           />
           <input
+            type="text"
             name="category"
-            value={newProduct.category}
-            onChange={handleInputChange}
             placeholder={t('Kategória')}
+            value={newProduct.category}
+            onChange={(e) => handleInputChange(e, 'new')}
             required
           />
           <input
+            type="url"
             name="image"
-            value={newProduct.image}
-            onChange={handleInputChange}
             placeholder={t('Kép URL')}
+            value={newProduct.image}
+            onChange={(e) => handleInputChange(e, 'new')}
             required
           />
           <textarea
             name="description"
-            value={newProduct.description}
-            onChange={handleInputChange}
             placeholder={t('Leírás')}
+            value={newProduct.description}
+            onChange={(e) => handleInputChange(e, 'new')}
             required
           />
           <input
             type="number"
             name="price"
-            value={newProduct.price}
-            onChange={handleInputChange}
             placeholder={t('Ár')}
-            required
-            min="0"
+            value={newProduct.price}
+            onChange={(e) => handleInputChange(e, 'new')}
             step="0.01"
+            min="0"
+            required
           />
           <input
             type="number"
             name="max_stock"
-            value={newProduct.max_stock}
-            onChange={handleInputChange}
             placeholder={t('Maximális készlet')}
-            required
+            value={newProduct.max_stock}
+            onChange={(e) => handleInputChange(e, 'new')}
             min="0"
+            required
           />
           <input
             type="number"
             name="current_stock"
-            value={newProduct.current_stock}
-            onChange={handleInputChange}
             placeholder={t('Jelenlegi készlet')}
-            required
+            value={newProduct.current_stock}
+            onChange={(e) => handleInputChange(e, 'new')}
             min="0"
+            required
           />
           <select
             name="status"
             value={newProduct.status}
-            onChange={handleInputChange}
-            required
+            onChange={(e) => handleInputChange(e, 'new')}
           >
             <option value="available">{t('Elérhető')}</option>
             <option value="unavailable">{t('Nem elérhető')}</option>
           </select>
           <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? t('Mentés...') : t('Termék hozzáadása')}
+            {isSubmitting ? t('Létrehozás...') : t('Termék hozzáadása')}
           </button>
         </form>
       </div>
 
-      <h2>{t('Meglévő termékek')}</h2>
+      {/* Termékek listája */}
       <div className="products-list">
-        {products.map((product) => (
-          <div key={product.product_id} className="product-item">
-            <h3>{product.name}</h3>
-            <p>{t('Kategória')}: {product.category}</p>
-            <p>{t('Ár')}: {product.price}</p>
-            <p>{t('Készlet')}: {product.current_stock} / {product.max_stock}</p>
-            <p>{t('Státusz')}: {product.status === 'available' ? t('Elérhető') : t('Nem elérhető')}</p>
+        <h3>{t('Meglévő termékek')}</h3>
+        {products.length === 0 ? (
+          <p>{t('Még nincsenek termékek.')}</p>
+        ) : (
+          <div className="products-grid">
+            {products.map(product => (
+              <div key={product.product_id} className="product-card">
+                <img src={product.image} alt={product.name} />
+                <h4>{product.name}</h4>
+                <p>{product.category}</p>
+                <p>{product.price} Ft</p>
+                <p>{t('Készlet')}: {product.current_stock}/{product.max_stock}</p>
+                <p className={`status ${product.status}`}>
+                  {product.status === 'available' ? t('Elérhető') : t('Nem elérhető')}
+                </p>
+                <div className="product-actions">
+                  <button onClick={() => openEditModal(product)}>{t('Szerkesztés')}</button>
+                  <button onClick={() => handleDelete(product.product_id)} className="delete-btn">
+                    {t('Törlés')}
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
+
+      {/* Szerkesztési modal */}
+      {isEditModalOpen && editingProduct && (
+        <div className="modal-overlay" onClick={closeEditModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>{t('Termék szerkesztése')}</h3>
+            <form onSubmit={handleUpdateProduct} className="product-form">
+              <input
+                type="text"
+                name="name"
+                value={editingProduct.name}
+                onChange={(e) => handleInputChange(e, 'edit')}
+                required
+              />
+              <input
+                type="text"
+                name="category"
+                value={editingProduct.category}
+                onChange={(e) => handleInputChange(e, 'edit')}
+                required
+              />
+              <input
+                type="url"
+                name="image"
+                value={editingProduct.image}
+                onChange={(e) => handleInputChange(e, 'edit')}
+                required
+              />
+              <textarea
+                name="description"
+                value={editingProduct.description}
+                onChange={(e) => handleInputChange(e, 'edit')}
+                required
+              />
+              <input
+                type="number"
+                name="price"
+                value={editingProduct.price}
+                onChange={(e) => handleInputChange(e, 'edit')}
+                step="0.01"
+                min="0"
+                required
+              />
+              <input
+                type="number"
+                name="max_stock"
+                value={editingProduct.max_stock}
+                onChange={(e) => handleInputChange(e, 'edit')}
+                min="0"
+                required
+              />
+              <input
+                type="number"
+                name="current_stock"
+                value={editingProduct.current_stock}
+                onChange={(e) => handleInputChange(e, 'edit')}
+                min="0"
+                required
+              />
+              <select
+                name="status"
+                value={editingProduct.status}
+                onChange={(e) => handleInputChange(e, 'edit')}
+              >
+                <option value="available">{t('Elérhető')}</option>
+                <option value="unavailable">{t('Nem elérhető')}</option>
+              </select>
+              <div className="modal-actions">
+                <button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? t('Mentés...') : t('Módosítások mentése')}
+                </button>
+                <button type="button" onClick={closeEditModal}>
+                  {t('Mégse')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

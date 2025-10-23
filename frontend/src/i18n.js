@@ -8,6 +8,7 @@ const resources = {
       "Használati útmutató": "User Manual",
       "Főoldal": "Homepage",
       "Bejelentkezés": "Login",
+      "Kijelentkezés": "Logout",
       "Termék keresés...": "Search products...",
       "Nem sikerült betölteni a bolt adatait": "Failed to load shop data",
       "Betöltés": "Loading",
@@ -76,7 +77,11 @@ const resources = {
       "QR Kód helye": "QR Code placeholder",
       "Adjon hozzá azonnal pénzt a hallgató egyenlegéhez.": "Add money instantly to student's balance.",
       "Összeg": "Amount",
-      "Hozzáadás": "Add"
+      "Hozzáadás": "Add",
+      "role_student": "Student",
+      "role_teacher": "Teacher",
+      "role_admin": "Admin",
+      "Kérjük, jelentkezz be a webshop megtekintéséhez!": "Please log in to view the webshop!"
     }
   },
   hu: {
@@ -85,6 +90,7 @@ const resources = {
       "Használati útmutató": "Használati útmutató",
       "Főoldal": "Főoldal",
       "Bejelentkezés": "Bejelentkezés",
+      "Kijelentkezés": "Kijelentkezés",
       "Termék keresés...": "Termék keresés...",
       "Nem sikerült betölteni a bolt adatait": "Nem sikerült betölteni a bolt adatait",
       "Betöltés": "Betöltés",
@@ -141,8 +147,8 @@ const resources = {
       "Webshop törlése": "Webshop törlése",
       "Biztosan törölni szeretnéd ezt a webshopot és minden termékét?": "Biztosan törölni szeretnéd ezt a webshopot és minden termékét?",
       "Webshop sikeresen törölve!": "Webshop sikeresen törölve!",
-      "Aláírás Generálás": "Aláírás Generálás",
-      "Kód generálás": "Kód Ggnerálás",
+      "Aláírás generálás": "Aláírás generálás",
+      "Kód generálás": "Kód Generálás",
       "QR Kód": "QR Kód",
       "Azonnali Hozzáadás": "Azonnali Hozzáadás",
       "Generáljon egyedi kódokat, amiket a hallgatók beválthatnak.": "Generáljon egyedi kódokat, amiket a hallgatók beválthatnak.",
@@ -153,7 +159,11 @@ const resources = {
       "QR Kód helye": "QR Kód helye",
       "Adjon hozzá azonnal pénzt a hallgató egyenlegéhez.": "Adjon hozzá azonnal pénzt a hallgató egyenlegéhez.",
       "Összeg": "Összeg",
-      "Hozzáadás": "Hozzáadás"
+      "Hozzáadás": "Hozzáadás",
+      "role_student": "Hallgató",
+      "role_teacher": "Tanár",
+      "role_admin": "Admin",
+      "Kérjük, jelentkezz be a webshop megtekintéséhez!": "Kérjük, jelentkezz be a webshop megtekintéséhez!"
     }
   }
 };
@@ -168,8 +178,9 @@ i18n
       escapeValue: false
     },
     react: {
-      useSuspense: true,  // Ez fontos!
+      useSuspense: true,
       wait: true
     }
   });
+
 export default i18n;

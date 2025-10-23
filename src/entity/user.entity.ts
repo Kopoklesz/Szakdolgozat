@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, Index } from 'typeorm';
 import { UserBalance } from './user-balance.entity';
 import { Cart } from './cart.entity';
 import { Purchase } from './purchase.entity';
@@ -11,19 +11,35 @@ export enum UserRole {
 }
 
 @Entity()
+@Index(['email'])
+@Index(['username'])
 export class User {
   @PrimaryGeneratedColumn()
   user_id: number;
 
-  @Column({ unique: true })
+  @Column({ unique: true, comment: 'Felhasználónév - bármi lehet' })
+  username: string;
+
+  @Column({ unique: true, comment: 'Email cím - szerepkör meghatározásához' })
   email: string;
+
+  @Column({ comment: 'Bcrypt hash-elt jelszó' })
+  password: string;
 
   @Column({
     type: 'enum',
     enum: UserRole,
-    default: UserRole.STUDENT
+    default: UserRole.STUDENT,
+    comment: 'Felhasználói szerepkör - email domain alapján automatikusan beállítva'
   })
   role: UserRole;
+
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    comment: 'Regisztráció időpontja'
+  })
+  created_at: Date;
 
   @OneToMany(() => UserBalance, userBalance => userBalance.user)
   balances: UserBalance[];
@@ -36,4 +52,21 @@ export class User {
 
   @OneToMany(() => Webshop, webshop => webshop.teacher)
   webshops: Webshop[];
+
+  /**
+   * Email domain alapján automatikus szerepkör meghatározás
+   * FIGYELEM: Ez a statikus metódus már elavult!
+   * Használd a PasswordService.determineRoleFromEmail() metódust helyette.
+   */
+  static determineRoleFromEmail(email: string): UserRole {
+    if (email.endsWith('@student.uni-pannon.hu')) {
+      return UserRole.STUDENT;
+    } else if (email.endsWith('@teacher.uni-pannon.hu')) {
+      return UserRole.TEACHER;
+    } else if (email === 'admin@uni-pannon.hu') {
+      return UserRole.ADMIN;
+    }
+    // Alapértelmezett diák szerepkör
+    return UserRole.STUDENT;
+  }
 }
