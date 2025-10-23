@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
-import { API_URL } from '../config';
+import { API_URL } from '../config/api';
 import '../css/Cart.css';
 
 const Cart = () => {

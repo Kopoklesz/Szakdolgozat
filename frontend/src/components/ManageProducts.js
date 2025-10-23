@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { API_URL } from '../config';
+import { API_URL } from '../config/api';
 import '../css/ManageProducts.css';
 
 const ManageProducts = () => {

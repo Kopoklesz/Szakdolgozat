@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import '../css/TeacherDashboard.css';
-
-const API_URL = process.env.REACT_APP_API_URL || 'https://api.pannon-shop.hu';
+import { API_URL } from '../config/api';
 
 const TeacherDashboard = () => {
   const { t } = useTranslation();
