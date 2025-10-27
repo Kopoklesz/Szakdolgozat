@@ -18,6 +18,8 @@ const Shop = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchWebshopData();
@@ -40,7 +42,6 @@ const Shop = () => {
   };
 
   const addToCart = async (productId, quantity) => {
-    // Ellenőrizzük, hogy be van-e jelentkezve
     if (!isAuthenticated) {
       alert(t('Kérjük, jelentkezz be a kosárba helyezéshez!'));
       navigate('/login');
@@ -67,10 +68,20 @@ const Shop = () => {
     }
   };
 
-  // Kategóriák lekérése
+  const openProductModal = (product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeProductModal = () => {
+    setIsModalOpen(false);
+    setSelectedProduct(null);
+    document.body.style.overflow = 'unset';
+  };
+
   const categories = ['all', ...new Set(products.map(p => p.category))];
 
-  // Szűrés
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
@@ -124,6 +135,7 @@ const Shop = () => {
                 product={product} 
                 payingInstrument={webshop.paying_instrument}
                 onAddToCart={addToCart}
+                onOpenModal={openProductModal}
               />
             ))
           ) : (
@@ -131,11 +143,20 @@ const Shop = () => {
           )}
         </div>
       </div>
+
+      {isModalOpen && selectedProduct && (
+        <ProductModal 
+          product={selectedProduct}
+          payingInstrument={webshop.paying_instrument}
+          onClose={closeProductModal}
+          onAddToCart={addToCart}
+        />
+      )}
     </div>
   );
 };
 
-const ProductCard = ({ product, payingInstrument, onAddToCart }) => {
+const ProductCard = ({ product, payingInstrument, onAddToCart, onOpenModal }) => {
   const { t } = useTranslation();
   const [quantity, setQuantity] = useState(0);
 
@@ -161,12 +182,12 @@ const ProductCard = ({ product, payingInstrument, onAddToCart }) => {
   const handleAddToCart = () => {
     if (quantity > 0) {
       onAddToCart(product.product_id, quantity);
-      setQuantity(0); // Reset mennyiség sikeres hozzáadás után
+      setQuantity(0);
     }
   };
 
   return (
-    <div className="product-card">
+    <div className="product-card" onClick={() => onOpenModal(product)}>
       <img 
         src={product.image} 
         alt={product.name}
@@ -176,7 +197,7 @@ const ProductCard = ({ product, payingInstrument, onAddToCart }) => {
       <p className="product-price">{t('Ár')}: {product.price} {payingInstrument}</p>
       <p className="product-stock">{t('Elérhető')}: {product.current_stock}</p>
       
-      <div className="quantity-control">
+      <div className="quantity-control" onClick={(e) => e.stopPropagation()}>
         <button 
           className="quantity-btn" 
           onClick={() => handleQuantityChange(-1)}
@@ -202,7 +223,10 @@ const ProductCard = ({ product, payingInstrument, onAddToCart }) => {
       
       <button 
         className="bookmarkBtn" 
-        onClick={handleAddToCart}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleAddToCart();
+        }}
         disabled={quantity === 0}
       >
         <span className="IconContainer">
@@ -212,6 +236,99 @@ const ProductCard = ({ product, payingInstrument, onAddToCart }) => {
         </span>
         <p className="text">{t('Kosárba')}</p>
       </button>
+    </div>
+  );
+};
+
+const ProductModal = ({ product, payingInstrument, onClose, onAddToCart }) => {
+  const { t } = useTranslation();
+  const [quantity, setQuantity] = useState(1);
+
+  const handleQuantityChange = (change) => {
+    setQuantity(prevQuantity => {
+      const newQuantity = (parseInt(prevQuantity) || 0) + change;
+      return Math.max(1, Math.min(newQuantity, product.current_stock));
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    if (value === '') {
+      setQuantity(1);
+    } else {
+      const numValue = parseInt(value);
+      if (numValue >= 1 && numValue <= product.current_stock) {
+        setQuantity(numValue);
+      }
+    }
+  };
+
+  const handleAddToCart = () => {
+    onAddToCart(product.product_id, quantity);
+    onClose();
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <button className="modal-close" onClick={onClose}>×</button>
+        
+        <div className="modal-body">
+          <div className="modal-image">
+            <img 
+              src={product.image} 
+              alt={product.name}
+              onError={(e) => e.target.src = 'https://via.placeholder.com/400'}
+            />
+          </div>
+          
+          <div className="modal-details">
+            <h2>{product.name}</h2>
+            <span className="modal-category">{product.category}</span>
+            
+            <p className="modal-description">{product.description}</p>
+            
+            <div className="modal-info">
+              <p className="modal-price">{t('Ár')}: <strong>{product.price} {payingInstrument}</strong></p>
+              <p className="modal-stock">{t('Elérhető')}: <strong>{product.current_stock} db</strong></p>
+            </div>
+
+            <div className="modal-quantity-control">
+              <label>{t('Mennyiség')}:</label>
+              <div className="quantity-control">
+                <button 
+                  className="quantity-btn" 
+                  onClick={() => handleQuantityChange(-1)}
+                  disabled={quantity === 1}
+                >
+                  -
+                </button>
+                <input 
+                  type="number" 
+                  min="1" 
+                  max={product.current_stock}
+                  value={quantity}
+                  onChange={handleInputChange}
+                />
+                <button 
+                  className="quantity-btn" 
+                  onClick={() => handleQuantityChange(1)}
+                  disabled={quantity >= product.current_stock}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <button 
+              className="modal-add-to-cart"
+              onClick={handleAddToCart}
+            >
+              {t('Kosárba helyezés')}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
