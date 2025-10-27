@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import apiClient from '../config/axios';
 import '../css/TeacherDashboard.css';
 import { API_URL } from '../config/api';
 
 const TeacherDashboard = () => {
   const { t } = useTranslation();
+  const { user } = useAuth(); // Bejelentkezett user lekérése
   const [webshops, setWebshops] = useState([]);
   const [newWebshop, setNewWebshop] = useState({
     subject_name: '',
@@ -27,7 +29,16 @@ const TeacherDashboard = () => {
   const fetchWebshops = async () => {
     try {
       const response = await apiClient.get(`${API_URL}/webshop`);
-      setWebshops(Array.isArray(response.data) ? response.data : []);
+      const allWebshops = Array.isArray(response.data) ? response.data : [];
+      
+      // ADMIN minden webshopot lát
+      if (user?.role === 'admin') {
+        setWebshops(allWebshops);
+      } else {
+        // TEACHER csak saját webshopokat látja
+        const myWebshops = allWebshops.filter(shop => shop.teacher_id === user?.user_id);
+        setWebshops(myWebshops);
+      }
     } catch (error) {
       console.error('Error fetching webshops:', error);
       setError(t('Hiba történt a webshopok betöltése közben.'));
@@ -52,7 +63,7 @@ const TeacherDashboard = () => {
         fetchWebshops();
       } catch (error) {
         console.error('Error deleting webshop:', error);
-        setError(t('Hiba történt a webshop törlése közben.'));
+        setError(error.response?.data?.message || t('Hiba történt a webshop törlése közben.'));
       }
     }
   };
@@ -74,36 +85,36 @@ const TeacherDashboard = () => {
         }
       }
     return true;
-};
+  };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
-  setSuccess('');
-  
-  try {
-    if (!validateWebshop(newWebshop)) {
-      return;
-    }
-
-    const response = await apiClient.post(`${API_URL}/webshop`, newWebshop);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
     
-    if (response.data) {
-      setNewWebshop({
-        subject_name: '',
-        paying_instrument: '',
-        header_color_code: '#000000',
-        paying_instrument_icon: '',
-        status: 'active'
-      });
-      setSuccess(t('Webshop sikeresen létrehozva!'));
-      await fetchWebshops();
+    try {
+      if (!validateWebshop(newWebshop)) {
+        return;
+      }
+
+      const response = await apiClient.post(`${API_URL}/webshop`, newWebshop);
+      
+      if (response.data) {
+        setNewWebshop({
+          subject_name: '',
+          paying_instrument: '',
+          header_color_code: '#000000',
+          paying_instrument_icon: '',
+          status: 'active'
+        });
+        setSuccess(t('Webshop sikeresen létrehozva!'));
+        await fetchWebshops();
+      }
+    } catch (error) {
+      console.error('Error creating webshop:', error);
+      setError(error.response?.data?.message || t('Hiba történt a webshop létrehozása közben.'));
     }
-  } catch (error) {
-    console.error('Error creating webshop:', error);
-    setError(error.response?.data?.message || t('Hiba történt a webshop létrehozása közben.'));
-  }
-};
+  };
 
   const handleEdit = (webshop) => {
     setEditingWebshop({ ...webshop });
@@ -124,7 +135,7 @@ const handleSubmit = async (e) => {
       fetchWebshops();
     } catch (error) {
       console.error('Error updating webshop:', error.response?.data || error.message);
-      setError(t('Hiba történt a webshop frissítése közben.'));
+      setError(error.response?.data?.message || t('Hiba történt a webshop frissítése közben.'));
     }
   };
 
@@ -167,21 +178,21 @@ const handleSubmit = async (e) => {
             />
           </div>
           <div className="color-picker-container">
-          <label htmlFor="header_color_code">{t('Fejléc színe')}</label>
-          <div className="color-picker-wrapper">
-            <input
-              type="color"
-              id="header_color_code"
-              name="header_color_code"
-              value={newWebshop.header_color_code}
-              onChange={(e) => handleInputChange(e, 'new')}
-              required
-            />
-            <div className="color-preview" style={{ backgroundColor: newWebshop.header_color_code }}>
-              <span>{newWebshop.header_color_code}</span>
+            <label htmlFor="header_color_code">{t('Fejléc színe')}</label>
+            <div className="color-picker-wrapper">
+              <input
+                type="color"
+                id="header_color_code"
+                name="header_color_code"
+                value={newWebshop.header_color_code}
+                onChange={(e) => handleInputChange(e, 'new')}
+                required
+              />
+              <div className="color-preview" style={{ backgroundColor: newWebshop.header_color_code }}>
+                <span>{newWebshop.header_color_code}</span>
+              </div>
             </div>
           </div>
-        </div>
           <div>
             <label htmlFor="status">{t('Státusz')}</label>
             <select
@@ -194,107 +205,115 @@ const handleSubmit = async (e) => {
               <option value="inactive">{t('Inaktív')}</option>
             </select>
           </div>
-          <button type="submit">{t('Webshop létrehozása')}</button>
+          <button type="submit">{t('Létrehozás')}</button>
         </form>
       </div>
 
-      <h2>{t('Webshopjaid')}</h2>
       <div className="webshops-list">
-        {webshops.map((webshop) => (
-          <div key={webshop.webshop_id} className="webshop-card">
-            <h3>{webshop.subject_name}</h3>
-            <p>{t('Pénznem')}: {webshop.paying_instrument}</p>
-            <div className="color-preview">
-              <span>{t('Fejléc színe')}:</span>
-              <div
-                className="color-box"
-                style={{ backgroundColor: webshop.header_color_code }}
-              ></div>
+        <h2>{t('Webshopjaim')}</h2>
+        {webshops.length === 0 ? (
+          <p className="no-webshops">{t('Még nincs létrehozott webshopod.')}</p>
+        ) : (
+          webshops.map((webshop) => (
+            <div key={webshop.webshop_id} className="webshop-card">
+              <h3>{webshop.subject_name}</h3>
+              <p><strong>{t('Pénznem')}:</strong> {webshop.paying_instrument}</p>
+              <p><strong>{t('Fejléc színe')}:</strong> 
+                <span 
+                  className="color-indicator" 
+                  style={{ backgroundColor: webshop.header_color_code }}
+                >
+                  {webshop.header_color_code}
+                </span>
+              </p>
+              <p><strong>{t('Státusz')}:</strong> {webshop.status === 'active' ? t('Aktív') : t('Inaktív')}</p>
+              <div className="webshop-card-buttons">
+                <button className="webshop-card-button edit" onClick={() => handleEdit(webshop)}>
+                  {t('Szerkesztés')}
+                </button>
+                <Link to={`/manage-products/${webshop.webshop_id}`} className="webshop-card-button manage">
+                  {t('Termékek kezelése')}
+                </Link>
+              </div>
             </div>
-            <p>{t('Státusz')}: {webshop.status === 'active' ? t('Aktív') : t('Inaktív')}</p>
-            <div className="webshop-card-buttons">
-              <button className="webshop-card-button edit" onClick={() => handleEdit(webshop)}>
-                {t('Szerkesztés')}
-              </button>
-              <Link to={`/manage-products/${webshop.webshop_id}`} className="webshop-card-button manage">
-                {t('Termékek kezelése')}
-              </Link>
-            </div>
-          </div>
-        ))}
-        </div>
-          {isEditModalOpen && (
-          <div className="edit-modal">
-            <div className="edit-modal-content">
-              <h2>{t('Webshop szerkesztése')}</h2>
-              <form onSubmit={handleUpdate}>
-                <div>
-                  <label htmlFor="edit_subject_name">{t('Tantárgy Neve')}</label>
-                  <input
-                    id="edit_subject_name"
-                    name="subject_name"
-                    value={editingWebshop.subject_name}
-                    onChange={(e) => handleInputChange(e, 'edit')}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="edit_paying_instrument">{t('Pénznem')}</label>
-                  <input
-                    id="edit_paying_instrument"
-                    name="paying_instrument"
-                    value={editingWebshop.paying_instrument}
-                    onChange={(e) => handleInputChange(e, 'edit')}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="edit_paying_instrument_icon">{t('Pénznem Kép URL-je')}</label>
-                  <input
-                    id="edit_paying_instrument_icon"
-                    name="paying_instrument_icon"
-                    value={editingWebshop.paying_instrument_icon}
-                    onChange={(e) => handleInputChange(e, 'edit')}
-                  />
-                </div>
-                <div className="color-picker-container">
-                  <label htmlFor="edit_header_color_code">{t('Fejléc színe')}</label>
-                  <div className="color-picker-wrapper">
-                    <input
-                      type="color"
-                      id="edit_header_color_code"
-                      name="header_color_code"
-                      value={editingWebshop.header_color_code}
-                      onChange={(e) => handleInputChange(e, 'edit')}
-                      required
-                    />
-                    <div className="color-preview" style={{ backgroundColor: editingWebshop.header_color_code }}>
-                      <span>{editingWebshop.header_color_code}</span>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <label htmlFor="edit_status">{t('Státusz')}</label>
-                  <select
-                    id="edit_status"
-                    name="status"
-                    value={editingWebshop.status}
-                    onChange={(e) => handleInputChange(e, 'edit')}
-                  >
-                    <option value="active">{t('Aktív')}</option>
-                    <option value="inactive">{t('Inaktív')}</option>
-                  </select>
-                </div>
-                <div className="modal-button-group">
-                  <button type="submit"> {t('Frissítés')} </button>
-                  <button type="button" onClick={() => setIsEditModalOpen(false)}> {t('Mégse')} </button>
-                  <button type="button" className="delete-button" onClick={() => handleDelete(editingWebshop.webshop_id)}> {t('Webshop törlése')} </button>
-                </div>
-              </form>
-            </div>
-          </div>
+          ))
         )}
       </div>
+
+      {isEditModalOpen && (
+        <div className="edit-modal">
+          <div className="edit-modal-content">
+            <h2>{t('Webshop szerkesztése')}</h2>
+            <form onSubmit={handleUpdate}>
+              <div>
+                <label htmlFor="edit_subject_name">{t('Tantárgy Neve')}</label>
+                <input
+                  id="edit_subject_name"
+                  name="subject_name"
+                  value={editingWebshop.subject_name}
+                  onChange={(e) => handleInputChange(e, 'edit')}
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="edit_paying_instrument">{t('Pénznem')}</label>
+                <input
+                  id="edit_paying_instrument"
+                  name="paying_instrument"
+                  value={editingWebshop.paying_instrument}
+                  onChange={(e) => handleInputChange(e, 'edit')}
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="edit_paying_instrument_icon">{t('Pénznem Kép URL-je')}</label>
+                <input
+                  id="edit_paying_instrument_icon"
+                  name="paying_instrument_icon"
+                  value={editingWebshop.paying_instrument_icon}
+                  onChange={(e) => handleInputChange(e, 'edit')}
+                />
+              </div>
+              <div className="color-picker-container">
+                <label htmlFor="edit_header_color_code">{t('Fejléc színe')}</label>
+                <div className="color-picker-wrapper">
+                  <input
+                    type="color"
+                    id="edit_header_color_code"
+                    name="header_color_code"
+                    value={editingWebshop.header_color_code}
+                    onChange={(e) => handleInputChange(e, 'edit')}
+                    required
+                  />
+                  <div className="color-preview" style={{ backgroundColor: editingWebshop.header_color_code }}>
+                    <span>{editingWebshop.header_color_code}</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label htmlFor="edit_status">{t('Státusz')}</label>
+                <select
+                  id="edit_status"
+                  name="status"
+                  value={editingWebshop.status}
+                  onChange={(e) => handleInputChange(e, 'edit')}
+                >
+                  <option value="active">{t('Aktív')}</option>
+                  <option value="inactive">{t('Inaktív')}</option>
+                </select>
+              </div>
+              <div className="modal-button-group">
+                <button type="submit">{t('Frissítés')}</button>
+                <button type="button" onClick={() => setIsEditModalOpen(false)}>{t('Mégse')}</button>
+                <button type="button" className="delete-button" onClick={() => handleDelete(editingWebshop.webshop_id)}>
+                  {t('Webshop törlése')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
