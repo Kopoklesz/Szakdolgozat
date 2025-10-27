@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../config/axios';
 import '../css/TeacherDashboard.css';
 import { API_URL } from '../config/api';
 
