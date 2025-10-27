@@ -6,8 +6,16 @@ import apiClient from '../config/axios';
 import { API_URL } from '../config/api';
 import '../css/ManageProducts.css';
 
-const MAX_IMAGE_URL_LENGTH = 2000; // TEXT típus, gyakorlatilag korlátlan de javasoljuk a rövidebb URL-eket
-const MAX_DESCRIPTION_LENGTH = 1000; // Ajánlott maximum a leíráshoz
+// Adatbázis korlátok a migrációból:
+// - name: VARCHAR(255)
+// - category: VARCHAR(100)
+// - image: VARCHAR(255) - FONTOS: Rövid URL-t használj!
+// - description: TEXT (korlátlan)
+
+const MAX_NAME_LENGTH = 255;
+const MAX_CATEGORY_LENGTH = 100;
+const MAX_IMAGE_URL_LENGTH = 255; // VARCHAR(255) - adatbázis korlát!
+const MAX_DESCRIPTION_LENGTH = 5000; // TEXT típus - ajánlott maximum
 
 const ManageProducts = () => {
   const { t } = useTranslation();
@@ -36,8 +44,12 @@ const ManageProducts = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Karakter számláló state-ek
+  const [nameLength, setNameLength] = useState(0);
+  const [categoryLength, setCategoryLength] = useState(0);
   const [imageUrlLength, setImageUrlLength] = useState(0);
   const [descriptionLength, setDescriptionLength] = useState(0);
+  const [editNameLength, setEditNameLength] = useState(0);
+  const [editCategoryLength, setEditCategoryLength] = useState(0);
   const [editImageUrlLength, setEditImageUrlLength] = useState(0);
   const [editDescriptionLength, setEditDescriptionLength] = useState(0);
 
@@ -106,7 +118,11 @@ const ManageProducts = () => {
       setNewProduct(prev => ({ ...prev, [name]: value }));
       
       // Karakter számláló frissítése
-      if (name === 'image') {
+      if (name === 'name') {
+        setNameLength(value.length);
+      } else if (name === 'category') {
+        setCategoryLength(value.length);
+      } else if (name === 'image') {
         setImageUrlLength(value.length);
       } else if (name === 'description') {
         setDescriptionLength(value.length);
@@ -115,7 +131,11 @@ const ManageProducts = () => {
       setEditingProduct(prev => ({ ...prev, [name]: value }));
       
       // Karakter számláló frissítése
-      if (name === 'image') {
+      if (name === 'name') {
+        setEditNameLength(value.length);
+      } else if (name === 'category') {
+        setEditCategoryLength(value.length);
+      } else if (name === 'image') {
         setEditImageUrlLength(value.length);
       } else if (name === 'description') {
         setEditDescriptionLength(value.length);
@@ -125,10 +145,16 @@ const ManageProducts = () => {
 
   const validateForm = (productData) => {
     if (!productData.name.trim()) return t('A termék neve kötelező.');
+    if (productData.name.length > MAX_NAME_LENGTH) {
+      return t(`A termék neve túl hosszú. Maximum ${MAX_NAME_LENGTH} karakter engedélyezett.`);
+    }
     if (!productData.category.trim()) return t('A kategória kötelező.');
+    if (productData.category.length > MAX_CATEGORY_LENGTH) {
+      return t(`A kategória túl hosszú. Maximum ${MAX_CATEGORY_LENGTH} karakter engedélyezett.`);
+    }
     if (!productData.image.trim()) return t('A kép URL kötelező.');
     if (productData.image.length > MAX_IMAGE_URL_LENGTH) {
-      return t(`A kép URL túl hosszú. Maximum ${MAX_IMAGE_URL_LENGTH} karakter engedélyezett.`);
+      return t(`A kép URL túl hosszú! Maximum ${MAX_IMAGE_URL_LENGTH} karakter lehet. Használj rövidebb URL-t (pl. imgur.com).`);
     }
     if (!productData.description.trim()) return t('A leírás kötelező.');
     if (productData.description.length > MAX_DESCRIPTION_LENGTH) {
@@ -179,6 +205,8 @@ const ManageProducts = () => {
         current_stock: '',
         status: 'available'
       });
+      setNameLength(0);
+      setCategoryLength(0);
       setImageUrlLength(0);
       setDescriptionLength(0);
       fetchProducts();
@@ -254,6 +282,8 @@ const ManageProducts = () => {
 
   const openEditModal = (product) => {
     setEditingProduct({ ...product });
+    setEditNameLength(product.name.length);
+    setEditCategoryLength(product.category.length);
     setEditImageUrlLength(product.image.length);
     setEditDescriptionLength(product.description.length);
     setIsEditModalOpen(true);
@@ -264,6 +294,8 @@ const ManageProducts = () => {
   const closeEditModal = () => {
     setIsEditModalOpen(false);
     setEditingProduct(null);
+    setEditNameLength(0);
+    setEditCategoryLength(0);
     setEditImageUrlLength(0);
     setEditDescriptionLength(0);
     setError('');
@@ -314,32 +346,43 @@ const ManageProducts = () => {
       <div className="add-product-form">
         <h2>{t('Új termék hozzáadása')}</h2>
         <form onSubmit={handleCreateProduct}>
-          <input
-            type="text"
-            name="name"
-            placeholder={t('Termék neve')}
-            value={newProduct.name}
-            onChange={(e) => handleInputChange(e, 'new')}
-            required
-          />
-          <input
-            type="text"
-            name="category"
-            placeholder={t('Kategória')}
-            value={newProduct.category}
-            onChange={(e) => handleInputChange(e, 'new')}
-            required
-          />
+          <div className="input-with-counter">
+            <input
+              type="text"
+              name="name"
+              placeholder={t('Termék neve')}
+              value={newProduct.name}
+              onChange={(e) => handleInputChange(e, 'new')}
+              required
+            />
+            <CharacterCounter current={nameLength} max={MAX_NAME_LENGTH} />
+          </div>
+          <div className="input-with-counter">
+            <input
+              type="text"
+              name="category"
+              placeholder={t('Kategória')}
+              value={newProduct.category}
+              onChange={(e) => handleInputChange(e, 'new')}
+              required
+            />
+            <CharacterCounter current={categoryLength} max={MAX_CATEGORY_LENGTH} />
+          </div>
           <div className="input-with-counter">
             <input
               type="url"
               name="image"
-              placeholder={t('Kép URL (rövidebb URL-t ajánlott használni)')}
+              placeholder={t('Kép URL (maximum 255 karakter! Használj rövid URL-t)')}
               value={newProduct.image}
               onChange={(e) => handleInputChange(e, 'new')}
               required
             />
             <CharacterCounter current={imageUrlLength} max={MAX_IMAGE_URL_LENGTH} />
+            {imageUrlLength > 200 && imageUrlLength <= MAX_IMAGE_URL_LENGTH && (
+              <div className="url-warning">
+                ⚠️ {t('Közel a 255 karakteres limithez! Használj rövidebb URL-t (pl. imgur.com, imgbb.com)')}
+              </div>
+            )}
           </div>
           <div className="input-with-counter">
             <textarea
@@ -387,7 +430,13 @@ const ManageProducts = () => {
             <option value="available">{t('Elérhető')}</option>
             <option value="unavailable">{t('Nem elérhető')}</option>
           </select>
-          <button type="submit" disabled={isSubmitting || imageUrlLength > MAX_IMAGE_URL_LENGTH || descriptionLength > MAX_DESCRIPTION_LENGTH}>
+          <button type="submit" disabled={
+            isSubmitting || 
+            nameLength > MAX_NAME_LENGTH || 
+            categoryLength > MAX_CATEGORY_LENGTH ||
+            imageUrlLength > MAX_IMAGE_URL_LENGTH || 
+            descriptionLength > MAX_DESCRIPTION_LENGTH
+          }>
             {isSubmitting ? t('Létrehozás...') : t('Termék hozzáadása')}
           </button>
         </form>
@@ -433,32 +482,43 @@ const ManageProducts = () => {
           <div className="edit-modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>{t('Termék szerkesztése')}</h2>
             <form onSubmit={handleUpdateProduct}>
-              <input
-                type="text"
-                name="name"
-                placeholder={t('Termék neve')}
-                value={editingProduct.name}
-                onChange={(e) => handleInputChange(e, 'edit')}
-                required
-              />
-              <input
-                type="text"
-                name="category"
-                placeholder={t('Kategória')}
-                value={editingProduct.category}
-                onChange={(e) => handleInputChange(e, 'edit')}
-                required
-              />
+              <div className="input-with-counter">
+                <input
+                  type="text"
+                  name="name"
+                  placeholder={t('Termék neve')}
+                  value={editingProduct.name}
+                  onChange={(e) => handleInputChange(e, 'edit')}
+                  required
+                />
+                <CharacterCounter current={editNameLength} max={MAX_NAME_LENGTH} />
+              </div>
+              <div className="input-with-counter">
+                <input
+                  type="text"
+                  name="category"
+                  placeholder={t('Kategória')}
+                  value={editingProduct.category}
+                  onChange={(e) => handleInputChange(e, 'edit')}
+                  required
+                />
+                <CharacterCounter current={editCategoryLength} max={MAX_CATEGORY_LENGTH} />
+              </div>
               <div className="input-with-counter">
                 <input
                   type="url"
                   name="image"
-                  placeholder={t('Kép URL')}
+                  placeholder={t('Kép URL (maximum 255 karakter!)')}
                   value={editingProduct.image}
                   onChange={(e) => handleInputChange(e, 'edit')}
                   required
                 />
                 <CharacterCounter current={editImageUrlLength} max={MAX_IMAGE_URL_LENGTH} />
+                {editImageUrlLength > 200 && editImageUrlLength <= MAX_IMAGE_URL_LENGTH && (
+                  <div className="url-warning">
+                    ⚠️ {t('Közel a limithez! Használj rövidebb URL-t')}
+                  </div>
+                )}
               </div>
               <div className="input-with-counter">
                 <textarea
@@ -507,7 +567,13 @@ const ManageProducts = () => {
                 <option value="unavailable">{t('Nem elérhető')}</option>
               </select>
               <div className="modal-button-group">
-                <button type="submit" disabled={isSubmitting || editImageUrlLength > MAX_IMAGE_URL_LENGTH || editDescriptionLength > MAX_DESCRIPTION_LENGTH}>
+                <button type="submit" disabled={
+                  isSubmitting || 
+                  editNameLength > MAX_NAME_LENGTH ||
+                  editCategoryLength > MAX_CATEGORY_LENGTH ||
+                  editImageUrlLength > MAX_IMAGE_URL_LENGTH || 
+                  editDescriptionLength > MAX_DESCRIPTION_LENGTH
+                }>
                   {isSubmitting ? t('Frissítés...') : t('Frissítés')}
                 </button>
                 <button type="button" onClick={closeEditModal}>
