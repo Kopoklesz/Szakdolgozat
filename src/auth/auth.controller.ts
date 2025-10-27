@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
   ParseIntPipe,
+  HttpException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -27,7 +28,7 @@ import { UserRole } from '../entity/user.entity';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   /**
    * Felhasználó regisztráció
@@ -56,7 +57,17 @@ export class AuthController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   async getProfile(@Request() req): Promise<UserResponseDto> {
-    return this.authService.findUserById(req.user.sub);
+    // Fix: req.user.user_id használata sub helyett
+    const userId = req.user?.sub || req.user?.user_id || req.user?.userId || req.user?.id;
+
+    console.log('🔍 GET PROFILE - req.user:', req.user);
+    console.log('🔍 Extracted user ID:', userId);
+
+    if (!userId) {
+      throw new HttpException('User ID not found in JWT token', HttpStatus.UNAUTHORIZED);
+    }
+
+    return this.authService.findUserById(userId);
   }
 
   /**
@@ -69,7 +80,14 @@ export class AuthController {
     @Request() req,
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<{ message: string }> {
-    return this.authService.changePassword(req.user.sub, changePasswordDto);
+    // Fix: req.user.user_id használata sub helyett
+    const userId = req.user?.sub || req.user?.user_id || req.user?.userId || req.user?.id;
+
+    if (!userId) {
+      throw new HttpException('User ID not found in JWT token', HttpStatus.UNAUTHORIZED);
+    }
+
+    return this.authService.changePassword(userId, changePasswordDto);
   }
 
   /**
