@@ -52,15 +52,29 @@ export class WebshopController {
     @Body() createWebshopDto: CreateWebshopDto
   ) {
     try {
-      const teacherId = req.user.sub;
-      const userRole = req.user.role;
-
       console.log('=== CREATE WEBSHOP REQUEST ===');
-      console.log('Teacher ID from JWT:', teacherId);
-      console.log('User role from JWT:', userRole);
-      console.log('Request user object:', req.user);
+      console.log('Full req.user object:', req.user);
+      console.log('req.user.sub:', req.user?.sub);
+      console.log('req.user.userId:', req.user?.userId);
+      console.log('req.user.user_id:', req.user?.user_id);
+      console.log('req.user.id:', req.user?.id);
+
+      // Próbáljuk megtalálni a user_id-t különböző mezőkből
+      const teacherId = req.user?.sub || req.user?.userId || req.user?.user_id || req.user?.id;
+      const userRole = req.user?.role;
+
+      console.log('Extracted teacher ID:', teacherId);
+      console.log('Teacher ID type:', typeof teacherId);
+      console.log('User role:', userRole);
       console.log('Webshop data:', createWebshopDto);
       console.log('=============================');
+
+      if (!teacherId) {
+        throw new HttpException(
+          'Teacher ID nem található a JWT token-ben! req.user: ' + JSON.stringify(req.user),
+          HttpStatus.UNAUTHORIZED
+        );
+      }
 
       const result = await this.webshopService.createWebshop(teacherId, createWebshopDto);
 
