@@ -10,7 +10,6 @@
   text-align: center;
 }
 
-/* Hibaüzenetek és sikeres üzenetek */
 .error-message {
   background-color: #ffcdd2;
   color: #d32f2f;
@@ -29,7 +28,6 @@
   text-align: center;
 }
 
-/* Termék hozzáadás form */
 .add-product-form {
   background-color: #f5f5f5;
   border-radius: 8px;
@@ -85,7 +83,29 @@
   cursor: not-allowed;
 }
 
-/* Termék lista */
+.input-with-counter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.char-counter {
+  font-size: 12px;
+  text-align: right;
+  color: #666;
+  padding: 0 5px;
+}
+
+.char-counter.warning {
+  color: #ff9800;
+  font-weight: bold;
+}
+
+.char-counter.error {
+  color: #f44336;
+  font-weight: bold;
+}
+
 .products-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -125,7 +145,6 @@
   font-size: 14px;
 }
 
-/* Termék gombok */
 .product-actions {
   display: flex;
   gap: 10px;
@@ -212,7 +231,6 @@
   resize: vertical;
 }
 
-/* Modal gombok */
 .modal-button-group {
   display: flex;
   gap: 10px;
@@ -253,7 +271,6 @@
   cursor: not-allowed;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .products-list {
     grid-template-columns: 1fr;

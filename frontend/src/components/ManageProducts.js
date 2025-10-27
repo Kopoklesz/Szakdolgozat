@@ -6,6 +6,9 @@ import apiClient from '../config/axios';
 import { API_URL } from '../config/api';
 import '../css/ManageProducts.css';
 
+const MAX_IMAGE_URL_LENGTH = 2000; // TEXT típus, gyakorlatilag korlátlan de javasoljuk a rövidebb URL-eket
+const MAX_DESCRIPTION_LENGTH = 1000; // Ajánlott maximum a leíráshoz
+
 const ManageProducts = () => {
   const { t } = useTranslation();
   const { webshopId } = useParams();
@@ -32,6 +35,12 @@ const ManageProducts = () => {
   const [success, setSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Karakter számláló state-ek
+  const [imageUrlLength, setImageUrlLength] = useState(0);
+  const [descriptionLength, setDescriptionLength] = useState(0);
+  const [editImageUrlLength, setEditImageUrlLength] = useState(0);
+  const [editDescriptionLength, setEditDescriptionLength] = useState(0);
+
   // Ownership ellenőrzés az oldal betöltésekor
   useEffect(() => {
     checkOwnership();
@@ -46,17 +55,13 @@ const ManageProducts = () => {
     }
 
     try {
-      // Webshop adatok lekérése
       const response = await apiClient.get(`${API_URL}/webshop/${webshopId}`);
       const fetchedWebshop = response.data;
       setWebshop(fetchedWebshop);
 
-      // Ownership ellenőrzés
       if (user.role === 'admin') {
-        // Admin mindent láthat
         setIsAuthorized(true);
       } else if (user.role === 'teacher') {
-        // Teacher csak saját webshopját kezelheti
         if (fetchedWebshop.teacher_id === user.user_id) {
           setIsAuthorized(true);
         } else {
@@ -65,7 +70,6 @@ const ManageProducts = () => {
           setTimeout(() => navigate('/teacher-dashboard'), 3000);
         }
       } else {
-        // Student nem férhet hozzá
         setIsAuthorized(false);
         setError(t('Nincs jogosultságod ehhez az oldalhoz.'));
         setTimeout(() => navigate('/webshops'), 3000);
@@ -97,10 +101,25 @@ const ManageProducts = () => {
 
   const handleInputChange = (e, type = 'new') => {
     const { name, value } = e.target;
+    
     if (type === 'new') {
       setNewProduct(prev => ({ ...prev, [name]: value }));
+      
+      // Karakter számláló frissítése
+      if (name === 'image') {
+        setImageUrlLength(value.length);
+      } else if (name === 'description') {
+        setDescriptionLength(value.length);
+      }
     } else {
       setEditingProduct(prev => ({ ...prev, [name]: value }));
+      
+      // Karakter számláló frissítése
+      if (name === 'image') {
+        setEditImageUrlLength(value.length);
+      } else if (name === 'description') {
+        setEditDescriptionLength(value.length);
+      }
     }
   };
 
@@ -108,7 +127,13 @@ const ManageProducts = () => {
     if (!productData.name.trim()) return t('A termék neve kötelező.');
     if (!productData.category.trim()) return t('A kategória kötelező.');
     if (!productData.image.trim()) return t('A kép URL kötelező.');
+    if (productData.image.length > MAX_IMAGE_URL_LENGTH) {
+      return t(`A kép URL túl hosszú. Maximum ${MAX_IMAGE_URL_LENGTH} karakter engedélyezett.`);
+    }
     if (!productData.description.trim()) return t('A leírás kötelező.');
+    if (productData.description.length > MAX_DESCRIPTION_LENGTH) {
+      return t(`A leírás túl hosszú. Maximum ${MAX_DESCRIPTION_LENGTH} karakter ajánlott.`);
+    }
     if (isNaN(parseFloat(productData.price)) || parseFloat(productData.price) <= 0) 
       return t('Érvényes árat adjon meg.');
     if (isNaN(parseInt(productData.max_stock)) || parseInt(productData.max_stock) < 0) 
@@ -154,6 +179,8 @@ const ManageProducts = () => {
         current_stock: '',
         status: 'available'
       });
+      setImageUrlLength(0);
+      setDescriptionLength(0);
       fetchProducts();
     } catch (error) {
       console.error('Error creating product:', error);
@@ -227,6 +254,8 @@ const ManageProducts = () => {
 
   const openEditModal = (product) => {
     setEditingProduct({ ...product });
+    setEditImageUrlLength(product.image.length);
+    setEditDescriptionLength(product.description.length);
     setIsEditModalOpen(true);
     setError('');
     setSuccess('');
@@ -235,11 +264,27 @@ const ManageProducts = () => {
   const closeEditModal = () => {
     setIsEditModalOpen(false);
     setEditingProduct(null);
+    setEditImageUrlLength(0);
+    setEditDescriptionLength(0);
     setError('');
     setSuccess('');
   };
 
-  // Betöltés vagy jogosultság ellenőrzés közben
+  // Karakter számláló megjelenítő komponens
+  const CharacterCounter = ({ current, max, warning = 0.8 }) => {
+    const isWarning = current > max * warning;
+    const isError = current > max;
+    const className = isError ? 'char-counter error' : isWarning ? 'char-counter warning' : 'char-counter';
+    
+    return (
+      <div className={className}>
+        {current} / {max} {t('karakter')}
+        {isWarning && !isError && ` (${t('közel a limithez')})`}
+        {isError && ` (${t('túl hosszú!')})`}
+      </div>
+    );
+  };
+
   if (isCheckingOwnership) {
     return (
       <div className="manage-products">
@@ -250,7 +295,6 @@ const ManageProducts = () => {
     );
   }
 
-  // Ha nincs jogosultság
   if (!isAuthorized) {
     return (
       <div className="manage-products">
@@ -259,16 +303,12 @@ const ManageProducts = () => {
     );
   }
 
-  // Ha van jogosultság, megjelenítjük a teljes oldalt
   return (
     <div className="manage-products">
       <h1>{t('Termékek kezelése')} - {webshop?.subject_name}</h1>
 
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
-
-      {/* Megjegyzés: URL titkosítás/védelem */}
-      {/* TODO: A jövőben implementálható UUID vagy hash alapú URL-ek a webshop_id helyett */}
 
       {/* Új termék hozzáadása */}
       <div className="add-product-form">
@@ -290,21 +330,27 @@ const ManageProducts = () => {
             onChange={(e) => handleInputChange(e, 'new')}
             required
           />
-          <input
-            type="url"
-            name="image"
-            placeholder={t('Kép URL')}
-            value={newProduct.image}
-            onChange={(e) => handleInputChange(e, 'new')}
-            required
-          />
-          <textarea
-            name="description"
-            placeholder={t('Leírás')}
-            value={newProduct.description}
-            onChange={(e) => handleInputChange(e, 'new')}
-            required
-          />
+          <div className="input-with-counter">
+            <input
+              type="url"
+              name="image"
+              placeholder={t('Kép URL (rövidebb URL-t ajánlott használni)')}
+              value={newProduct.image}
+              onChange={(e) => handleInputChange(e, 'new')}
+              required
+            />
+            <CharacterCounter current={imageUrlLength} max={MAX_IMAGE_URL_LENGTH} />
+          </div>
+          <div className="input-with-counter">
+            <textarea
+              name="description"
+              placeholder={t('Leírás')}
+              value={newProduct.description}
+              onChange={(e) => handleInputChange(e, 'new')}
+              required
+            />
+            <CharacterCounter current={descriptionLength} max={MAX_DESCRIPTION_LENGTH} />
+          </div>
           <input
             type="number"
             name="price"
@@ -341,7 +387,7 @@ const ManageProducts = () => {
             <option value="available">{t('Elérhető')}</option>
             <option value="unavailable">{t('Nem elérhető')}</option>
           </select>
-          <button type="submit" disabled={isSubmitting}>
+          <button type="submit" disabled={isSubmitting || imageUrlLength > MAX_IMAGE_URL_LENGTH || descriptionLength > MAX_DESCRIPTION_LENGTH}>
             {isSubmitting ? t('Létrehozás...') : t('Termék hozzáadása')}
           </button>
         </form>
@@ -403,21 +449,27 @@ const ManageProducts = () => {
                 onChange={(e) => handleInputChange(e, 'edit')}
                 required
               />
-              <input
-                type="url"
-                name="image"
-                placeholder={t('Kép URL')}
-                value={editingProduct.image}
-                onChange={(e) => handleInputChange(e, 'edit')}
-                required
-              />
-              <textarea
-                name="description"
-                placeholder={t('Leírás')}
-                value={editingProduct.description}
-                onChange={(e) => handleInputChange(e, 'edit')}
-                required
-              />
+              <div className="input-with-counter">
+                <input
+                  type="url"
+                  name="image"
+                  placeholder={t('Kép URL')}
+                  value={editingProduct.image}
+                  onChange={(e) => handleInputChange(e, 'edit')}
+                  required
+                />
+                <CharacterCounter current={editImageUrlLength} max={MAX_IMAGE_URL_LENGTH} />
+              </div>
+              <div className="input-with-counter">
+                <textarea
+                  name="description"
+                  placeholder={t('Leírás')}
+                  value={editingProduct.description}
+                  onChange={(e) => handleInputChange(e, 'edit')}
+                  required
+                />
+                <CharacterCounter current={editDescriptionLength} max={MAX_DESCRIPTION_LENGTH} />
+              </div>
               <input
                 type="number"
                 name="price"
@@ -455,7 +507,7 @@ const ManageProducts = () => {
                 <option value="unavailable">{t('Nem elérhető')}</option>
               </select>
               <div className="modal-button-group">
-                <button type="submit" disabled={isSubmitting}>
+                <button type="submit" disabled={isSubmitting || editImageUrlLength > MAX_IMAGE_URL_LENGTH || editDescriptionLength > MAX_DESCRIPTION_LENGTH}>
                   {isSubmitting ? t('Frissítés...') : t('Frissítés')}
                 </button>
                 <button type="button" onClick={closeEditModal}>
