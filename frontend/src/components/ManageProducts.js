@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import apiClient from '../config/axios';
 import { API_URL } from '../config/api';
 import '../css/ManageProducts.css';
 
@@ -31,7 +31,7 @@ const ManageProducts = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get(`${API_URL}/product/webshop/${webshopId}`);
+      const response = await apiClient.get(`${API_URL}/product/webshop/${webshopId}`);
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -86,7 +86,7 @@ const ManageProducts = () => {
         webshop_id: parseInt(webshopId)
       };
 
-      await axios.post(`${API_URL}/product`, productData);
+      await apiClient.post(`${API_URL}/product`, productData);
       setSuccess(t('Termék sikeresen létrehozva!'));
       setNewProduct({
         name: '',
@@ -101,7 +101,7 @@ const ManageProducts = () => {
       fetchProducts();
     } catch (error) {
       console.error('Error creating product:', error);
-      setError(t('Hiba történt a termék létrehozása közben.'));
+      setError(error.response?.data?.message || t('Hiba történt a termék létrehozása közben.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -132,14 +132,14 @@ const ManageProducts = () => {
         status: editingProduct.status
       };
 
-      await axios.put(`${API_URL}/product/${editingProduct.product_id}`, productData);
+      await apiClient.put(`${API_URL}/product/${editingProduct.product_id}`, productData);
       setSuccess(t('Termék sikeresen frissítve!'));
       setIsEditModalOpen(false);
       setEditingProduct(null);
       fetchProducts();
     } catch (error) {
       console.error('Error updating product:', error);
-      setError(t('Hiba történt a termék frissítése közben.'));
+      setError(error.response?.data?.message || t('Hiba történt a termék frissítése közben.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -154,7 +154,7 @@ const ManageProducts = () => {
     setSuccess('');
 
     try {
-      await axios.delete(`${API_URL}/product/${productId}`);
+      await apiClient.delete(`${API_URL}/product/${productId}`);
       setSuccess(t('Termék sikeresen törölve!'));
       
       if (isEditModalOpen) {
@@ -165,7 +165,7 @@ const ManageProducts = () => {
       fetchProducts();
     } catch (error) {
       console.error('Error deleting product:', error);
-      setError(t('Hiba történt a termék törlése közben.'));
+      setError(error.response?.data?.message || t('Hiba történt a termék törlése közben.'));
     }
   };
 
@@ -184,17 +184,16 @@ const ManageProducts = () => {
   };
 
   return (
-    <div className="manage-products-container">
-      <h2>{t('Termékek kezelése')}</h2>
+    <div className="manage-products">
+      <h1>{t('Termékek kezelése')}</h1>
 
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
 
-      {/* Új termék létrehozása form */}
-      <div className="create-product-section">
-        <h3>{t('Új termék hozzáadása')}</h3>
-        <form onSubmit={handleCreateProduct} className="product-form">
-          {/* Form mezők... */}
+      {/* Új termék hozzáadása */}
+      <div className="add-product-form">
+        <h2>{t('Új termék hozzáadása')}</h2>
+        <form onSubmit={handleCreateProduct}>
           <input
             type="text"
             name="name"
@@ -268,26 +267,31 @@ const ManageProducts = () => {
         </form>
       </div>
 
-      {/* Termékek listája */}
-      <div className="products-list">
-        <h3>{t('Meglévő termékek')}</h3>
+      {/* Meglévő termékek */}
+      <div className="products-section">
+        <h2>{t('Meglévő termékek')}</h2>
         {products.length === 0 ? (
-          <p>{t('Még nincsenek termékek.')}</p>
+          <p className="no-products">{t('Még nincsenek termékek.')}</p>
         ) : (
-          <div className="products-grid">
+          <div className="products-list">
             {products.map(product => (
-              <div key={product.product_id} className="product-card">
+              <div key={product.product_id} className="product-item">
                 <img src={product.image} alt={product.name} />
-                <h4>{product.name}</h4>
-                <p>{product.category}</p>
-                <p>{product.price} Ft</p>
-                <p>{t('Készlet')}: {product.current_stock}/{product.max_stock}</p>
+                <h3>{product.name}</h3>
+                <p className="category">{product.category}</p>
+                <p className="description">{product.description}</p>
+                <p className="price"><strong>{t('Ár')}:</strong> {product.price} Ft</p>
+                <p className="stock">
+                  <strong>{t('Készlet')}:</strong> {product.current_stock}/{product.max_stock}
+                </p>
                 <p className={`status ${product.status}`}>
                   {product.status === 'available' ? t('Elérhető') : t('Nem elérhető')}
                 </p>
                 <div className="product-actions">
-                  <button onClick={() => openEditModal(product)}>{t('Szerkesztés')}</button>
-                  <button onClick={() => handleDelete(product.product_id)} className="delete-btn">
+                  <button className="edit-button" onClick={() => openEditModal(product)}>
+                    {t('Szerkesztés')}
+                  </button>
+                  <button className="delete-button" onClick={() => handleDelete(product.product_id)}>
                     {t('Törlés')}
                   </button>
                 </div>
@@ -299,13 +303,14 @@ const ManageProducts = () => {
 
       {/* Szerkesztési modal */}
       {isEditModalOpen && editingProduct && (
-        <div className="modal-overlay" onClick={closeEditModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>{t('Termék szerkesztése')}</h3>
-            <form onSubmit={handleUpdateProduct} className="product-form">
+        <div className="edit-modal" onClick={closeEditModal}>
+          <div className="edit-modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>{t('Termék szerkesztése')}</h2>
+            <form onSubmit={handleUpdateProduct}>
               <input
                 type="text"
                 name="name"
+                placeholder={t('Termék neve')}
                 value={editingProduct.name}
                 onChange={(e) => handleInputChange(e, 'edit')}
                 required
@@ -313,6 +318,7 @@ const ManageProducts = () => {
               <input
                 type="text"
                 name="category"
+                placeholder={t('Kategória')}
                 value={editingProduct.category}
                 onChange={(e) => handleInputChange(e, 'edit')}
                 required
@@ -320,12 +326,14 @@ const ManageProducts = () => {
               <input
                 type="url"
                 name="image"
+                placeholder={t('Kép URL')}
                 value={editingProduct.image}
                 onChange={(e) => handleInputChange(e, 'edit')}
                 required
               />
               <textarea
                 name="description"
+                placeholder={t('Leírás')}
                 value={editingProduct.description}
                 onChange={(e) => handleInputChange(e, 'edit')}
                 required
@@ -333,6 +341,7 @@ const ManageProducts = () => {
               <input
                 type="number"
                 name="price"
+                placeholder={t('Ár')}
                 value={editingProduct.price}
                 onChange={(e) => handleInputChange(e, 'edit')}
                 step="0.01"
@@ -342,6 +351,7 @@ const ManageProducts = () => {
               <input
                 type="number"
                 name="max_stock"
+                placeholder={t('Maximális készlet')}
                 value={editingProduct.max_stock}
                 onChange={(e) => handleInputChange(e, 'edit')}
                 min="0"
@@ -350,6 +360,7 @@ const ManageProducts = () => {
               <input
                 type="number"
                 name="current_stock"
+                placeholder={t('Jelenlegi készlet')}
                 value={editingProduct.current_stock}
                 onChange={(e) => handleInputChange(e, 'edit')}
                 min="0"
@@ -363,9 +374,9 @@ const ManageProducts = () => {
                 <option value="available">{t('Elérhető')}</option>
                 <option value="unavailable">{t('Nem elérhető')}</option>
               </select>
-              <div className="modal-actions">
+              <div className="modal-button-group">
                 <button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? t('Mentés...') : t('Módosítások mentése')}
+                  {isSubmitting ? t('Frissítés...') : t('Frissítés')}
                 </button>
                 <button type="button" onClick={closeEditModal}>
                   {t('Mégse')}
