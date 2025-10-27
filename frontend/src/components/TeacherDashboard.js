@@ -26,7 +26,7 @@ const TeacherDashboard = () => {
 
   const fetchWebshops = async () => {
     try {
-      const response = await axios.get(`${API_URL}/webshop`);
+      const response = await apiClient.get(`${API_URL}/webshop`);
       setWebshops(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching webshops:', error);
@@ -46,7 +46,7 @@ const TeacherDashboard = () => {
   const handleDelete = async (webshopId) => {
     if (window.confirm(t('Biztosan törölni szeretnéd ezt a webshopot és minden termékét?'))) {
       try {
-        await axios.delete(`${API_URL}/webshop/${webshopId}`);
+        await apiClient.delete(`${API_URL}/webshop/${webshopId}`);
         setSuccess(t('Webshop sikeresen törölve!'));
         setIsEditModalOpen(false);
         fetchWebshops();
@@ -86,7 +86,7 @@ const handleSubmit = async (e) => {
       return;
     }
 
-    const response = await axios.post(`${API_URL}/webshop`, newWebshop);
+    const response = await apiClient.post(`${API_URL}/webshop`, newWebshop);
     
     if (response.data) {
       setNewWebshop({
@@ -118,7 +118,7 @@ const handleSubmit = async (e) => {
       return;
     }
     try {
-      await axios.put(`${API_URL}/webshop/${editingWebshop.webshop_id}`, editingWebshop);
+      await apiClient.put(`${API_URL}/webshop/${editingWebshop.webshop_id}`, editingWebshop);
       setSuccess(t('Webshop sikeresen frissítve!'));
       setIsEditModalOpen(false);
       fetchWebshops();
