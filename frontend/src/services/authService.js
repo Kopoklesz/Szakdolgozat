@@ -128,6 +128,27 @@ const validatePassword = (password) => {
   };
 };
 
+// Email domain validáció - szinkronizálva a backend-del
+const validateEmailDomain = (email) => {
+  // Admin email engedélyezése
+  if (email === 'admin@uni-pannon.hu') {
+    return { isValid: true };
+  }
+
+  // Csak student és teacher domaineket fogadunk el
+  const validDomains = ['@student.uni-pannon.hu', '@teacher.uni-pannon.hu'];
+  const isValid = validDomains.some(domain => email.endsWith(domain));
+
+  if (!isValid) {
+    return {
+      isValid: false,
+      error: 'Csak @student.uni-pannon.hu vagy @teacher.uni-pannon.hu email címmel lehet regisztrálni'
+    };
+  }
+
+  return { isValid: true };
+};
+
 const authService = {
   register,
   login,
@@ -136,6 +157,7 @@ const authService = {
   getAuthData,
   clearAuthData,  
   validatePassword,
+  validateEmailDomain,
   setAuthData
 };
 
