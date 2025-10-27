@@ -1,17 +1,17 @@
-import { 
-  Controller, 
-  Delete, 
-  Get, 
-  Post, 
-  Put, 
-  Body, 
-  Param, 
-  ParseIntPipe, 
-  UseFilters, 
+import {
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Put,
+  Body,
+  Param,
+  ParseIntPipe,
+  UseFilters,
   UseGuards,
   Request,
-  HttpException, 
-  HttpStatus 
+  HttpException,
+  HttpStatus
 } from '@nestjs/common';
 import { WebshopService } from './webshop.service';
 import { HttpExceptionFilter } from '../filters/http-exception.filter';
@@ -25,7 +25,7 @@ import { UserRole } from '../entity/user.entity';
 @Controller('webshop')
 @UseFilters(new HttpExceptionFilter())
 export class WebshopController {
-  constructor(private readonly webshopService: WebshopService) {}
+  constructor(private readonly webshopService: WebshopService) { }
 
   /**
    * Összes webshop listázása (publikus)
@@ -52,14 +52,43 @@ export class WebshopController {
     @Body() createWebshopDto: CreateWebshopDto
   ) {
     try {
-      // Teacher ID automatikus beállítás a JWT tokenből
       const teacherId = req.user.sub;
-      return await this.webshopService.createWebshop(teacherId, createWebshopDto);
+      const userRole = req.user.role;
+
+      console.log('=== CREATE WEBSHOP REQUEST ===');
+      console.log('Teacher ID from JWT:', teacherId);
+      console.log('User role from JWT:', userRole);
+      console.log('Request user object:', req.user);
+      console.log('Webshop data:', createWebshopDto);
+      console.log('=============================');
+
+      const result = await this.webshopService.createWebshop(teacherId, createWebshopDto);
+
+      console.log('Webshop created successfully:', result.webshop_id);
+
+      return result;
     } catch (error) {
+      console.error('=== CREATE WEBSHOP ERROR ===');
+      console.error('Error type:', error.constructor.name);
+      console.error('Error status:', error.status);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.error('===========================');
+
       if (error.status === HttpStatus.BAD_REQUEST) {
         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       }
-      throw new HttpException('Failed to create webshop', HttpStatus.INTERNAL_SERVER_ERROR);
+      if (error.status === HttpStatus.NOT_FOUND) {
+        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+      }
+      if (error.status === HttpStatus.FORBIDDEN) {
+        throw new HttpException(error.message, HttpStatus.FORBIDDEN);
+      }
+
+      throw new HttpException(
+        error.message || 'Failed to create webshop',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
