@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext';
 import apiClient from '../config/axios';
 import { API_URL } from '../config/api';
 import '../css/ManageProducts.css';
@@ -8,7 +9,13 @@ import '../css/ManageProducts.css';
 const ManageProducts = () => {
   const { t } = useTranslation();
   const { webshopId } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  
   const [products, setProducts] = useState([]);
+  const [webshop, setWebshop] = useState(null);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isCheckingOwnership, setIsCheckingOwnership] = useState(true);
   const [newProduct, setNewProduct] = useState({
     name: '',
     category: '',
@@ -25,9 +32,58 @@ const ManageProducts = () => {
   const [success, setSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Ownership ellenőrzés az oldal betöltésekor
   useEffect(() => {
-    fetchProducts();
-  }, [webshopId]);
+    checkOwnership();
+  }, [webshopId, user]);
+
+  const checkOwnership = async () => {
+    if (!user) {
+      setError(t('Be kell jelentkezned a termékek kezeléséhez.'));
+      setIsCheckingOwnership(false);
+      setTimeout(() => navigate('/login'), 2000);
+      return;
+    }
+
+    try {
+      // Webshop adatok lekérése
+      const response = await apiClient.get(`${API_URL}/webshop/${webshopId}`);
+      const fetchedWebshop = response.data;
+      setWebshop(fetchedWebshop);
+
+      // Ownership ellenőrzés
+      if (user.role === 'admin') {
+        // Admin mindent láthat
+        setIsAuthorized(true);
+      } else if (user.role === 'teacher') {
+        // Teacher csak saját webshopját kezelheti
+        if (fetchedWebshop.teacher_id === user.user_id) {
+          setIsAuthorized(true);
+        } else {
+          setIsAuthorized(false);
+          setError(t('Nincs jogosultságod ennek a webshopnak a kezeléséhez. Csak a saját webshopjaid termékeit kezelheted.'));
+          setTimeout(() => navigate('/teacher-dashboard'), 3000);
+        }
+      } else {
+        // Student nem férhet hozzá
+        setIsAuthorized(false);
+        setError(t('Nincs jogosultságod ehhez az oldalhoz.'));
+        setTimeout(() => navigate('/webshops'), 3000);
+      }
+    } catch (error) {
+      console.error('Error checking ownership:', error);
+      setError(t('Hiba történt a webshop ellenőrzése közben.'));
+      setTimeout(() => navigate('/teacher-dashboard'), 3000);
+    } finally {
+      setIsCheckingOwnership(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthorized) {
+      fetchProducts();
+    }
+  }, [isAuthorized, webshopId]);
 
   const fetchProducts = async () => {
     try {
@@ -183,12 +239,36 @@ const ManageProducts = () => {
     setSuccess('');
   };
 
+  // Betöltés vagy jogosultság ellenőrzés közben
+  if (isCheckingOwnership) {
+    return (
+      <div className="manage-products">
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          <p>{t('Jogosultság ellenőrzése...')}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Ha nincs jogosultság
+  if (!isAuthorized) {
+    return (
+      <div className="manage-products">
+        {error && <div className="error-message">{error}</div>}
+      </div>
+    );
+  }
+
+  // Ha van jogosultság, megjelenítjük a teljes oldalt
   return (
     <div className="manage-products">
-      <h1>{t('Termékek kezelése')}</h1>
+      <h1>{t('Termékek kezelése')} - {webshop?.subject_name}</h1>
 
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
+
+      {/* Megjegyzés: URL titkosítás/védelem */}
+      {/* TODO: A jövőben implementálható UUID vagy hash alapú URL-ek a webshop_id helyett */}
 
       {/* Új termék hozzáadása */}
       <div className="add-product-form">

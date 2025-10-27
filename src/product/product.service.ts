@@ -35,10 +35,23 @@ export class ProductService {
       throw new NotFoundException(`Webshop with ID ${webshop_id} not found`);
     }
 
+    // DEBUG: Ownership ellenőrzés részletes logolással
+    console.log('=== PRODUCT CREATE OWNERSHIP CHECK ===');
+    console.log('User ID from JWT:', userId, 'Type:', typeof userId);
+    console.log('User Role:', userRole);
+    console.log('Webshop teacher_id:', webshop.teacher_id, 'Type:', typeof webshop.teacher_id);
+    console.log('Match (===):', webshop.teacher_id === userId);
+    console.log('Match (==):', webshop.teacher_id == userId);
+    console.log('======================================');
+
     // Ownership ellenőrzés - csak saját webshopba tehet terméket (kivéve ADMIN)
     if (userRole !== UserRole.ADMIN && webshop.teacher_id !== userId) {
+      console.error('❌ Ownership check FAILED!');
+      console.error(`Expected teacher_id: ${webshop.teacher_id}, Got userId: ${userId}`);
       throw new ForbiddenException('Csak a saját webshopodba hozhatsz létre terméket');
     }
+
+    console.log('✅ Ownership check PASSED');
 
     // Validációk
     if (current_stock > max_stock) {
