@@ -23,15 +23,26 @@ export const AuthProvider = ({ children }) => {
   const checkAuth = async () => {
     const { token, user: savedUser } = authService.getAuthData();
     
+    console.log('🔍 AuthContext - checkAuth');
+    console.log('Token exists:', !!token);
+    console.log('Saved user:', savedUser);
+    
     if (token && savedUser) {
       // Token validálása a backend-del
+      console.log('📡 Validating token with backend...');
       const result = await authService.getProfile();
+      
       if (result.success) {
+        console.log('✅ Token valid, user:', result.user);
         setUser(result.user);
       } else {
         // Token érvénytelen, töröljük
+        console.warn('❌ Token invalid, clearing auth data');
+        authService.clearAuthData();
         setUser(null);
       }
+    } else {
+      console.log('ℹ️  No saved auth data found');
     }
     
     setLoading(false);
