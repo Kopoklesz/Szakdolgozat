@@ -39,7 +39,9 @@ const ManagePartners = () => {
     try {
       setLoading(true);
       const response = await apiClient.get(`${API_URL}/webshop/${webshopId}/partners`);
-      setPartners(response.data || []);
+      // Biztonsági ellenőrzés
+      const partnersData = Array.isArray(response.data) ? response.data : [];
+      setPartners(partnersData);
     } catch (error) {
       console.error('Error fetching partners:', error);
       if (error.response?.status === 403) {
@@ -47,6 +49,7 @@ const ManagePartners = () => {
       } else {
         setError(t('Hiba történt a partnerek betöltése közben.'));
       }
+      setPartners([]); // Üres tömb hiba esetén
     } finally {
       setLoading(false);
     }
@@ -55,16 +58,17 @@ const ManagePartners = () => {
   const fetchAvailableTeachers = async () => {
     try {
       const response = await apiClient.get(`${API_URL}/auth/users`);
-      const allUsers = response.data || [];
+      const allUsers = Array.isArray(response.data) ? response.data : [];
       
-      // Szűrjük ki a tanárokat és adminokat
+      // Szűrjük ki a tanárokat és adminokat, biztonságos módon
       const teachers = allUsers.filter(user => 
-        user.role === 'teacher' || user.role === 'admin'
+        user && (user.role === 'teacher' || user.role === 'admin')
       );
       
       setAvailableTeachers(teachers);
     } catch (error) {
       console.error('Error fetching teachers:', error);
+      setAvailableTeachers([]); // Üres tömb hiba esetén
     }
   };
 
@@ -128,13 +132,18 @@ const ManagePartners = () => {
 
   // Szűrjük ki azokat a tanárokat, akik már partnerek vagy az owner
   const getFilteredTeachers = () => {
-    if (!webshop) return availableTeachers;
+    if (!webshop || !Array.isArray(availableTeachers) || !Array.isArray(partners)) {
+      return [];
+    }
     
-    const partnerIds = partners.map(p => p.user_id);
+    const partnerIds = partners.map(p => p?.user_id).filter(id => id !== undefined);
     const ownerId = webshop.teacher_id;
     
     return availableTeachers.filter(teacher => 
-      teacher.user_id !== ownerId && !partnerIds.includes(teacher.user_id)
+      teacher && 
+      teacher.user_id && 
+      teacher.user_id !== ownerId && 
+      !partnerIds.includes(teacher.user_id)
     );
   };
 
@@ -153,7 +162,7 @@ const ManagePartners = () => {
           ← {t('Vissza')}
         </button>
         <h1>{t('Partner Kezelés')}</h1>
-        {webshop && (
+        {webshop && webshop.subject_name && (
           <p className="webshop-name">
             {webshop.subject_name}
           </p>
@@ -182,28 +191,35 @@ const ManagePartners = () => {
           </div>
         ) : (
           <div className="partners-grid">
-            {partners.map((partner) => (
-              <div key={partner.user_id} className="partner-card">
-                <div className="partner-info">
-                  <div className="partner-avatar">
-                    {partner.username.charAt(0).toUpperCase()}
+            {partners.map((partner) => {
+              // Biztonsági ellenőrzés minden partner objektumra
+              if (!partner || !partner.user_id) {
+                return null;
+              }
+              
+              return (
+                <div key={partner.user_id} className="partner-card">
+                  <div className="partner-info">
+                    <div className="partner-avatar">
+                      {partner.username ? partner.username.charAt(0).toUpperCase() : '?'}
+                    </div>
+                    <div className="partner-details">
+                      <h3>{partner.username || 'N/A'}</h3>
+                      <p className="partner-email">{partner.email || 'N/A'}</p>
+                      <span className="partner-role">
+                        {partner.role === 'admin' ? t('Admin') : t('Tanár')}
+                      </span>
+                    </div>
                   </div>
-                  <div className="partner-details">
-                    <h3>{partner.username}</h3>
-                    <p className="partner-email">{partner.email}</p>
-                    <span className="partner-role">
-                      {partner.role === 'admin' ? t('Admin') : t('Tanár')}
-                    </span>
-                  </div>
+                  <button 
+                    className="remove-partner-btn"
+                    onClick={() => handleRemovePartner(partner.user_id)}
+                  >
+                    {t('Eltávolítás')}
+                  </button>
                 </div>
-                <button 
-                  className="remove-partner-btn"
-                  onClick={() => handleRemovePartner(partner.user_id)}
-                >
-                  {t('Eltávolítás')}
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -217,11 +233,11 @@ const ManagePartners = () => {
           <div className="owner-card">
             <div className="owner-info">
               <div className="owner-avatar">
-                {webshop.teacher.username.charAt(0).toUpperCase()}
+                {webshop.teacher.username ? webshop.teacher.username.charAt(0).toUpperCase() : '?'}
               </div>
               <div className="owner-details">
-                <h3>{webshop.teacher.username}</h3>
-                <p className="owner-email">{webshop.teacher.email}</p>
+                <h3>{webshop.teacher.username || 'N/A'}</h3>
+                <p className="owner-email">{webshop.teacher.email || 'N/A'}</p>
                 <span className="owner-badge">{t('Tulajdonos')}</span>
               </div>
             </div>
@@ -246,11 +262,15 @@ const ManagePartners = () => {
                   required
                 >
                   <option value="">{t('-- Válassz --')}</option>
-                  {getFilteredTeachers().map((teacher) => (
-                    <option key={teacher.user_id} value={teacher.user_id}>
-                      {teacher.username} ({teacher.email})
-                    </option>
-                  ))}
+                  {getFilteredTeachers().map((teacher) => {
+                    if (!teacher || !teacher.user_id) return null;
+                    
+                    return (
+                      <option key={teacher.user_id} value={teacher.user_id}>
+                        {teacher.username || 'N/A'} ({teacher.email || 'N/A'})
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
