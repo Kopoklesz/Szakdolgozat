@@ -81,7 +81,12 @@ const resources = {
       "role_student": "Student",
       "role_teacher": "Teacher",
       "role_admin": "Admin",
-      "Kérjük, jelentkezz be a webshop megtekintéséhez!": "Please log in to view the webshop!"
+      "Kérjük, jelentkezz be a webshop megtekintéséhez!": "Please log in to view the webshop!",
+      "Egyenleged": "Your Balance",
+      "Keresés a termékek között...": "Search among products...",
+      "Keresés webshop neve szerint...": "Search by webshop name...",
+      "találat": "results",
+      "keresésre": "for search"
     }
   },
   hu: {
@@ -163,7 +168,12 @@ const resources = {
       "role_student": "Hallgató",
       "role_teacher": "Tanár",
       "role_admin": "Admin",
-      "Kérjük, jelentkezz be a webshop megtekintéséhez!": "Kérjük, jelentkezz be a webshop megtekintéséhez!"
+      "Kérjük, jelentkezz be a webshop megtekintéséhez!": "Kérjük, jelentkezz be a webshop megtekintéséhez!",
+      "Egyenleged": "Egyenleged",
+      "Keresés a termékek között...": "Keresés a termékek között...",
+      "Keresés webshop neve szerint...": "Keresés webshop neve szerint...",
+      "találat": "találat",
+      "keresésre": "keresésre"
     }
   }
 };

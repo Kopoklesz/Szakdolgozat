@@ -20,6 +20,7 @@ const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [balance, setBalance] = useState(0);
 
   useEffect(() => {
     fetchWebshopData();
@@ -32,6 +33,18 @@ const Shop = () => {
 
       const productsResponse = await axios.get(`${API_URL}/product/webshop/${webshopId}`);
       setProducts(productsResponse.data);
+      
+      if (isAuthenticated && user) {
+        try {
+          const balanceResponse = await axios.get(`${API_URL}/user/${user.user_id}/balances`);
+          const balances = balanceResponse.data;
+          const currentBalance = balances.find(b => b.webshop.webshop_id === parseInt(webshopId));
+          setBalance(currentBalance?.amount || 0);
+        } catch (balanceError) {
+          console.error('Error fetching balance:', balanceError);
+          setBalance(0);
+        }
+      }
       
       setLoading(false);
     } catch (err) {
@@ -80,7 +93,6 @@ const Shop = () => {
     document.body.style.overflow = 'unset';
   };
 
-  // Dinamikus színek generálása
   const getDarkerShade = (color, amount = 20) => {
     const hex = color.replace('#', '');
     let r = parseInt(hex.substr(0, 2), 16);
@@ -138,7 +150,6 @@ const Shop = () => {
 
   return (
     <div className="shop-container">
-      {/* Menő Header gradienssel */}
       <header 
         className="shop-header"
         style={{ 
@@ -155,11 +166,19 @@ const Shop = () => {
             </p>
           </div>
           {webshop.paying_instrument_icon && (
-            <div className="header-icon">
-              <img 
-                src={webshop.paying_instrument_icon} 
-                alt={webshop.paying_instrument}
-              />
+            <div className="header-icon-balance">
+              <div className="header-icon">
+                <img 
+                  src={webshop.paying_instrument_icon} 
+                  alt={webshop.paying_instrument}
+                />
+              </div>
+              {isAuthenticated && (
+                <div className="header-balance" style={{ color: textColor }}>
+                  <span className="balance-amount">{balance}</span>
+                  <span className="balance-currency">{webshop.paying_instrument}</span>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -171,7 +190,6 @@ const Shop = () => {
       </header>
 
       <div className="shop-content">
-        {/* Modern keresés és szűrés */}
         <div className="search-filter-section">
           <div className="search-box" style={{ borderColor: lightAccent }}>
             <svg className="search-icon" style={{ fill: accentColor }} viewBox="0 0 24 24" width="20" height="20">
