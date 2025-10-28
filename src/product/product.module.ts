@@ -7,9 +7,15 @@ import { Webshop } from '../entity/webshop.entity';
 import { WebshopPartner } from '../entity/webshop-partner.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, Webshop, WebshopPartner])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Product,
+      Webshop,
+      WebshopPartner
+    ])
+  ],
   controllers: [ProductController],
   providers: [ProductService],
   exports: [ProductService],
 })
-export class ProductModule {}
+export class ProductModule { }
