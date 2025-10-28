@@ -28,9 +28,10 @@ const ManagePartners = () => {
   const fetchWebshopData = async () => {
     try {
       const response = await apiClient.get(`${API_URL}/webshop/${webshopId}`);
-      setWebshop(response.data);
+      console.log('📦 Webshop data:', response.data);
+      setWebshop(response.data || null);
     } catch (error) {
-      console.error('Error fetching webshop:', error);
+      console.error('❌ Error fetching webshop:', error);
       setError(t('Hiba történt a webshop betöltése közben.'));
     }
   };
@@ -39,17 +40,32 @@ const ManagePartners = () => {
     try {
       setLoading(true);
       const response = await apiClient.get(`${API_URL}/webshop/${webshopId}/partners`);
-      // Biztonsági ellenőrzés
-      const partnersData = Array.isArray(response.data) ? response.data : [];
-      setPartners(partnersData);
+      
+      console.log('👥 Partners response:', response);
+      console.log('👥 Partners data:', response.data);
+      console.log('👥 Partners type:', typeof response.data);
+      console.log('👥 Is array?', Array.isArray(response.data));
+      
+      // Alapértelmezett üres tömb ha nincs adat
+      const partnersData = response.data || [];
+      
+      // Ha nem tömb, próbáljuk tömbbé alakítani
+      const partnersArray = Array.isArray(partnersData) ? partnersData : [];
+      
+      console.log('👥 Final partners array:', partnersArray);
+      
+      setPartners(partnersArray);
     } catch (error) {
-      console.error('Error fetching partners:', error);
+      console.error('❌ Error fetching partners:', error);
+      console.error('❌ Error response:', error.response);
+      console.error('❌ Error data:', error.response?.data);
+      
       if (error.response?.status === 403) {
         setError(t('Nincs jogosultságod a partnerek megtekintéséhez.'));
       } else {
         setError(t('Hiba történt a partnerek betöltése közben.'));
       }
-      setPartners([]); // Üres tömb hiba esetén
+      setPartners([]);
     } finally {
       setLoading(false);
     }
@@ -58,17 +74,20 @@ const ManagePartners = () => {
   const fetchAvailableTeachers = async () => {
     try {
       const response = await apiClient.get(`${API_URL}/auth/users`);
-      const allUsers = Array.isArray(response.data) ? response.data : [];
+      console.log('👨‍🏫 Teachers response:', response.data);
       
-      // Szűrjük ki a tanárokat és adminokat, biztonságos módon
+      const allUsers = Array.isArray(response.data) ? response.data : [];
       const teachers = allUsers.filter(user => 
-        user && (user.role === 'teacher' || user.role === 'admin')
+        user && 
+        user.user_id && 
+        (user.role === 'teacher' || user.role === 'admin')
       );
       
+      console.log('👨‍🏫 Filtered teachers:', teachers);
       setAvailableTeachers(teachers);
     } catch (error) {
-      console.error('Error fetching teachers:', error);
-      setAvailableTeachers([]); // Üres tömb hiba esetén
+      console.error('❌ Error fetching teachers:', error);
+      setAvailableTeachers([]);
     }
   };
 
@@ -83,9 +102,12 @@ const ManagePartners = () => {
     }
 
     try {
-      await apiClient.post(`${API_URL}/webshop/${webshopId}/partners`, {
+      console.log('➕ Adding partner:', selectedTeacherId);
+      const response = await apiClient.post(`${API_URL}/webshop/${webshopId}/partners`, {
         partner_teacher_id: parseInt(selectedTeacherId)
       });
+      
+      console.log('✅ Partner added:', response.data);
       
       setSuccess(t('Partner sikeresen hozzáadva!'));
       setIsAddModalOpen(false);
@@ -94,7 +116,8 @@ const ManagePartners = () => {
       
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
-      console.error('Error adding partner:', error);
+      console.error('❌ Error adding partner:', error);
+      console.error('❌ Error response:', error.response?.data);
       setError(error.response?.data?.message || t('Hiba történt a partner hozzáadása közben.'));
     }
   };
@@ -108,13 +131,15 @@ const ManagePartners = () => {
     setSuccess('');
 
     try {
+      console.log('➖ Removing partner:', partnerId);
       await apiClient.delete(`${API_URL}/webshop/${webshopId}/partners/${partnerId}`);
+      
       setSuccess(t('Partner sikeresen eltávolítva!'));
       fetchPartners();
       
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
-      console.error('Error removing partner:', error);
+      console.error('❌ Error removing partner:', error);
       setError(error.response?.data?.message || t('Hiba történt a partner eltávolítása közben.'));
     }
   };
@@ -130,21 +155,41 @@ const ManagePartners = () => {
     document.body.style.overflow = 'unset';
   };
 
-  // Szűrjük ki azokat a tanárokat, akik már partnerek vagy az owner
   const getFilteredTeachers = () => {
     if (!webshop || !Array.isArray(availableTeachers) || !Array.isArray(partners)) {
+      console.log('⚠️ Cannot filter teachers - missing data');
       return [];
     }
     
-    const partnerIds = partners.map(p => p?.user_id).filter(id => id !== undefined);
+    const partnerIds = partners
+      .filter(p => p && p.user_id)
+      .map(p => p.user_id);
+    
     const ownerId = webshop.teacher_id;
     
-    return availableTeachers.filter(teacher => 
+    console.log('🔍 Filtering teachers. Owner:', ownerId, 'Partners:', partnerIds);
+    
+    const filtered = availableTeachers.filter(teacher => 
       teacher && 
       teacher.user_id && 
       teacher.user_id !== ownerId && 
       !partnerIds.includes(teacher.user_id)
     );
+    
+    console.log('🔍 Filtered teachers:', filtered);
+    return filtered;
+  };
+
+  // SAFE helper funkció username lekéréshez
+  const getUsername = (user) => {
+    if (!user) return '?';
+    return user.username || user.email || 'Névtelen';
+  };
+
+  // SAFE helper funkció email lekéréshez
+  const getEmail = (user) => {
+    if (!user) return 'N/A';
+    return user.email || 'Nincs email';
   };
 
   if (loading && !webshop) {
@@ -162,9 +207,9 @@ const ManagePartners = () => {
           ← {t('Vissza')}
         </button>
         <h1>{t('Partner Kezelés')}</h1>
-        {webshop && webshop.subject_name && (
+        {webshop && (
           <p className="webshop-name">
-            {webshop.subject_name}
+            {webshop.subject_name || 'Webshop'}
           </p>
         )}
       </div>
@@ -182,7 +227,7 @@ const ManagePartners = () => {
 
         {loading ? (
           <div className="loading">{t('Betöltés...')}</div>
-        ) : partners.length === 0 ? (
+        ) : !Array.isArray(partners) || partners.length === 0 ? (
           <div className="no-partners">
             <p>{t('Még nincsenek partnerek ehhez a webshophoz.')}</p>
             <button className="add-first-partner-btn" onClick={openAddModal}>
@@ -191,21 +236,25 @@ const ManagePartners = () => {
           </div>
         ) : (
           <div className="partners-grid">
-            {partners.map((partner) => {
-              // Biztonsági ellenőrzés minden partner objektumra
+            {partners.map((partner, index) => {
+              // Extra védelem minden partner elemre
               if (!partner || !partner.user_id) {
+                console.warn('⚠️ Invalid partner at index', index, partner);
                 return null;
               }
+              
+              const username = getUsername(partner);
+              const email = getEmail(partner);
               
               return (
                 <div key={partner.user_id} className="partner-card">
                   <div className="partner-info">
                     <div className="partner-avatar">
-                      {partner.username ? partner.username.charAt(0).toUpperCase() : '?'}
+                      {username.charAt(0).toUpperCase()}
                     </div>
                     <div className="partner-details">
-                      <h3>{partner.username || 'N/A'}</h3>
-                      <p className="partner-email">{partner.email || 'N/A'}</p>
+                      <h3>{username}</h3>
+                      <p className="partner-email">{email}</p>
                       <span className="partner-role">
                         {partner.role === 'admin' ? t('Admin') : t('Tanár')}
                       </span>
@@ -233,11 +282,11 @@ const ManagePartners = () => {
           <div className="owner-card">
             <div className="owner-info">
               <div className="owner-avatar">
-                {webshop.teacher.username ? webshop.teacher.username.charAt(0).toUpperCase() : '?'}
+                {getUsername(webshop.teacher).charAt(0).toUpperCase()}
               </div>
               <div className="owner-details">
-                <h3>{webshop.teacher.username || 'N/A'}</h3>
-                <p className="owner-email">{webshop.teacher.email || 'N/A'}</p>
+                <h3>{getUsername(webshop.teacher)}</h3>
+                <p className="owner-email">{getEmail(webshop.teacher)}</p>
                 <span className="owner-badge">{t('Tulajdonos')}</span>
               </div>
             </div>
@@ -262,15 +311,11 @@ const ManagePartners = () => {
                   required
                 >
                   <option value="">{t('-- Válassz --')}</option>
-                  {getFilteredTeachers().map((teacher) => {
-                    if (!teacher || !teacher.user_id) return null;
-                    
-                    return (
-                      <option key={teacher.user_id} value={teacher.user_id}>
-                        {teacher.username || 'N/A'} ({teacher.email || 'N/A'})
-                      </option>
-                    );
-                  })}
+                  {getFilteredTeachers().map((teacher) => (
+                    <option key={teacher.user_id} value={teacher.user_id}>
+                      {getUsername(teacher)} ({getEmail(teacher)})
+                    </option>
+                  ))}
                 </select>
               </div>
 
