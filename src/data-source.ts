@@ -4,6 +4,7 @@ import { config } from 'dotenv';
 
 import { User } from './entity/user.entity';
 import { Webshop } from './entity/webshop.entity';
+import { WebshopPartner } from './entity/webshop-partner.entity';
 import { Product } from './entity/product.entity';
 import { UserBalance } from './entity/user-balance.entity';
 import { Cart } from './entity/cart.entity';
@@ -21,7 +22,7 @@ export default new DataSource({
   username: configService.get('DB_USERNAME'),
   password: configService.get('DB_PASSWORD'),
   database: configService.get('DB_NAME'),
-  entities: [User, Webshop, Product, UserBalance, Cart, CartItem, Purchase],
+  entities: [User, Webshop, WebshopPartner, Product, UserBalance, Cart, CartItem, Purchase],
   migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
   synchronize: false,
 });

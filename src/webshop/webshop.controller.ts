@@ -17,6 +17,7 @@ import { WebshopService } from './webshop.service';
 import { HttpExceptionFilter } from '../filters/http-exception.filter';
 import { CreateWebshopDto } from '../dto/create-webshop.dto';
 import { UpdateWebshopDto } from '../dto/update-webshop.dto';
+import { AddPartnerDto } from '../dto/manage-webshop-partner.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -125,7 +126,7 @@ export class WebshopController {
   }
 
   /**
-   * Webshop módosítása (csak TEACHER [saját] és ADMIN)
+   * Webshop módosítása (csak TEACHER [owner] és ADMIN)
    * PUT /webshop/:id
    */
   @Put(':id')
@@ -149,7 +150,7 @@ export class WebshopController {
   }
 
   /**
-   * Webshop törlése (csak TEACHER [saját] és ADMIN)
+   * Webshop törlése (csak TEACHER [owner] és ADMIN)
    * DELETE /webshop/:id
    */
   @Delete(':id')
@@ -168,6 +169,89 @@ export class WebshopController {
         throw new HttpException(error.message, HttpStatus.FORBIDDEN);
       }
       throw new HttpException('Failed to delete webshop', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /**
+   * Partner hozzáadása webshophoz (csak TEACHER [owner] és ADMIN)
+   * POST /webshop/:id/partners
+   */
+  @Post(':id/partners')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.TEACHER, UserRole.ADMIN)
+  async addPartner(
+    @Request() req,
+    @Param('id', ParseIntPipe) webshopId: number,
+    @Body() addPartnerDto: AddPartnerDto
+  ) {
+    try {
+      const userId = req.user.sub;
+      const userRole = req.user.role;
+      return await this.webshopService.addPartnerToWebshop(
+        webshopId,
+        addPartnerDto.partner_teacher_id,
+        userId,
+        userRole
+      );
+    } catch (error) {
+      if (error.status === HttpStatus.BAD_REQUEST || 
+          error.status === HttpStatus.FORBIDDEN || 
+          error.status === HttpStatus.NOT_FOUND) {
+        throw new HttpException(error.message, error.status);
+      }
+      throw new HttpException('Failed to add partner', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /**
+   * Partner eltávolítása webshopból (csak TEACHER [owner] és ADMIN)
+   * DELETE /webshop/:id/partners/:partnerId
+   */
+  @Delete(':id/partners/:partnerId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.TEACHER, UserRole.ADMIN)
+  async removePartner(
+    @Request() req,
+    @Param('id', ParseIntPipe) webshopId: number,
+    @Param('partnerId', ParseIntPipe) partnerId: number
+  ) {
+    try {
+      const userId = req.user.sub;
+      const userRole = req.user.role;
+      return await this.webshopService.removePartnerFromWebshop(
+        webshopId,
+        partnerId,
+        userId,
+        userRole
+      );
+    } catch (error) {
+      if (error.status === HttpStatus.FORBIDDEN || error.status === HttpStatus.NOT_FOUND) {
+        throw new HttpException(error.message, error.status);
+      }
+      throw new HttpException('Failed to remove partner', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /**
+   * Webshop partnereinek lekérése (csak TEACHER [owner/partner] és ADMIN)
+   * GET /webshop/:id/partners
+   */
+  @Get(':id/partners')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.TEACHER, UserRole.ADMIN)
+  async getPartners(
+    @Request() req,
+    @Param('id', ParseIntPipe) webshopId: number
+  ) {
+    try {
+      const userId = req.user.sub;
+      const userRole = req.user.role;
+      return await this.webshopService.getWebshopPartners(webshopId, userId, userRole);
+    } catch (error) {
+      if (error.status === HttpStatus.FORBIDDEN) {
+        throw new HttpException(error.message, HttpStatus.FORBIDDEN);
+      }
+      throw new HttpException('Failed to fetch partners', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

@@ -60,7 +60,7 @@ const TeacherDashboard = () => {
   };
 
   const handleInputChange = (e, formType) => {
-    const { name, value } = e.target;
+    const {name, value } = e.target;
     if (formType === 'new') {
       setNewWebshop(prev => ({ ...prev, [name]: value }));
     } else if (formType === 'edit') {
@@ -176,7 +176,7 @@ const TeacherDashboard = () => {
     <div className="teacher-dashboard">
       <div className="dashboard-header">
         <h1>{t('Előadói Irányítópult')}</h1>
-        <p className="dashboard-subtitle">Kezeld webshopjaidat és termékeidet</p>
+        <p className="dashboard-subtitle">{t('Kezeld webshopjaidat és termékeidet')}</p>
       </div>
       
       <div className="create-webshop-section">
@@ -196,7 +196,7 @@ const TeacherDashboard = () => {
                 name="subject_name"
                 value={newWebshop.subject_name}
                 onChange={(e) => handleInputChange(e, 'new')}
-                placeholder="pl. Matematika"
+                placeholder={t('pl. Matematika')}
                 required
               />
             </div>
@@ -208,7 +208,7 @@ const TeacherDashboard = () => {
                 name="paying_instrument"
                 value={newWebshop.paying_instrument}
                 onChange={(e) => handleInputChange(e, 'new')}
-                placeholder="pl. PG, Ft"
+                placeholder={t('pl. PG, Ft')}
                 required
               />
             </div>
@@ -272,7 +272,7 @@ const TeacherDashboard = () => {
           </div>
 
           <button type="submit" className="submit-btn">
-            {t('Létrehozás')}
+            {t('Webshop Létrehozása')}
           </button>
         </form>
       </div>
@@ -281,45 +281,45 @@ const TeacherDashboard = () => {
         <div className="section-header">
           <h2>{t('Webshopjaim')}</h2>
         </div>
-        
+
         {webshops.length === 0 ? (
           <div className="no-webshops">
             <div className="no-webshops-icon">🏪</div>
-            <p>{t('Még nincs létrehozott webshopod.')}</p>
+            <p>{t('Még nem hoztál létre webshopot.')}</p>
           </div>
         ) : (
           <div className="webshop-grid">
-            {webshops.map((webshop) => (
-              <div key={webshop.webshop_id} className="webshop-card">
-                <div 
-                  className="webshop-card-header"
-                  style={{ backgroundColor: webshop.header_color_code }}
-                >
-                  <h3>{webshop.subject_name}</h3>
+            {webshops.map((shop) => (
+              <div key={shop.webshop_id} className="webshop-card">
+                <div className="webshop-card-header" style={{ backgroundColor: shop.header_color_code }}>
+                  <h3>{shop.subject_name}</h3>
                 </div>
                 <div className="webshop-card-body">
                   <div className="webshop-info">
                     <span className="info-label">{t('Pénznem')}:</span>
-                    <span className="info-value">{webshop.paying_instrument}</span>
+                    <span className="info-value">{shop.paying_instrument}</span>
                   </div>
                   <div className="webshop-info">
                     <span className="info-label">{t('Státusz')}:</span>
-                    <span className={`status-badge ${webshop.status}`}>
-                      {webshop.status === 'active' ? t('Aktív') : t('Inaktív')}
+                    <span className={`status-badge ${shop.status}`}>
+                      {shop.status === 'active' ? t('Aktív') : t('Inaktív')}
                     </span>
                   </div>
                   <div className="webshop-actions">
-                    <button 
-                      className="action-btn edit-btn" 
-                      onClick={() => handleEdit(webshop)}
-                    >
-                      ✏️ {t('Szerkesztés')}
+                    <button className="edit-btn" onClick={() => handleEdit(shop)}>
+                      {t('Szerkesztés')}
                     </button>
                     <Link 
-                      to={`/manage-products/${webshop.webshop_id}`} 
-                      className="action-btn manage-btn"
+                      to={`/teacher/manage-products/${shop.webshop_id}`} 
+                      className="manage-btn"
                     >
-                      📦 {t('Termékek kezelése')}
+                      {t('Termékek')}
+                    </Link>
+                    <Link 
+                      to={`/teacher/manage-partners/${shop.webshop_id}`} 
+                      className="manage-btn partners-btn"
+                    >
+                      {t('Partnerek')}
                     </Link>
                   </div>
                 </div>
@@ -329,12 +329,12 @@ const TeacherDashboard = () => {
         )}
       </div>
 
+      {/* Szerkesztés Modal */}
       {isEditModalOpen && editingWebshop && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={closeModal}>×</button>
-            
-            <h2 className="modal-title">{t('Webshop szerkesztése')}</h2>
+            <h2 className="modal-title">{t('Webshop Szerkesztése')}</h2>
             
             <form onSubmit={handleUpdate}>
               <div className="form-row">

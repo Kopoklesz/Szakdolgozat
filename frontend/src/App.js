@@ -8,6 +8,7 @@ import './i18n';
 import Shop from './components/Shop';
 import Nav from './components/Nav';
 import TeacherDashboard from './components/TeacherDashboard';
+import ManagePartners from './components/ManagePartners';
 import Cart from './components/Cart';
 import WebshopList from './components/WebshopList';
 import ManageProducts from './components/ManageProducts';
@@ -19,91 +20,75 @@ import ProtectedRoute from './components/ProtectedRoute';
 // 3. Context
 import { AuthProvider } from './context/AuthContext';
 
-// 4. Stílusok
+// 4. CSS
 import './App.css';
 
-const LANGUAGES = { HU: 'hu', EN: 'en' };
-
 function App() {
-  const { i18n } = useTranslation();
-  const [currentLanguage, setCurrentLanguage] = useState(LANGUAGES.HU);
-
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
-    setCurrentLanguage(lng);
-  };
+  const { t } = useTranslation();
+  const [cart, setCart] = useState([]);
 
   return (
     <AuthProvider>
-      <Suspense fallback="Loading...">
-        <Router>
-          <Nav currentLanguage={currentLanguage} changeLanguage={changeLanguage} />
-          <Routes>
-            {/* Publikus route-ok */}
-            <Route path="/" element={<Navigate replace to="/webshops" />} />
-            <Route path="/webshops" element={<WebshopList />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+      <Router>
+        <div className="App">
+          <Suspense fallback={<div>Loading...</div>}>
+            <Nav cart={cart} />
+            <Routes>
+              {/* Publikus útvonalak */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/webshops" element={<WebshopList />} />
+              <Route path="/shop/:id" element={<Shop cart={cart} setCart={setCart} />} />
 
-            {/* Védett route-ok */}
-            {/* Shop route - bejelentkezés szükséges */}
-            <Route 
-              path="/shop/:webshopId" 
-              element={
-                <ProtectedRoute>
-                  <Shop />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/teacher-dashboard" 
-              element={
-                <ProtectedRoute allowedRoles={['teacher', 'admin']}>
-                  <TeacherDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/cart/:webshopId" 
-              element={
-                <ProtectedRoute>
-                  <Cart />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/manage-products/:webshopId" 
-              element={
-                <ProtectedRoute allowedRoles={['teacher', 'admin']}>
-                  <ManageProducts />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Aláírás generálás - CSAK tanárok és adminok */}
-            <Route 
-              path="/signature-generator" 
-              element={
-                <ProtectedRoute allowedRoles={['teacher', 'admin']}>
-                  <SignatureGenerated />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <div>Profil oldal (hamarosan)</div>
-                </ProtectedRoute>
-              } 
-            />
-          </Routes>
-        </Router>
-      </Suspense>
+              {/* Védett útvonalak */}
+              <Route
+                path="/teacher"
+                element={
+                  <ProtectedRoute allowedRoles={['teacher', 'admin']}>
+                    <TeacherDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/teacher/manage-products/:webshopId"
+                element={
+                  <ProtectedRoute allowedRoles={['teacher', 'admin']}>
+                    <ManageProducts />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/teacher/manage-partners/:webshopId"
+                element={
+                  <ProtectedRoute allowedRoles={['teacher', 'admin']}>
+                    <ManagePartners />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/cart"
+                element={
+                  <ProtectedRoute allowedRoles={['student', 'teacher', 'admin']}>
+                    <Cart cart={cart} setCart={setCart} />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/signature-generated"
+                element={
+                  <ProtectedRoute allowedRoles={['student', 'teacher', 'admin']}>
+                    <SignatureGenerated />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Átirányítások */}
+              <Route path="/" element={<Navigate to="/webshops" replace />} />
+              <Route path="*" element={<Navigate to="/webshops" replace />} />
+            </Routes>
+          </Suspense>
+        </div>
+      </Router>
     </AuthProvider>
   );
 }
