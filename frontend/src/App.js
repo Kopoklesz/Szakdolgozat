@@ -24,15 +24,25 @@ import { AuthProvider } from './context/AuthContext';
 import './App.css';
 
 function App() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [cart, setCart] = useState([]);
+  const [currentLanguage, setCurrentLanguage] = useState(i18n.language || 'hu');
+
+  const changeLanguage = (lang) => {
+    i18n.changeLanguage(lang);
+    setCurrentLanguage(lang);
+  };
 
   return (
     <AuthProvider>
       <Router>
         <div className="App">
           <Suspense fallback={<div>Loading...</div>}>
-            <Nav cart={cart} />
+            <Nav 
+              cart={cart} 
+              currentLanguage={currentLanguage}
+              changeLanguage={changeLanguage}
+            />
             <Routes>
               {/* Publikus útvonalak */}
               <Route path="/login" element={<Login />} />
@@ -43,6 +53,14 @@ function App() {
               {/* Védett útvonalak */}
               <Route
                 path="/teacher"
+                element={
+                  <ProtectedRoute allowedRoles={['teacher', 'admin']}>
+                    <TeacherDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/teacher-dashboard"
                 element={
                   <ProtectedRoute allowedRoles={['teacher', 'admin']}>
                     <TeacherDashboard />
@@ -77,6 +95,14 @@ function App() {
                 path="/signature-generated"
                 element={
                   <ProtectedRoute allowedRoles={['student', 'teacher', 'admin']}>
+                    <SignatureGenerated />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/signature-generator"
+                element={
+                  <ProtectedRoute allowedRoles={['teacher', 'admin']}>
                     <SignatureGenerated />
                   </ProtectedRoute>
                 }
