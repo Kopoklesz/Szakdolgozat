@@ -110,8 +110,7 @@ const ManagePartners = () => {
       console.log('✅ Partner added:', response.data);
       
       setSuccess(t('Partner sikeresen hozzáadva!'));
-      setIsAddModalOpen(false);
-      setSelectedTeacherId('');
+      closeAddModal(); // JAVÍTÁS: Modal bezárása és scroll visszaállítása
       fetchPartners();
       
       setTimeout(() => setSuccess(''), 3000);
@@ -152,31 +151,47 @@ const ManagePartners = () => {
   const closeAddModal = () => {
     setIsAddModalOpen(false);
     setSelectedTeacherId('');
-    document.body.style.overflow = 'unset';
+    document.body.style.overflow = 'unset'; // JAVÍTÁS: Biztosan visszaállítjuk a scroll-t
   };
 
+  // JAVÍTOTT getFilteredTeachers funkció
   const getFilteredTeachers = () => {
     if (!webshop || !Array.isArray(availableTeachers) || !Array.isArray(partners)) {
       console.log('⚠️ Cannot filter teachers - missing data');
+      console.log('⚠️ Webshop:', webshop);
+      console.log('⚠️ AvailableTeachers:', availableTeachers);
+      console.log('⚠️ Partners:', partners);
       return [];
     }
     
     const partnerIds = partners
       .filter(p => p && p.user_id)
-      .map(p => p.user_id);
+      .map(p => Number(p.user_id)); // Ensure numbers
     
-    const ownerId = webshop.teacher_id;
+    // Ensure ownerId is a number
+    const ownerId = Number(webshop.teacher_id);
     
-    console.log('🔍 Filtering teachers. Owner:', ownerId, 'Partners:', partnerIds);
+    console.log('🔍 Filtering teachers:');
+    console.log('🔍 Owner ID (number):', ownerId, typeof ownerId);
+    console.log('🔍 Partner IDs (numbers):', partnerIds);
+    console.log('🔍 Available teachers:', availableTeachers.map(t => ({ id: t.user_id, type: typeof t.user_id, name: t.username || t.email })));
     
-    const filtered = availableTeachers.filter(teacher => 
-      teacher && 
-      teacher.user_id && 
-      teacher.user_id !== ownerId && 
-      !partnerIds.includes(teacher.user_id)
-    );
+    const filtered = availableTeachers.filter(teacher => {
+      if (!teacher || !teacher.user_id) {
+        console.log('❌ Skipping invalid teacher:', teacher);
+        return false;
+      }
+      
+      const teacherId = Number(teacher.user_id);
+      const isOwner = teacherId === ownerId;
+      const isPartner = partnerIds.includes(teacherId);
+      
+      console.log(`🔍 Teacher ${teacher.username || teacher.email} (ID: ${teacherId}): owner=${isOwner}, partner=${isPartner}`);
+      
+      return !isOwner && !isPartner;
+    });
     
-    console.log('🔍 Filtered teachers:', filtered);
+    console.log('🔍 Final filtered teachers:', filtered.map(t => ({ id: t.user_id, name: t.username || t.email })));
     return filtered;
   };
 
@@ -203,7 +218,7 @@ const ManagePartners = () => {
   return (
     <div className="manage-partners">
       <div className="partners-header">
-        <button className="back-btn" onClick={() => navigate('/teacher')}>
+        <button className="back-btn" onClick={() => navigate('/teacher-dashboard')}>
           ← {t('Vissza')}
         </button>
         <h1>{t('Partner Kezelés')}</h1>
@@ -329,7 +344,7 @@ const ManagePartners = () => {
                 <button 
                   type="submit" 
                   className="submit-btn"
-                  disabled={getFilteredTeachers().length === 0}
+                  disabled={!selectedTeacherId || getFilteredTeachers().length === 0}
                 >
                   {t('Hozzáadás')}
                 </button>

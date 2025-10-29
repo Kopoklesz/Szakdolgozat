@@ -19,10 +19,51 @@ export class WebshopService {
   ) { }
 
   /**
-   * Összes webshop lekérése
+   * Összes webshop lekérése (publikus használatra)
    */
   async getAllWebshops(): Promise<Webshop[]> {
     return await this.webshopRepository.find();
+  }
+
+  /**
+   * Tanár által elérhető webshopok lekérése (saját + partner)
+   */
+  async getWebshopsForTeacher(teacherId: number): Promise<Webshop[]> {
+    console.log('🔍 Getting webshops for teacher:', teacherId);
+
+    // 1. Saját webshopok (owner)
+    const ownedWebshops = await this.webshopRepository.find({
+      where: { teacher_id: teacherId },
+      relations: ['teacher', 'partners', 'partners.partner']
+    });
+
+    console.log('📋 Owned webshops:', ownedWebshops.length);
+
+    // 2. Partner webshopok
+    const partnerWebshops = await this.webshopRepository
+      .createQueryBuilder('webshop')
+      .innerJoin('webshop.partners', 'partner')
+      .where('partner.partner_teacher_id = :teacherId', { teacherId })
+      .leftJoinAndSelect('webshop.teacher', 'teacher')
+      .leftJoinAndSelect('webshop.partners', 'partners')
+      .leftJoinAndSelect('partners.partner', 'partnerUser')
+      .getMany();
+
+    console.log('🤝 Partner webshops:', partnerWebshops.length);
+
+    // 3. Kombinálás és duplikátumok eltávolítása
+    const allWebshops = [...ownedWebshops];
+
+    partnerWebshops.forEach(partnerWebshop => {
+      const alreadyExists = allWebshops.some(ws => ws.webshop_id === partnerWebshop.webshop_id);
+      if (!alreadyExists) {
+        allWebshops.push(partnerWebshop);
+      }
+    });
+
+    console.log('📚 Total accessible webshops:', allWebshops.length);
+
+    return allWebshops;
   }
 
   /**

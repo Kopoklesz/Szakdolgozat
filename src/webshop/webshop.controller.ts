@@ -42,6 +42,37 @@ export class WebshopController {
   }
 
   /**
+   * Tanár saját webshopjainak lekérése (tulajdonos + partner)
+   * GET /webshop/my-webshops
+   */
+  @Get('my-webshops')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.TEACHER, UserRole.ADMIN)
+  async getMyWebshops(@Request() req) {
+    try {
+      const teacherId = req.user?.sub || req.user?.userId || req.user?.user_id || req.user?.id;
+      const userRole = req.user?.role;
+
+      console.log('🔍 Getting my webshops for teacher:', teacherId, 'role:', userRole);
+
+      if (!teacherId) {
+        throw new HttpException('Teacher ID not found in JWT token', HttpStatus.BAD_REQUEST);
+      }
+
+      // Admin esetén az összes webshopot visszaadjuk
+      if (userRole === UserRole.ADMIN) {
+        return await this.webshopService.getAllWebshops();
+      }
+
+      // Tanár esetén a saját + partner webshopokat
+      return await this.webshopService.getWebshopsForTeacher(teacherId);
+    } catch (error) {
+      console.error('❌ Error fetching my webshops:', error);
+      throw new HttpException('Failed to fetch teacher webshops', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /**
    * Új webshop létrehozása (csak TEACHER és ADMIN)
    * POST /webshop
    */
@@ -72,57 +103,47 @@ export class WebshopController {
 
       if (!teacherId) {
         throw new HttpException(
-          'Teacher ID nem található a JWT token-ben! req.user: ' + JSON.stringify(req.user),
-          HttpStatus.UNAUTHORIZED
+          'Teacher ID nem található a JWT token-ben!',
+          HttpStatus.BAD_REQUEST
         );
       }
 
-      const result = await this.webshopService.createWebshop(teacherId, createWebshopDto);
-
-      console.log('Webshop created successfully:', result.webshop_id);
-
-      return result;
+      return await this.webshopService.createWebshop(teacherId, createWebshopDto);
     } catch (error) {
-      console.error('=== CREATE WEBSHOP ERROR ===');
-      console.error('Error type:', error.constructor.name);
-      console.error('Error status:', error.status);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      console.error('===========================');
-
-      if (error.status === HttpStatus.BAD_REQUEST) {
-        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      if (error.status === HttpStatus.BAD_REQUEST || error.status === HttpStatus.FORBIDDEN) {
+        throw new HttpException(error.message, error.status);
       }
-      if (error.status === HttpStatus.NOT_FOUND) {
-        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
-      }
-      if (error.status === HttpStatus.FORBIDDEN) {
-        throw new HttpException(error.message, HttpStatus.FORBIDDEN);
-      }
-
-      throw new HttpException(
-        error.message || 'Failed to create webshop',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new HttpException('Failed to create webshop', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   /**
-   * Egy webshop lekérése (publikus)
+   * Egy webshop lekérése ID alapján
    * GET /webshop/:id
    */
   @Get(':id')
-  getWebshop(@Param('id', ParseIntPipe) id: number) {
-    return this.webshopService.getWebshop(id);
+  async getWebshop(@Param('id', ParseIntPipe) id: number) {
+    try {
+      return await this.webshopService.getWebshop(id);
+    } catch (error) {
+      if (error.status === HttpStatus.NOT_FOUND) {
+        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+      }
+      throw new HttpException('Failed to fetch webshop', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   /**
-   * Webshop kategóriák lekérése (publikus)
+   * Webshop kategóriáinak lekérése
    * GET /webshop/:id/categories
    */
   @Get(':id/categories')
-  getCategories(@Param('id', ParseIntPipe) id: number) {
-    return this.webshopService.getCategories(id);
+  async getCategories(@Param('id', ParseIntPipe) webshopId: number) {
+    try {
+      return await this.webshopService.getCategories(webshopId);
+    } catch (error) {
+      throw new HttpException('Failed to fetch categories', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   /**
@@ -194,9 +215,9 @@ export class WebshopController {
         userRole
       );
     } catch (error) {
-      if (error.status === HttpStatus.BAD_REQUEST || 
-          error.status === HttpStatus.FORBIDDEN || 
-          error.status === HttpStatus.NOT_FOUND) {
+      if (error.status === HttpStatus.BAD_REQUEST ||
+        error.status === HttpStatus.FORBIDDEN ||
+        error.status === HttpStatus.NOT_FOUND) {
         throw new HttpException(error.message, error.status);
       }
       throw new HttpException('Failed to add partner', HttpStatus.INTERNAL_SERVER_ERROR);

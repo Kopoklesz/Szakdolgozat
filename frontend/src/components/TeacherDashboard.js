@@ -43,20 +43,42 @@ const TeacherDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // JAVÍTOTT webshop lekérés partner támogatással
   const fetchWebshops = async () => {
     try {
-      const response = await apiClient.get(`${API_URL}/webshop`);
-      const allWebshops = Array.isArray(response.data) ? response.data : [];
+      // JAVÍTÁS: Új endpoint használata ami tartalmazza a partner webshopokat is
+      const response = await apiClient.get(`${API_URL}/webshop/my-webshops`);
+      const userWebshops = Array.isArray(response.data) ? response.data : [];
       
-      if (user?.role === 'admin') {
-        setWebshops(allWebshops);
-      } else {
-        const myWebshops = allWebshops.filter(shop => shop.teacher_id === user?.user_id);
-        setWebshops(myWebshops);
-      }
+      console.log('📚 Fetched webshops for user:', userWebshops.length);
+      console.log('📚 User role:', user?.role);
+      console.log('📚 User ID:', user?.user_id);
+      
+      setWebshops(userWebshops);
     } catch (error) {
       console.error('Error fetching webshops:', error);
-      setError(t('Hiba történt a webshopok betöltése közben.'));
+      
+      // Fallback az eredeti endpoint-ra ha az új nem működik
+      if (error.response?.status === 404 || error.response?.status === 405) {
+        console.log('🔄 Falling back to original endpoint...');
+        try {
+          const fallbackResponse = await apiClient.get(`${API_URL}/webshop`);
+          const allWebshops = Array.isArray(fallbackResponse.data) ? fallbackResponse.data : [];
+          
+          if (user?.role === 'admin') {
+            setWebshops(allWebshops);
+          } else {
+            // Csak a saját webshopokat szűrjük (eredeti logic)
+            const myWebshops = allWebshops.filter(shop => shop.teacher_id === user?.user_id);
+            setWebshops(myWebshops);
+          }
+        } catch (fallbackError) {
+          console.error('Fallback also failed:', fallbackError);
+          setError(t('Hiba történt a webshopok betöltése közben.'));
+        }
+      } else {
+        setError(t('Hiba történt a webshopok betöltése közben.'));
+      }
     }
   };
 
@@ -83,6 +105,7 @@ const TeacherDashboard = () => {
         await apiClient.delete(`${API_URL}/webshop/${webshopId}`);
         setSuccess(t('Webshop sikeresen törölve!'));
         setIsEditModalOpen(false);
+        document.body.style.overflow = 'unset';
         fetchWebshops();
       } catch (error) {
         console.error('Error deleting webshop:', error);
@@ -171,6 +194,29 @@ const TeacherDashboard = () => {
   const closeModal = () => {
     setIsEditModalOpen(false);
     document.body.style.overflow = 'unset';
+  };
+
+  // JAVÍTOTT: Ownership ellenőrzés partner támogatással
+  const isWebshopOwner = (webshop) => {
+    return webshop.teacher_id === user?.user_id;
+  };
+
+  const isWebshopPartner = (webshop) => {
+    return webshop.partners && webshop.partners.some(
+      partnership => partnership.partner_teacher_id === user?.user_id || 
+                    (partnership.partner && partnership.partner.user_id === user?.user_id)
+    );
+  };
+
+  const canEditWebshop = (webshop) => {
+    return user?.role === 'admin' || isWebshopOwner(webshop);
+  };
+
+  const getWebshopRole = (webshop) => {
+    if (user?.role === 'admin') return 'Admin';
+    if (isWebshopOwner(webshop)) return t('Tulajdonos');
+    if (isWebshopPartner(webshop)) return t('Partner');
+    return '';
   };
 
   return (
@@ -294,6 +340,10 @@ const TeacherDashboard = () => {
               <div key={shop.webshop_id} className="webshop-card">
                 <div className="webshop-card-header" style={{ backgroundColor: shop.header_color_code }}>
                   <h3>{shop.subject_name}</h3>
+                  {/* JAVÍTÁS: Szerepkör megjelenítése */}
+                  <span className="webshop-role-badge">
+                    {getWebshopRole(shop)}
+                  </span>
                 </div>
                 <div className="webshop-card-body">
                   <div className="webshop-info">
@@ -307,21 +357,25 @@ const TeacherDashboard = () => {
                     </span>
                   </div>
                   <div className="webshop-actions">
-                    <button className="edit-btn" onClick={() => handleEdit(shop)}>
-                      {t('Szerkesztés')}
-                    </button>
+                    {canEditWebshop(shop) && (
+                      <button className="edit-btn" onClick={() => handleEdit(shop)}>
+                        {t('Szerkesztés')}
+                      </button>
+                    )}
                     <Link 
                       to={`/teacher/manage-products/${shop.webshop_id}`} 
                       className="manage-btn"
                     >
                       {t('Termékek')}
                     </Link>
-                    <Link 
-                      to={`/teacher/manage-partners/${shop.webshop_id}`} 
-                      className="manage-btn partners-btn"
-                    >
-                      {t('Partnerek')}
-                    </Link>
+                    {canEditWebshop(shop) && (
+                      <Link 
+                        to={`/teacher/manage-partners/${shop.webshop_id}`} 
+                        className="manage-btn partners-btn"
+                      >
+                        {t('Partnerek')}
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>

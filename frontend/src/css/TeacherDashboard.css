@@ -37,6 +37,7 @@
     transform: translateY(-10px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -155,7 +156,7 @@
   gap: 15px;
 }
 
-.custom-color > label {
+.custom-color>label {
   min-width: 100px;
   font-weight: 600;
 }
@@ -241,6 +242,7 @@
 .webshop-card-header {
   padding: 24px;
   color: white;
+  position: relative;
 }
 
 .webshop-card-header h3 {
@@ -248,6 +250,21 @@
   font-size: 22px;
   font-weight: 700;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* JAVÍTÁS: Szerepkör badge a webshop kártyán */
+.webshop-role-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .webshop-card-body {
@@ -293,19 +310,22 @@
   color: #c62828;
 }
 
+/* JAVÍTOTT webshop-actions CSS */
 .webshop-actions {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 12px;
+  width: 100%;
+  min-height: 44px;
 }
 
 .webshop-actions button,
 .webshop-actions a {
-  padding: 10px 16px;
+  padding: 8px 12px;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
@@ -314,6 +334,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 40px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .edit-btn {
@@ -337,11 +362,11 @@
 }
 
 .partners-btn {
-  background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+  background: linear-gradient(135deg, #9C27B0, #7B1FA2) !important;
 }
 
 .partners-btn:hover {
-  box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4);
+  box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4) !important;
 }
 
 .modal-overlay {
@@ -374,8 +399,13 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
@@ -383,6 +413,7 @@
     transform: translateY(30px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -478,12 +509,14 @@
     align-items: stretch;
   }
 
-  .custom-color > label {
+  .custom-color>label {
     min-width: auto;
   }
 
+  /* Mobile layout: stack buttons vertically */
   .webshop-actions {
     grid-template-columns: 1fr;
+    gap: 8px;
   }
 }
 
@@ -511,5 +544,11 @@
 
   .modal-actions {
     flex-direction: column;
+  }
+
+  .webshop-actions button,
+  .webshop-actions a {
+    font-size: 12px;
+    padding: 10px 8px;
   }
 }
