@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import apiClient from '../config/axios';
 import '../css/WebshopList.css';
 import { API_URL } from '../config/api';
 
@@ -20,13 +20,13 @@ const WebshopList = () => {
   useEffect(() => {
     const fetchWebshops = async () => {
       try {
-        const response = await axios.get(`${API_URL}/webshop`);
+        const response = await apiClient.get(`${API_URL}/webshop`);
         const filteredWebshops = response.data.filter(webshop => webshop.webshop_id !== 0);
         setWebshops(filteredWebshops);
         
         if (isAuthenticated && user) {
           try {
-            const balanceResponse = await axios.get(`${API_URL}/user/${user.user_id}/balances`);
+            const balanceResponse = await apiClient.get(`${API_URL}/user/${user.user_id}/balances`);
             const userBalances = balanceResponse.data;
             
             const balanceMap = {};
