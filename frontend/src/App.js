@@ -48,9 +48,9 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/webshops" element={<WebshopList />} />
-              <Route path="/shop/:id" element={<Shop cart={cart} setCart={setCart} />} />
+              <Route path="/shop/:webshopId" element={<Shop cart={cart} setCart={setCart} />} />
 
-              {/* Védett útvonalak */}
+              {/* Védett útvonalak - Tanár/Admin */}
               <Route
                 path="/teacher"
                 element={
@@ -84,6 +84,24 @@ function App() {
                 }
               />
               <Route
+                path="/signature-generator"
+                element={
+                  <ProtectedRoute allowedRoles={['teacher', 'admin']}>
+                    <SignatureGenerated />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/signature-generated"
+                element={
+                  <ProtectedRoute allowedRoles={['teacher', 'admin']}>
+                    <SignatureGenerated />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Védett útvonalak - Diák/Tanár/Admin */}
+              <Route
                 path="/cart"
                 element={
                   <ProtectedRoute allowedRoles={['student', 'teacher', 'admin']}>
@@ -92,18 +110,10 @@ function App() {
                 }
               />
               <Route
-                path="/signature-generated"
+                path="/cart/:webshopId"
                 element={
                   <ProtectedRoute allowedRoles={['student', 'teacher', 'admin']}>
-                    <SignatureGenerated />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/signature-generator"
-                element={
-                  <ProtectedRoute allowedRoles={['teacher', 'admin']}>
-                    <SignatureGenerated />
+                    <Cart cart={cart} setCart={setCart} />
                   </ProtectedRoute>
                 }
               />
