@@ -116,6 +116,13 @@ export class AuthController {
     return this.authService.getAllUsers();
   }
 
+  @Get('teachers')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.TEACHER, UserRole.ADMIN)
+  async getTeachers(): Promise<UserResponseDto[]> {
+    return this.authService.getTeachers();
+  }
+
   /**
    * Felhasználó törlése (csak admin)
    * DELETE /auth/users/:id

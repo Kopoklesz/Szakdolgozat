@@ -74,22 +74,14 @@ const ManagePartners = () => {
 
   const fetchAvailableTeachers = async () => {
     try {
-      const response = await apiClient.get(`${API_URL}/auth/users`);
+      const response = await apiClient.get(`${API_URL}/auth/teachers`);
       console.log('👨‍🏫 Teachers response:', response.data);
       console.log('👨‍🏫 Response type:', typeof response.data);
       console.log('👨‍🏫 Is array?:', Array.isArray(response.data));
       
-      const allUsers = Array.isArray(response.data) ? response.data : [];
-      console.log('👨‍🏫 All users count:', allUsers.length);
-      
-      const teachers = allUsers.filter(user => 
-        user && 
-        user.user_id && 
-        (user.role === 'teacher' || user.role === 'admin')
-      );
-      
-      console.log('👨‍🏫 Filtered teachers:', teachers);
+      const teachers = Array.isArray(response.data) ? response.data : [];
       console.log('👨‍🏫 Teachers count:', teachers.length);
+      console.log('👨‍🏫 Teachers:', teachers);
       
       setAvailableTeachers(teachers);
     } catch (error) {

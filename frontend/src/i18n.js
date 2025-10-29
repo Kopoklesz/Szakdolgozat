@@ -121,7 +121,18 @@ const resources = {
       "Még nem hoztál létre webshopot.": "You haven't created a webshop yet.",
       "Termékek": "Products",
       "Webshop Szerkesztése": "Edit Webshop",
-      "Webshop sikeresen létrehozva!": "Webshop successfully created!"
+      "Webshop sikeresen létrehozva!": "Webshop successfully created!",
+      "Felhasználónév vagy Email cím": "Username or Email",
+      "Jelszó": "Password",
+      "Emlékezz rám": "Remember me",
+      "Még nincs fiókod? Regisztrálj itt": "Don't have an account yet? Sign up here",
+      "Regisztráció": "Registration",
+      "Felhasználónév": "Username",
+      "Email cím": "Email address",
+      "Csak @student.uni-pannon.hu vagy @teacher.uni-pannon.hu email cím használható": "Only @student.uni-pannon.hu or @teacher.uni-pannon.hu email addresses are allowed",
+      "Jelszó megerősítése": "Confirm password",
+      "Már van fiókod? Jelentkezz be itt": "Already have an account? Log in here",
+      "Regisztráció sikeres! Most már bejelentkezhetsz.": "Registration successful! You can now log in."
     }
   },
   hu: {
@@ -243,7 +254,18 @@ const resources = {
       "Még nem hoztál létre webshopot.": "Még nem hoztál létre webshopot.",
       "Termékek": "Termékek",
       "Webshop Szerkesztése": "Webshop Szerkesztése",
-      "Webshop sikeresen létrehozva!": "Webshop sikeresen létrehozva!"
+      "Webshop sikeresen létrehozva!": "Webshop sikeresen létrehozva!",
+      "Felhasználónév vagy Email cím": "Felhasználónév vagy Email cím",
+      "Jelszó": "Jelszó",
+      "Emlékezz rám": "Emlékezz rám",
+      "Még nincs fiókod? Regisztrálj itt": "Még nincs fiókod? Regisztrálj itt",
+      "Regisztráció": "Regisztráció",
+      "Felhasználónév": "Felhasználónév",
+      "Email cím": "Email cím",
+      "Csak @student.uni-pannon.hu vagy @teacher.uni-pannon.hu email cím használható": "Csak @student.uni-pannon.hu vagy @teacher.uni-pannon.hu email cím használható",
+      "Jelszó megerősítése": "Jelszó megerősítése",
+      "Már van fiókod? Jelentkezz be itt": "Már van fiókod? Jelentkezz be itt",
+      "Regisztráció sikeres! Most már bejelentkezhetsz.": "Regisztráció sikeres! Most már bejelentkezhetsz."
     }
   }
 };

@@ -101,9 +101,7 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  /* JAVÍTÁS: wrap hozzáadva */
   gap: 15px;
-  /* JAVÍTÁS: gap hozzáadva */
   margin-bottom: 30px;
   padding-bottom: 15px;
   border-bottom: 2px solid #f0f0f0;
@@ -127,7 +125,6 @@
   cursor: pointer;
   transition: all 0.3s;
   white-space: nowrap;
-  /* JAVÍTÁS: szöveg nem törik */
 }
 
 .add-partner-btn:hover {
@@ -489,8 +486,11 @@
 
   .section-header {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
+    align-items: stretch;
+  }
+
+  .section-header h2 {
+    width: 100%;
   }
 
   .add-partner-btn {
