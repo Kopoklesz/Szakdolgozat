@@ -1,4 +1,3 @@
-// frontend/src/config/axios.js
 import axios from 'axios';
 import { API_ENDPOINTS } from './api';
 
@@ -25,7 +24,8 @@ apiClient.interceptors.request.use(
     
     // Debug log fejlesztési környezetben
     if (process.env.NODE_ENV === 'development') {
-      console.log('API Request:', config.method?.toUpperCase(), config.url);
+      const method = config.method ? config.method.toUpperCase() : 'UNKNOWN';
+      console.log('API Request:', method, config.url);
     }
     
     return config;

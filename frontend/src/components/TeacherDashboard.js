@@ -40,6 +40,7 @@ const TeacherDashboard = () => {
 
   useEffect(() => {
     fetchWebshops();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchWebshops = async () => {

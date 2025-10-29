@@ -56,6 +56,7 @@ const ManageProducts = () => {
   // Ownership ellenőrzés az oldal betöltésekor
   useEffect(() => {
     checkOwnership();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [webshopId, user]);
 
   const checkOwnership = async () => {
@@ -99,6 +100,7 @@ const ManageProducts = () => {
     if (isAuthorized) {
       fetchProducts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthorized, webshopId]);
 
   const fetchProducts = async () => {
