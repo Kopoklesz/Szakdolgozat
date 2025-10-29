@@ -76,8 +76,12 @@ const ManagePartners = () => {
     try {
       const response = await apiClient.get(`${API_URL}/auth/users`);
       console.log('👨‍🏫 Teachers response:', response.data);
+      console.log('👨‍🏫 Response type:', typeof response.data);
+      console.log('👨‍🏫 Is array?:', Array.isArray(response.data));
       
       const allUsers = Array.isArray(response.data) ? response.data : [];
+      console.log('👨‍🏫 All users count:', allUsers.length);
+      
       const teachers = allUsers.filter(user => 
         user && 
         user.user_id && 
@@ -85,9 +89,12 @@ const ManagePartners = () => {
       );
       
       console.log('👨‍🏫 Filtered teachers:', teachers);
+      console.log('👨‍🏫 Teachers count:', teachers.length);
+      
       setAvailableTeachers(teachers);
     } catch (error) {
       console.error('❌ Error fetching teachers:', error);
+      console.error('❌ Error response:', error.response);
       setAvailableTeachers([]);
     }
   };
