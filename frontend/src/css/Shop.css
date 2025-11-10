@@ -124,25 +124,23 @@
 
 .search-box {
   position: relative;
-  width: 100%;
   max-width: 600px;
   margin: 0 auto 30px;
 }
 
 .search-box input {
   width: 100%;
-  padding: 16px 50px;
+  padding: 16px 50px 16px 50px;
   border: 2px solid #e0e0e0;
   border-radius: 50px;
   font-size: 16px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .search-box input:focus {
   outline: none;
-  border-color: #04b0b8;
-  box-shadow: 0 6px 20px rgba(4, 176, 184, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   transform: translateY(-2px);
 }
 
@@ -151,7 +149,6 @@
   left: 18px;
   top: 50%;
   transform: translateY(-50%);
-  fill: #666;
   pointer-events: none;
 }
 
@@ -163,10 +160,9 @@
   background: none;
   border: none;
   font-size: 20px;
-  color: #999;
   cursor: pointer;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -176,47 +172,54 @@
 
 .clear-search:hover {
   background: rgba(0, 0, 0, 0.05);
-  color: #666;
 }
 
 .category-pills {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: 30px;
 }
 
 .category-pill {
   padding: 10px 20px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid;
   border-radius: 25px;
   background: white;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-weight: 600;
-  font-size: 15px;
-  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 .category-pill:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .category-pill.active {
-  color: white;
-  border-color: transparent;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+.pill-icon {
+  font-size: 16px;
+}
+
+.product-grid {
+  display: flex;
+  flex-wrap: wrap;
   gap: 24px;
+  justify-content: center;
 }
 
 .product-card {
+  width: calc(25% - 18px);
+  min-width: 260px;
+  max-width: 320px;
   background: white;
   border-radius: 16px;
   overflow: hidden;
@@ -229,7 +232,7 @@
 
 .product-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
 .product-image-wrapper {
@@ -237,6 +240,7 @@
   width: 100%;
   height: 240px;
   overflow: hidden;
+  background: #f5f5f5;
 }
 
 .product-image-wrapper img {
@@ -424,7 +428,7 @@
 .modal-content {
   background: white;
   border-radius: 20px;
-  max-width: 1200px;
+  max-width: 1000px;
   width: 95%;
   max-height: 90vh;
   overflow-y: auto;
@@ -473,15 +477,15 @@
 .modal-body {
   display: flex;
   flex-direction: row;
-  gap: 30px;
+  gap: 40px;
   padding: 40px;
   min-width: 0;
 }
 
 .modal-image {
   flex: 0 0 auto;
-  width: 350px;
-  min-width: 280px;
+  width: 400px;
+  min-width: 300px;
 }
 
 .modal-image img {
@@ -497,8 +501,6 @@
   display: flex;
   flex-direction: column;
   overflow-wrap: break-word;
-  max-width: 100%;
-  width: 100%;
 }
 
 .modal-details h2 {
@@ -526,8 +528,6 @@
   color: #555;
   margin-bottom: 24px;
   flex-grow: 1;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
 }
 
 .modal-info {
