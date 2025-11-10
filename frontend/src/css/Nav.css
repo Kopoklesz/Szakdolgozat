@@ -4,7 +4,6 @@
   --text-color: white;
 }
 
-/* Alap stílusok a navigációs sávhoz */
 .externLinksNav {
   background-color: var(--external-nav-color);
   display: flex;
@@ -22,7 +21,6 @@
   min-height: 30px;
 }
 
-/* Lista stílusok */
 nav ul {
   list-style-type: none;
   margin: 0;
@@ -31,12 +29,10 @@ nav ul {
   align-items: center;
 }
 
-/* Listaelemek stílusai */
 nav li {
   margin-right: 2em;
 }
 
-/* Linkek stílusai */
 nav a {
   color: white;
   text-decoration: none;
@@ -44,12 +40,10 @@ nav a {
   font-size: 1.2rem;
 }
 
-/* Linkek hover állapota */
 nav a:hover {
   text-decoration: underline;
 }
 
-/* ========== ÚJ: Auth szekció - jobb oldal ========== */
 .auth-section {
   display: flex;
   align-items: center;
@@ -91,7 +85,6 @@ nav a:hover {
   font-style: italic;
 }
 
-/* Kijelentkezés gomb */
 .logout-button {
   background-color: rgba(255, 255, 255, 0.2);
   color: white;
@@ -109,7 +102,6 @@ nav a:hover {
   border-color: rgba(255, 255, 255, 0.5);
 }
 
-/* Nyelvváltó gomb stílusai */
 .language-selector {
   position: relative;
   display: inline-block;
@@ -137,7 +129,6 @@ nav a:hover {
   margin-right: 0.5em;
 }
 
-/* Media query-k a reszponzív dizájnhoz */
 @media (max-width: 768px) {
 
   .externLinksNav,

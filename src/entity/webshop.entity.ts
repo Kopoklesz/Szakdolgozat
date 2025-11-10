@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { Product } from './product.entity';
 import { User } from './user.entity';
+import { WebshopPartner } from './webshop-partner.entity';
 
 export enum WebshopStatus {
   ACTIVE = 'active',
@@ -43,4 +44,7 @@ export class Webshop {
 
   @OneToMany(() => Product, product => product.webshop)
   products: Product[];
+
+  @OneToMany(() => WebshopPartner, partner => partner.webshop)
+  partners: WebshopPartner[];
 }

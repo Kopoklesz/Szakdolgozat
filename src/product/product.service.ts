@@ -5,6 +5,7 @@ import { Product } from '../entity/product.entity';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { Webshop } from '../entity/webshop.entity';
+import { WebshopPartner } from '../entity/webshop-partner.entity';
 import { UserRole } from '../entity/user.entity';
 
 @Injectable()
@@ -14,10 +15,12 @@ export class ProductService {
     private productRepository: Repository<Product>,
     @InjectRepository(Webshop)
     private webshopRepository: Repository<Webshop>,
+    @InjectRepository(WebshopPartner)
+    private webshopPartnerRepository: Repository<WebshopPartner>,
   ) { }
 
   /**
-   * Termék létrehozása ownership ellenőrzéssel
+   * Termék létrehozása ownership/partner ellenőrzéssel
    */
   async createProduct(
     userId: number,
@@ -35,10 +38,14 @@ export class ProductService {
       throw new NotFoundException(`Webshop with ID ${webshop_id} not found`);
     }
 
-    // Ownership ellenőrzés - csak saját webshopba tehet terméket (kivéve ADMIN)
-    if (userRole !== UserRole.ADMIN && webshop.teacher_id !== userId) {
-      throw new ForbiddenException('Csak a saját webshopodba hozhatsz létre terméket');
-    }
+    console.log('=== PRODUCT CREATE ACCESS CHECK ===');
+    console.log('User ID from JWT:', userId, 'Type:', typeof userId);
+    console.log('User Role:', userRole);
+    console.log('Webshop teacher_id (owner):', webshop.teacher_id, 'Type:', typeof webshop.teacher_id);
+    console.log('======================================');
+
+    // Access ellenőrzés - owner, partner vagy admin létrehozhat terméket
+    await this.checkWebshopAccess(webshop_id, userId, userRole, 'create product');
 
     // Validációk
     if (current_stock > max_stock) {
@@ -62,7 +69,7 @@ export class ProductService {
   }
 
   /**
-   * Termék módosítása ownership ellenőrzéssel
+   * Termék módosítása ownership/partner ellenőrzéssel
    */
   async updateProduct(
     userId: number,
@@ -70,16 +77,17 @@ export class ProductService {
     productId: number,
     updateProductDto: UpdateProductDto
   ): Promise<Product> {
-    // Ownership ellenőrzés
-    await this.checkProductOwnership(productId, userId, userRole);
-
     const product = await this.productRepository.findOne({
-      where: { product_id: productId }
+      where: { product_id: productId },
+      relations: ['webshop']
     });
 
     if (!product) {
       throw new NotFoundException(`Product with ID ${productId} not found`);
     }
+
+    // Access ellenőrzés - owner, partner vagy admin módosíthat terméket
+    await this.checkWebshopAccess(product.webshop.webshop_id, userId, userRole, 'update product');
 
     // Validáció: current_stock <= max_stock
     const newMaxStock = updateProductDto.max_stock ?? product.max_stock;
@@ -96,23 +104,24 @@ export class ProductService {
   }
 
   /**
-   * Termék törlése ownership ellenőrzéssel
+   * Termék törlése ownership/partner ellenőrzéssel
    */
   async deleteProduct(
     userId: number,
     userRole: UserRole,
     productId: number
   ): Promise<{ message: string }> {
-    // Ownership ellenőrzés
-    await this.checkProductOwnership(productId, userId, userRole);
-
     const product = await this.productRepository.findOne({
-      where: { product_id: productId }
+      where: { product_id: productId },
+      relations: ['webshop']
     });
 
     if (!product) {
       throw new NotFoundException(`Product with ID ${productId} not found`);
     }
+
+    // Access ellenőrzés - owner, partner vagy admin törölhet terméket
+    await this.checkWebshopAccess(product.webshop.webshop_id, userId, userRole, 'delete product');
 
     await this.productRepository.remove(product);
 
@@ -169,14 +178,14 @@ export class ProductService {
   }
 
   /**
-   * Készlet növelése (pl. visszavonás esetén)
+   * Készlet növelése (pl. visszaküldés esetén)
    */
   async increaseStock(productId: number, quantity: number): Promise<Product> {
     const product = await this.getProduct(productId);
 
     product.current_stock += quantity;
 
-    // Ha volt készlet, aktiváljuk
+    // Ha volt készlet, visszaállítjuk elérhetőre
     if (product.current_stock > 0 && product.status === 'unavailable') {
       product.status = 'available';
     }
@@ -185,21 +194,56 @@ export class ProductService {
   }
 
   /**
-   * Készlet ellenőrzése több termékre
+   * Webshop hozzáférés ellenőrzése (owner, partner vagy admin)
+   * PRIVATE helper metódus
    */
-  async checkStockAvailability(items: { productId: number; quantity: number }[]): Promise<boolean> {
-    for (const item of items) {
-      const product = await this.getProduct(item.productId);
-      if (product.current_stock < item.quantity) {
-        return false;
-      }
+  private async checkWebshopAccess(
+    webshopId: number,
+    userId: number,
+    userRole: UserRole,
+    action: string
+  ): Promise<void> {
+    // Admin mindent csinálhat
+    if (userRole === UserRole.ADMIN) {
+      console.log(`✅ Access granted for ${action}: ADMIN role`);
+      return;
     }
-    return true;
+
+    const webshop = await this.webshopRepository.findOne({
+      where: { webshop_id: webshopId }
+    });
+
+    if (!webshop) {
+      throw new NotFoundException(`Webshop with ID ${webshopId} not found`);
+    }
+
+    // Ellenőrizzük, hogy owner-e
+    if (webshop.teacher_id === userId) {
+      console.log(`✅ Access granted for ${action}: User is OWNER`);
+      return;
+    }
+
+    // Ellenőrizzük, hogy partner-e
+    const isPartner = await this.webshopPartnerRepository.findOne({
+      where: {
+        webshop_id: webshopId,
+        partner_teacher_id: userId
+      }
+    });
+
+    if (isPartner) {
+      console.log(`✅ Access granted for ${action}: User is PARTNER`);
+      return;
+    }
+
+    // Ha sem owner, sem partner, sem admin nem
+    console.error(`❌ Access denied for ${action}: User is neither owner, partner, nor admin`);
+    throw new ForbiddenException(`Nincs jogosultságod ehhez a művelethez. Csak a webshop tulajdonosa, partnerei vagy admin ${action.includes('create') ? 'hozhat létre' : action.includes('update') ? 'módosíthat' : 'törölhet'} terméket.`);
   }
 
   /**
-   * HELPER: Ownership ellenőrzés
-   * Ellenőrzi, hogy a felhasználó módosíthatja/törölheti-e a terméket
+   * DEPRECATED: Régi ownership ellenőrzés - már nem használjuk
+   * Helyette a checkWebshopAccess() metódust használjuk
    */
   private async checkProductOwnership(
     productId: number,
@@ -208,21 +252,13 @@ export class ProductService {
   ): Promise<void> {
     const product = await this.productRepository.findOne({
       where: { product_id: productId },
-      relations: ['webshop'],
+      relations: ['webshop']
     });
 
     if (!product) {
       throw new NotFoundException(`Product with ID ${productId} not found`);
     }
 
-    // ADMIN mindent módosíthat/törölhet
-    if (userRole === UserRole.ADMIN) {
-      return;
-    }
-
-    // TEACHER csak saját webshopjának termékeit módosíthatja/törölheti
-    if (product.webshop.teacher_id !== userId) {
-      throw new ForbiddenException('Csak a saját webshopod termékeit módosíthatod/törölheted');
-    }
+    await this.checkWebshopAccess(product.webshop.webshop_id, userId, userRole, 'manage product');
   }
 }

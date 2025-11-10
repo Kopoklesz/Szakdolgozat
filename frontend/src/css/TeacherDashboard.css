@@ -1,253 +1,554 @@
-/* CSS változók definiálása */
-:root {
-  --primary-color: #04b0b8;
-  --primary-hover: #038e95;
-  --error-color: #d32f2f;
-  --error-bg: #ffcdd2;
-  --success-color: #388e3c;
-  --success-bg: #c8e6c9;
-  --delete-color: #dc3545;
-  --delete-hover: #c82333;
-  --border-color: #ddd;
-  --shadow-color: rgba(0, 0, 0, 0.1);
-  --shadow-hover: rgba(0, 0, 0, 0.15);
-  --modal-bg: rgba(0, 0, 0, 0.5);
-}
-
-/* Alap konténer stílusok */
 .teacher-dashboard {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 40px 20px;
+  background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+  min-height: 100vh;
 }
 
-/* Üzenet stílusok */
-.error-message, .success-message {
-  padding: 10px;
-  border-radius: 4px;
-  margin-bottom: 15px;
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.dashboard-header h1 {
+  font-size: 36px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 10px 0;
+}
+
+.dashboard-subtitle {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+.message {
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .error-message {
-  color: var(--error-color);
-  background-color: var(--error-bg);
+  background: #ffebee;
+  color: #c62828;
+  border-left: 4px solid #c62828;
 }
 
 .success-message {
-  color: var(--success-color);
-  background-color: var(--success-bg);
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-left: 4px solid #2e7d32;
 }
 
-/* Új webshop űrlap */
-.create-webshop-form {
-  background-color: #f5f5f5;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
+.create-webshop-section,
+.webshops-section {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 40px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.create-webshop-form form > div {
-  margin-bottom: 15px;
+.section-header {
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
 }
 
-.create-webshop-form label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
+.section-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
 }
 
-/* Általános input és select stílusok */
-.create-webshop-form input,
-.create-webshop-form select,
-.edit-modal-content input,
-.edit-modal-content select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 14px;
-  margin-bottom: 10px;
-}
-
-/* Általános gomb stílusok */
-.create-webshop-form button,
-.webshop-card-button,
-.modal-button-group button {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.create-webshop-form button,
-.webshop-card-button.manage {
-  background-color: var(--primary-color);
-  color: white;
-  font-size: 16px;
-  padding: 10px 15px;
-}
-
-.create-webshop-form button:hover,
-.webshop-card-button.manage:hover {
-  background-color: var(--primary-hover);
-}
-
-/* Színválasztó */
-.color-picker-container {
-  margin-bottom: 15px;
-}
-
-.color-picker-wrapper {
+.webshop-form {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 24px;
 }
 
-input[type="color"] {
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  overflow: hidden;
-  cursor: pointer;
-  padding: 0;
-}
-
-input[type="color"]::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-
-input[type="color"]::-webkit-color-swatch {
-  border: none;
-  border-radius: 50%;
-}
-
-.color-preview {
-  width: 100px;
-  height: 40px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  color: white;
-  text-shadow: 0 0 2px var(--shadow-color);
-}
-
-/* Webshop lista */
-.webshops-list {
+.form-row {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
-.webshop-card {
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 15px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px var(--shadow-color);
-  transition: box-shadow 0.3s;
+.form-group {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
-.webshop-card:hover {
-  box-shadow: 0 4px 8px var(--shadow-hover);
+.form-group label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
 }
 
-.webshop-card .color-box {
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--border-color);
-  margin-left: 10px;
-  border-radius: 4px;
+.form-group input,
+.form-group select {
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 15px;
+  transition: all 0.3s;
+  background: white;
 }
 
-/* Webshop kártya gombok */
-.webshop-card-buttons {
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.color-selector {
   display: flex;
-  justify-content: space-between;
-  margin-top: auto;
-  gap: 10px;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.webshop-card-button {
-  text-decoration: none;
-  text-align: center;
+.preset-colors {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+.color-preset {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 3px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.color-preset:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.color-preset.active {
+  border-color: #333;
+  transform: scale(1.05);
+}
+
+.custom-color {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.custom-color>label {
+  min-width: 100px;
+  font-weight: 600;
+}
+
+.custom-color-input {
+  display: flex;
+  align-items: center;
+  gap: 15px;
   flex: 1;
 }
 
-.webshop-card-button.edit {
-  background-color: #f0f0f0;
+.custom-color-input input[type="color"] {
+  width: 60px;
+  height: 45px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.color-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  flex: 1;
+}
+
+.submit-btn {
+  padding: 14px 28px;
+  border: none;
+  background: linear-gradient(135deg, #4CAF50, #388E3C);
+  color: white;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.webshop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.no-webshops {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.no-webshops-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.no-webshops p {
+  font-size: 18px;
+}
+
+.webshop-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+}
+
+.webshop-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.webshop-card-header {
+  padding: 24px;
+  color: white;
+  position: relative;
+}
+
+.webshop-card-header h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* JAVÍTÁS: Szerepkör badge a webshop kártyán */
+.webshop-role-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.webshop-card-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.webshop-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #666;
+  font-size: 14px;
+}
+
+.info-value {
+  color: #333;
+  font-weight: 600;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-badge.inactive {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* JAVÍTOTT webshop-actions CSS */
+.webshop-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+  width: 100%;
+  min-height: 44px;
+}
+
+.webshop-actions button,
+.webshop-actions a {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.edit-btn {
+  background: #f5f5f5;
   color: #333;
 }
 
-.webshop-card-button.edit:hover {
-  background-color: #e0e0e0;
+.edit-btn:hover {
+  background: #e0e0e0;
+  transform: translateY(-2px);
 }
 
-/* Modal stílusok */
-.edit-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: var(--modal-bg);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.edit-modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 80%;
-  max-width: 500px;
-}
-
-.edit-modal-content h2 {
-  margin-top: 0;
-}
-
-.edit-modal-content form {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Modal gombok */
-.modal-button-group {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.delete-button {
-  background-color: var(--delete-color);
+.manage-btn {
+  background: linear-gradient(135deg, #2196F3, #1976D2);
   color: white;
 }
 
-.delete-button:hover {
-  background-color: var(--delete-hover);
+.manage-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
 }
 
-/* Reszponzív beállítások */
-@media (max-width: 768px) {
-  .webshops-list {
+.partners-btn {
+  background: linear-gradient(135deg, #9C27B0, #7B1FA2) !important;
+}
+
+.partners-btn:hover {
+  box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4) !important;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: slideUp 0.3s ease;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f5f5f5;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: #666;
+}
+
+.modal-close:hover {
+  background: #e0e0e0;
+  transform: rotate(90deg);
+}
+
+.modal-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 30px 0;
+  color: #333;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.cancel-btn {
+  padding: 14px 28px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  flex: 1;
+}
+
+.cancel-btn:hover {
+  background: #f5f5f5;
+  border-color: #bdbdbd;
+}
+
+.delete-btn {
+  padding: 14px 28px;
+  border: none;
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  flex: 1;
+}
+
+.delete-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+}
+
+@media (max-width: 900px) {
+  .form-row {
     grid-template-columns: 1fr;
   }
 
-  .edit-modal-content {
-    width: 95%;
-    margin: 10px;
+  .preset-colors {
+    grid-template-columns: repeat(4, 1fr);
   }
 
-  .modal-button-group {
+  .webshop-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .custom-color {
     flex-direction: column;
+    align-items: stretch;
+  }
+
+  .custom-color>label {
+    min-width: auto;
+  }
+
+  /* Mobile layout: stack buttons vertically */
+  .webshop-actions {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 600px) {
+  .teacher-dashboard {
+    padding: 20px 10px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 28px;
+  }
+
+  .create-webshop-section,
+  .webshops-section {
+    padding: 20px;
+  }
+
+  .preset-colors {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .modal-content {
+    padding: 30px 20px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .webshop-actions button,
+  .webshop-actions a {
+    font-size: 12px;
+    padding: 10px 8px;
   }
 }

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsHexColor, IsEnum } from 'class-validator';
+import { IsNotEmpty, IsString, IsHexColor, IsEnum, IsOptional } from 'class-validator';
 
 export enum WebshopStatus {
   ACTIVE = 'active',
@@ -18,7 +18,7 @@ export class CreateWebshopDto {
   @IsString()
   paying_instrument: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   paying_instrument_icon: string;
 

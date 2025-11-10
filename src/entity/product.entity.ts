@@ -13,13 +13,13 @@ export class Product {
   @Column()
   webshop_id: number;
 
-  @Column()
+  @Column({ length: 500 })
   name: string;
 
-  @Column()
+  @Column({ length: 255 })
   category: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   image: string;
 
   @Column('text')

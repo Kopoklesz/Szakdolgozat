@@ -26,14 +26,14 @@ const clearAuthData = () => {
   localStorage.removeItem('pannon_shop_user');
   sessionStorage.removeItem('pannon_shop_token');
   sessionStorage.removeItem('pannon_shop_user');
+  console.log('🧹 Auth data cleared from storage');
 };
 
 // Regisztráció
 const register = async (username, email, password, rememberMe = false) => {
   try {
-    // ELTÁVOLÍTVA: nagybetűsítés - a username már bármi lehet
     const response = await apiClient.post('/auth/register', {
-      username,  // változatlan formában
+      username,
       email,
       password
     });
@@ -54,9 +54,8 @@ const register = async (username, email, password, rememberMe = false) => {
 // Bejelentkezés
 const login = async (identifier, password, rememberMe = false) => {
   try {
-    // ELTÁVOLÍTVA: nagybetűsítés - már nem csak Neptune kód lehet
     const response = await apiClient.post('/auth/login', {
-      identifier,  // változatlan formában
+      identifier,
       password
     });
     
@@ -120,7 +119,7 @@ const validatePassword = (password) => {
   }
   
   if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-    errors.push('Legalább egy speciális karakter (!@#$%^&*...)');
+    errors.push('Legalább egy speciális karakter (!@#$%^&*(),.?":{}|<>)');
   }
   
   return {
@@ -129,9 +128,9 @@ const validatePassword = (password) => {
   };
 };
 
-// Email domain validáció - ÚJ
+// Email domain validáció - szinkronizálva a backend-del
 const validateEmailDomain = (email) => {
-  // Admin email
+  // Admin email engedélyezése
   if (email === 'admin@uni-pannon.hu') {
     return { isValid: true };
   }
@@ -150,26 +149,16 @@ const validateEmailDomain = (email) => {
   return { isValid: true };
 };
 
-// Named exports
-export {
+const authService = {
   register,
   login,
   logout,
   getProfile,
+  getAuthData,
+  clearAuthData,  
   validatePassword,
   validateEmailDomain,
-  getAuthData,
-  clearAuthData
+  setAuthData
 };
 
-// Default export
-export default {
-  register,
-  login,
-  logout,
-  getProfile,
-  validatePassword,
-  validateEmailDomain,
-  getAuthData,
-  clearAuthData
-};
+export default authService;
