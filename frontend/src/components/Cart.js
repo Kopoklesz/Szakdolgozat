@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import apiClient from '../config/axios';
 import { API_URL } from '../config/api';
 import '../css/Cart.css';
 
@@ -28,7 +28,7 @@ const Cart = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${API_URL}/cart/${user.user_id}/${webshopId}`);
+      const response = await apiClient.get(`${API_URL}/cart/${user.user_id}/${webshopId}`);
       setCartItems(response.data.items || []);
     } catch (error) {
       console.error('Error fetching cart items:', error);
@@ -42,7 +42,7 @@ const Cart = () => {
     if (newQuantity < 1) return;
     
     try {
-      await axios.post(`${API_URL}/cart/${user.user_id}/${webshopId}`, { 
+      await apiClient.post(`${API_URL}/cart/${user.user_id}/${webshopId}`, { 
         productId: productId, 
         quantity: newQuantity 
       });
@@ -59,7 +59,7 @@ const Cart = () => {
 
   const removeItem = async (productId) => {
     try {
-      await axios.post(`${API_URL}/cart/${user.user_id}/${webshopId}`, { 
+      await apiClient.post(`${API_URL}/cart/${user.user_id}/${webshopId}`, { 
         productId: productId, 
         quantity: 0 
       });
@@ -76,7 +76,7 @@ const Cart = () => {
     setSuccess('');
     
     try {
-      const response = await axios.post(`${API_URL}/purchase/${user.user_id}/${webshopId}`);
+      const response = await apiClient.post(`${API_URL}/purchase/${user.user_id}/${webshopId}`);
       
       // Sikeres vásárlás
       setSuccess(t('Sikeres vásárlás! Köszönjük a rendelést.'));

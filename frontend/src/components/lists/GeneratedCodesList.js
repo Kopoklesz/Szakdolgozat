@@ -14,6 +14,7 @@ const GeneratedCodesList = forwardRef((props, ref) => {
 
   useEffect(() => {
     fetchGeneratedCodes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useImperativeHandle(ref, () => ({

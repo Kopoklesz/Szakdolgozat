@@ -1,10 +1,8 @@
-/* Shop Container */
 .shop-container {
   min-height: 100vh;
   background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
 }
 
-/* ===== MENŐ HEADER ===== */
 .shop-header {
   position: relative;
   padding: 40px 20px 60px;
@@ -50,6 +48,13 @@
   backdrop-filter: blur(10px);
 }
 
+.header-icon-balance {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
 .header-icon {
   width: 120px;
   height: 120px;
@@ -69,6 +74,30 @@
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
 }
 
+.header-balance {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px 20px;
+  border-radius: 25px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.balance-amount {
+  font-size: 28px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.balance-currency {
+  font-size: 18px;
+  font-weight: 600;
+  opacity: 0.95;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
 .header-wave {
   position: absolute;
   bottom: 0;
@@ -83,7 +112,6 @@
   height: 100%;
 }
 
-/* ===== SZEBB KERESÉS ÉS SZŰRÉS ===== */
 .shop-content {
   max-width: 1400px;
   margin: 0 auto;
@@ -146,7 +174,6 @@
   background: rgba(0, 0, 0, 0.05);
 }
 
-/* Category Pills (Gombok) */
 .category-pills {
   display: flex;
   flex-wrap: wrap;
@@ -182,7 +209,6 @@
   font-size: 16px;
 }
 
-/* ===== PRODUCT GRID ===== */
 .product-grid {
   display: flex;
   flex-wrap: wrap;
@@ -190,7 +216,6 @@
   justify-content: center;
 }
 
-/* ===== PRODUCT CARD ===== */
 .product-card {
   width: calc(25% - 18px);
   min-width: 260px;
@@ -274,7 +299,6 @@
   font-size: 16px;
 }
 
-/* Product Actions */
 .product-actions {
   padding: 16px;
   border-top: 1px solid #f0f0f0;
@@ -359,7 +383,6 @@
   opacity: 0.6;
 }
 
-/* ===== NO PRODUCTS ===== */
 .no-products {
   text-align: center;
   padding: 60px 20px;
@@ -375,7 +398,6 @@
   font-size: 18px;
 }
 
-/* ===== MODAL ===== */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -390,6 +412,8 @@
   padding: 20px;
   animation: fadeIn 0.2s ease;
   backdrop-filter: blur(4px);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 @keyframes fadeIn {
@@ -405,8 +429,8 @@
 .modal-content {
   background: white;
   border-radius: 20px;
-  max-width: 900px;
-  width: 100%;
+  max-width: 90vw;
+  width: 90vw;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
@@ -454,25 +478,35 @@
 .modal-body {
   display: flex;
   flex-direction: row;
-  gap: 40px;
+  gap: 30px;
   padding: 40px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .modal-image {
-  flex: 0 0 400px;
+  flex: 0 0 auto;
+  width: 280px;
+  min-width: 200px;
+  max-width: 35%;
 }
 
 .modal-image img {
   width: 100%;
-  height: 400px;
+  height: 300px;
   object-fit: cover;
   border-radius: 16px;
 }
 
 .modal-details {
   flex: 1;
+  min-width: 300px;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .modal-details h2 {
@@ -480,6 +514,8 @@
   font-weight: 700;
   color: #333;
   margin: 0 0 12px 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .modal-category {
@@ -552,7 +588,6 @@
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
 }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 1200px) {
   .product-card {
     width: calc(33.33% - 16px);
@@ -564,17 +599,31 @@
     width: calc(50% - 12px);
   }
 
+  .modal-content {
+    max-width: 95vw;
+    width: 95vw;
+  }
+
   .modal-body {
     flex-direction: column;
     padding: 30px;
+    gap: 20px;
   }
 
   .modal-image {
     flex: 0 0 auto;
+    width: 100%;
+    min-width: auto;
+    max-width: 100%;
   }
 
   .modal-image img {
     height: 300px;
+  }
+
+  .modal-details {
+    min-width: auto;
+    max-width: 100%;
   }
 
   .header-text h1 {
@@ -617,8 +666,14 @@
     font-size: 14px;
   }
 
+  .modal-content {
+    max-width: 98vw;
+    width: 98vw;
+  }
+
   .modal-body {
     padding: 20px;
+    gap: 15px;
   }
 
   .modal-image img {
@@ -630,7 +685,6 @@
   }
 }
 
-/* Loading & Error */
 .loading,
 .error {
   text-align: center;

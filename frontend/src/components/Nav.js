@@ -16,7 +16,6 @@ function Nav({ currentLanguage, changeLanguage }) {
     navigate('/webshops');
   };
 
-  // Szerepkör fordítása - többnyelvű
   const getRoleLabel = (role) => {
     return t(`role_${role}`);
   };
@@ -34,18 +33,15 @@ function Nav({ currentLanguage, changeLanguage }) {
         <ul>
           <li><Link to="/webshops">{t('Főoldal')}</Link></li>
           
-          {/* Csak tanárok és adminok láthatják az Előadói dashboardot */}
           {isAuthenticated && (user.role === 'teacher' || user.role === 'admin') && (
             <li><Link to="/teacher-dashboard">{t('Előadói')}</Link></li>
           )}
           
-          {/* Aláírás generálás - CSAK tanárok és adminok látják */}
           {isAuthenticated && (user.role === 'teacher' || user.role === 'admin') && (
             <li><Link to="/signature-generator">{t('Aláírás generálás')}</Link></li>
           )}
         </ul>
 
-        {/* Auth szekció - jobb oldal */}
         <div className="auth-section">
           {!isAuthenticated ? (
             <Link to="/login" className="login-link">{t('Bejelentkezés')}</Link>

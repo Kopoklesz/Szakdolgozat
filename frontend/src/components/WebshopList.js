@@ -2,26 +2,43 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import apiClient from '../config/axios';
 import '../css/WebshopList.css';
 import { API_URL } from '../config/api';
 
 const WebshopList = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   
   const [webshops, setWebshops] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [balances, setBalances] = useState({});
 
   useEffect(() => {
     const fetchWebshops = async () => {
       try {
-        const response = await axios.get(`${API_URL}/webshop`);
+        const response = await apiClient.get(`${API_URL}/webshop`);
         const filteredWebshops = response.data.filter(webshop => webshop.webshop_id !== 0);
         setWebshops(filteredWebshops);
+        
+        if (isAuthenticated && user) {
+          try {
+            const balanceResponse = await apiClient.get(`${API_URL}/user/${user.user_id}/balances`);
+            const userBalances = balanceResponse.data;
+            
+            const balanceMap = {};
+            userBalances.forEach(balance => {
+              balanceMap[balance.webshop.webshop_id] = balance.amount;
+            });
+            setBalances(balanceMap);
+          } catch (balanceError) {
+            console.error('Error fetching balances:', balanceError);
+          }
+        }
+        
         setLoading(false);
       } catch (error) {
         console.error('Error fetching webshops:', error);
@@ -31,7 +48,7 @@ const WebshopList = () => {
     };
 
     fetchWebshops();
-  }, [t]);
+  }, [t, isAuthenticated, user]);
 
   const filteredWebshops = webshops.filter(webshop =>
     webshop.subject_name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -115,6 +132,7 @@ const WebshopList = () => {
         {filteredWebshops.length > 0 ? (
           filteredWebshops.map((webshop) => {
             const textColor = getTextColor(webshop.header_color_code);
+            const userBalance = balances[webshop.webshop_id] || 0;
             
             return (
               <div
@@ -140,6 +158,14 @@ const WebshopList = () => {
                       <span className="info-value">{webshop.paying_instrument}</span>
                     </div>
                   </div>
+                  
+                  {isAuthenticated && (
+                    <div className="webshop-balance">
+                      <span className="balance-label">{t('Egyenleged')}:</span>
+                      <span className="balance-value">{userBalance} {webshop.paying_instrument}</span>
+                    </div>
+                  )}
+                  
                   <button 
                     className="enter-btn"
                     style={{ 

@@ -140,6 +140,15 @@ export class AuthService {
     return users.map(user => this.transformToResponseDto(user));
   }
 
+  async getTeachers(): Promise<UserResponseDto[]> {
+    const teachers = await this.userRepository.find({
+      where: { role: UserRole.TEACHER },
+      order: { username: 'ASC' }
+    });
+
+    return teachers.map(user => this.transformToResponseDto(user));
+  }
+
   async deleteUser(userId: number): Promise<{ message: string }> {
     const user = await this.userRepository.findOne({
       where: { user_id: userId }

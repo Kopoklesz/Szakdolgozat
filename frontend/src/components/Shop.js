@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import apiClient from '../config/axios';
 import { API_URL } from '../config/api';
 import '../css/Shop.css';
 
@@ -20,18 +20,32 @@ const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [balance, setBalance] = useState(0);
 
   useEffect(() => {
     fetchWebshopData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [webshopId]);
 
   const fetchWebshopData = async () => {
     try {
-      const webshopResponse = await axios.get(`${API_URL}/webshop/${webshopId}`);
+      const webshopResponse = await apiClient.get(`${API_URL}/webshop/${webshopId}`);
       setWebshop(webshopResponse.data);
 
-      const productsResponse = await axios.get(`${API_URL}/product/webshop/${webshopId}`);
+      const productsResponse = await apiClient.get(`${API_URL}/product/webshop/${webshopId}`);
       setProducts(productsResponse.data);
+      
+      if (isAuthenticated && user) {
+        try {
+          const balanceResponse = await apiClient.get(`${API_URL}/user/${user.user_id}/balances`);
+          const balances = balanceResponse.data;
+          const currentBalance = balances.find(b => b.webshop.webshop_id === parseInt(webshopId));
+          setBalance(currentBalance?.amount || 0);
+        } catch (balanceError) {
+          console.error('Error fetching balance:', balanceError);
+          setBalance(0);
+        }
+      }
       
       setLoading(false);
     } catch (err) {
@@ -54,7 +68,7 @@ const Shop = () => {
     }
 
     try {
-      await axios.post(`${API_URL}/cart/${user.user_id}/${webshopId}`, {
+      await apiClient.post(`${API_URL}/cart/${user.user_id}/${webshopId}`, {
         productId,
         quantity: parseInt(quantity)
       });
@@ -80,7 +94,6 @@ const Shop = () => {
     document.body.style.overflow = 'unset';
   };
 
-  // Dinamikus színek generálása
   const getDarkerShade = (color, amount = 20) => {
     const hex = color.replace('#', '');
     let r = parseInt(hex.substr(0, 2), 16);
@@ -138,7 +151,6 @@ const Shop = () => {
 
   return (
     <div className="shop-container">
-      {/* Menő Header gradienssel */}
       <header 
         className="shop-header"
         style={{ 
@@ -155,11 +167,19 @@ const Shop = () => {
             </p>
           </div>
           {webshop.paying_instrument_icon && (
-            <div className="header-icon">
-              <img 
-                src={webshop.paying_instrument_icon} 
-                alt={webshop.paying_instrument}
-              />
+            <div className="header-icon-balance">
+              <div className="header-icon">
+                <img 
+                  src={webshop.paying_instrument_icon} 
+                  alt={webshop.paying_instrument}
+                />
+              </div>
+              {isAuthenticated && (
+                <div className="header-balance" style={{ color: textColor }}>
+                  <span className="balance-amount">{balance}</span>
+                  <span className="balance-currency">{webshop.paying_instrument}</span>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -171,7 +191,6 @@ const Shop = () => {
       </header>
 
       <div className="shop-content">
-        {/* Modern keresés és szűrés */}
         <div className="search-filter-section">
           <div className="search-box" style={{ borderColor: lightAccent }}>
             <svg className="search-icon" style={{ fill: accentColor }} viewBox="0 0 24 24" width="20" height="20">
@@ -307,49 +326,52 @@ const ProductCard = ({ product, payingInstrument, onAddToCart, onOpenModal, acce
         </p>
         <p className="product-stock">
           <span className="stock-icon">📦</span>
-          {t('Elérhető')}: {product.current_stock} db
+          {t('Készlet')}: {product.current_stock}
         </p>
       </div>
-      
       <div className="product-actions" onClick={(e) => e.stopPropagation()}>
         <div className="quantity-control">
           <button 
-            className="quantity-btn" 
-            onClick={() => handleQuantityChange(-1)}
+            className="quantity-btn"
+            style={{ borderColor: accentColor, color: accentColor }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleQuantityChange(-1);
+            }}
             disabled={quantity === 0}
-            style={{ borderColor: accentColor }}
           >
-            -
+            −
           </button>
           <input 
             type="number" 
-            min="0" 
-            max={product.current_stock}
-            value={quantity}
+            value={quantity} 
             onChange={handleInputChange}
+            onClick={(e) => e.stopPropagation()}
+            min="0"
+            max={product.current_stock}
           />
           <button 
-            className="quantity-btn" 
-            onClick={() => handleQuantityChange(1)}
+            className="quantity-btn"
+            style={{ borderColor: accentColor, color: accentColor }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleQuantityChange(1);
+            }}
             disabled={quantity >= product.current_stock}
-            style={{ borderColor: accentColor }}
           >
             +
           </button>
         </div>
-        
         <button 
-          className="add-to-cart-btn" 
-          onClick={handleAddToCart}
-          disabled={quantity === 0}
-          style={{ 
-            backgroundColor: quantity > 0 ? accentColor : '#ccc'
+          className="add-to-cart-btn"
+          style={{ backgroundColor: accentColor }}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddToCart();
           }}
+          disabled={quantity === 0}
         >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="white">
-            <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
-          </svg>
-          <span>{t('Kosárba')}</span>
+          🛒 {t('Kosárba')}
         </button>
       </div>
     </div>
@@ -361,22 +383,10 @@ const ProductModal = ({ product, payingInstrument, onClose, onAddToCart, accentC
   const [quantity, setQuantity] = useState(1);
 
   const handleQuantityChange = (change) => {
-    setQuantity(prevQuantity => {
-      const newQuantity = (parseInt(prevQuantity) || 0) + change;
+    setQuantity(prev => {
+      const newQuantity = prev + change;
       return Math.max(1, Math.min(newQuantity, product.current_stock));
     });
-  };
-
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    if (value === '') {
-      setQuantity(1);
-    } else {
-      const numValue = parseInt(value);
-      if (numValue >= 1 && numValue <= product.current_stock) {
-        setQuantity(numValue);
-      }
-    }
   };
 
   const handleAddToCart = () => {
@@ -387,8 +397,7 @@ const ProductModal = ({ product, payingInstrument, onClose, onAddToCart, accentC
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose}>×</button>
-        
+        <button className="modal-close" onClick={onClose}>✕</button>
         <div className="modal-body">
           <div className="modal-image">
             <img 
@@ -396,61 +405,48 @@ const ProductModal = ({ product, payingInstrument, onClose, onAddToCart, accentC
               alt={product.name}
               onError={(e) => e.target.src = 'https://via.placeholder.com/400'}
             />
-          </div>
-          
-          <div className="modal-details">
-            <h2>{product.name}</h2>
-            <span className="modal-category" style={{ backgroundColor: accentColor }}>
+            <span className="modal-category-badge" style={{ backgroundColor: accentColor }}>
               {product.category}
             </span>
-            
+          </div>
+          <div className="modal-details">
+            <h2>{product.name}</h2>
+            <p className="modal-price" style={{ color: accentColor }}>
+              {product.price} {payingInstrument}
+            </p>
             <p className="modal-description">{product.description}</p>
-            
-            <div className="modal-info">
-              <p className="modal-price">
-                {t('Ár')}: <strong style={{ color: accentColor }}>{product.price} {payingInstrument}</strong>
-              </p>
-              <p className="modal-stock">
-                {t('Elérhető')}: <strong style={{ color: accentColor }}>{product.current_stock} db</strong>
-              </p>
-            </div>
-
-            <div className="modal-quantity-control">
-              <label>{t('Mennyiség')}:</label>
+            <p className="modal-stock">
+              <span className="stock-icon">📦</span>
+              {t('Készlet')}: {product.current_stock}
+            </p>
+            <div className="modal-actions">
               <div className="quantity-control">
                 <button 
-                  className="quantity-btn" 
+                  className="quantity-btn"
+                  style={{ borderColor: accentColor, color: accentColor }}
                   onClick={() => handleQuantityChange(-1)}
                   disabled={quantity === 1}
-                  style={{ borderColor: accentColor }}
                 >
-                  -
+                  −
                 </button>
-                <input 
-                  type="number" 
-                  min="1" 
-                  max={product.current_stock}
-                  value={quantity}
-                  onChange={handleInputChange}
-                />
+                <span className="quantity-display">{quantity}</span>
                 <button 
-                  className="quantity-btn" 
+                  className="quantity-btn"
+                  style={{ borderColor: accentColor, color: accentColor }}
                   onClick={() => handleQuantityChange(1)}
                   disabled={quantity >= product.current_stock}
-                  style={{ borderColor: accentColor }}
                 >
                   +
                 </button>
               </div>
+              <button 
+                className="modal-add-btn"
+                style={{ backgroundColor: accentColor }}
+                onClick={handleAddToCart}
+              >
+                🛒 {t('Kosárba')} ({quantity * product.price} {payingInstrument})
+              </button>
             </div>
-
-            <button 
-              className="modal-add-to-cart"
-              onClick={handleAddToCart}
-              style={{ backgroundColor: accentColor }}
-            >
-              {t('Kosárba helyezés')}
-            </button>
           </div>
         </div>
       </div>

@@ -1,4 +1,3 @@
-/* ===== TEACHER DASHBOARD ===== */
 .teacher-dashboard {
   max-width: 1200px;
   margin: 0 auto;
@@ -7,7 +6,6 @@
   min-height: 100vh;
 }
 
-/* Dashboard Header */
 .dashboard-header {
   text-align: center;
   margin-bottom: 50px;
@@ -26,7 +24,6 @@
   margin: 0;
 }
 
-/* ===== MESSAGES ===== */
 .message {
   padding: 16px 20px;
   border-radius: 12px;
@@ -59,7 +56,6 @@
   border-left: 4px solid #2e7d32;
 }
 
-/* ===== SECTIONS ===== */
 .create-webshop-section,
 .webshops-section {
   background: white;
@@ -82,7 +78,6 @@
   margin: 0;
 }
 
-/* ===== FORM ===== */
 .webshop-form {
   display: flex;
   flex-direction: column;
@@ -124,7 +119,6 @@
   box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
 }
 
-/* ===== SZÍNVÁLASZTÓ ===== */
 .color-selector {
   display: flex;
   flex-direction: column;
@@ -141,119 +135,76 @@
   width: 100%;
   aspect-ratio: 1;
   border: 3px solid transparent;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s;
-  position: relative;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .color-preset:hover {
   transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .color-preset.active {
   border-color: #333;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transform: scale(1.05);
 }
 
-.color-preset.active::after {
-  content: '✓';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
-  font-size: 24px;
-  font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-/* Egyedi szín választó */
 .custom-color {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 15px;
 }
 
 .custom-color>label {
-  font-weight: 600;
-  color: #666;
   min-width: 100px;
+  font-weight: 600;
 }
 
 .custom-color-input {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 15px;
   flex: 1;
 }
 
 .custom-color-input input[type="color"] {
   width: 60px;
-  height: 60px;
-  border: none;
-  border-radius: 12px;
+  height: 45px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s;
-}
-
-.custom-color-input input[type="color"]:hover {
-  transform: scale(1.05);
 }
 
 .color-preview {
-  flex: 1;
-  height: 60px;
-  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 10px 20px;
+  border-radius: 8px;
   font-weight: 600;
   color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  flex: 1;
 }
 
-.color-preview span {
-  background: rgba(0, 0, 0, 0.3);
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  backdrop-filter: blur(10px);
-}
-
-/* ===== BUTTONS ===== */
-.submit-btn,
-.action-btn {
+.submit-btn {
   padding: 14px 28px;
   border: none;
+  background: linear-gradient(135deg, #4CAF50, #388E3C);
+  color: white;
   border-radius: 10px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.submit-btn {
-  background: linear-gradient(135deg, #2196F3, #1976D2);
-  color: white;
-  width: 100%;
 }
 
 .submit-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
 }
 
-/* ===== WEBSHOP GRID ===== */
 .webshop-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -275,7 +226,6 @@
   font-size: 18px;
 }
 
-/* ===== WEBSHOP CARD ===== */
 .webshop-card {
   background: white;
   border-radius: 16px;
@@ -292,6 +242,7 @@
 .webshop-card-header {
   padding: 24px;
   color: white;
+  position: relative;
 }
 
 .webshop-card-header h3 {
@@ -299,6 +250,21 @@
   font-size: 22px;
   font-weight: 700;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* JAVÍTÁS: Szerepkör badge a webshop kártyán */
+.webshop-role-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .webshop-card-body {
@@ -344,36 +310,65 @@
   color: #c62828;
 }
 
+/* JAVÍTOTT webshop-actions CSS */
 .webshop-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+  width: 100%;
+  min-height: 44px;
+}
+
+.webshop-actions button,
+.webshop-actions a {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  text-decoration: none;
   display: flex;
-  gap: 10px;
-  margin-top: 8px;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .edit-btn {
   background: #f5f5f5;
   color: #333;
-  flex: 1;
-  box-shadow: none;
 }
 
 .edit-btn:hover {
   background: #e0e0e0;
+  transform: translateY(-2px);
 }
 
 .manage-btn {
   background: linear-gradient(135deg, #2196F3, #1976D2);
   color: white;
-  flex: 1;
-  text-decoration: none;
 }
 
 .manage-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
 }
 
-/* ===== MODAL ===== */
+.partners-btn {
+  background: linear-gradient(135deg, #9C27B0, #7B1FA2) !important;
+}
+
+.partners-btn:hover {
+  box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4) !important;
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -496,7 +491,6 @@
   box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
 }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
   .form-row {
     grid-template-columns: 1fr;
@@ -517,6 +511,12 @@
 
   .custom-color>label {
     min-width: auto;
+  }
+
+  /* Mobile layout: stack buttons vertically */
+  .webshop-actions {
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
 }
 
@@ -546,7 +546,9 @@
     flex-direction: column;
   }
 
-  .webshop-actions {
-    flex-direction: column;
+  .webshop-actions button,
+  .webshop-actions a {
+    font-size: 12px;
+    padding: 10px 8px;
   }
 }
