@@ -6,7 +6,7 @@ import { SignatureCode } from '../entity/signature-code.entity';
 import { SignatureQR } from '../entity/signature-qr.entity';
 import { SignatureQRActivation } from '../entity/signature-qr-activation.entity';
 import { Webshop } from '../entity/webshop.entity';
-import { User } from '../entity/user.entity';
+import { User, UserRole } from '../entity/user.entity';
 import { UserBalance } from '../entity/user-balance.entity';
 import { WebshopPartner } from '../entity/webshop-partner.entity';
 import { GenerateCodesDto } from '../dto/generate-codes.dto';
@@ -330,8 +330,8 @@ export class SignatureService {
             for (const targetUserId of dto.userIds) {
                 let balance = await queryRunner.manager.findOne(UserBalance, {
                     where: {
-                        user_id: targetUserId,
-                        webshop_id: dto.webshopId,
+                        user: { user_id: targetUserId },
+                        webshop: { webshop_id: dto.webshopId },
                     },
                 });
 
@@ -398,8 +398,8 @@ export class SignatureService {
             // Egyenleg frissítés
             let balance = await queryRunner.manager.findOne(UserBalance, {
                 where: {
-                    user_id: userId,
-                    webshop_id: code.event.webshop_id,
+                    user: { user_id: userId },
+                    webshop: { webshop_id: code.event.webshop_id },
                 },
             });
 
@@ -484,8 +484,8 @@ export class SignatureService {
             // Egyenleg frissítés
             let balance = await queryRunner.manager.findOne(UserBalance, {
                 where: {
-                    user_id: userId,
-                    webshop_id: qr.event.webshop_id,
+                    user: { user_id: userId },
+                    webshop: { webshop_id: qr.event.webshop_id },
                 },
             });
 
@@ -614,7 +614,7 @@ export class SignatureService {
 
     async getAllStudents(): Promise<User[]> {
         return this.userRepository.find({
-            where: { role: 'student' },
+            where: { role: UserRole.STUDENT },
             select: ['user_id', 'username', 'email'],
             order: { username: 'ASC' },
         });
