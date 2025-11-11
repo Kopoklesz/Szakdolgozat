@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import CodeGenerator from './generators/CodeGenerator';
-import QRGenerator from './generators/QRGenerator';
-import DirectAdd from './generators/DirectAdd';
+//import QRGenerator from './generators/QRGenerator';
+//import DirectAdd from './generators/DirectAdd';
 import '../css/SignatureGenerated.css';
 
 export default function SignatureGenerated() {
