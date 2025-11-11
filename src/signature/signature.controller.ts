@@ -21,6 +21,7 @@ import { GenerateQRDto } from '../dto/generate-qr.dto';
 import { AddBalanceDirectDto } from '../dto/add-balance-direct.dto';
 import { RedeemCodeDto } from '../dto/redeem-code.dto';
 import { RedeemQRDto } from '../dto/redeem-qr.dto';
+import { UserRole } from '../entity/user.entity';
 
 @Controller('signature')
 export class SignatureController {
@@ -30,7 +31,7 @@ export class SignatureController {
 
     @Post('generate-codes')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles('teacher', 'admin')
+    @Roles(UserRole.TEACHER, UserRole.ADMIN)
     async generateCodes(@Req() req, @Body() dto: GenerateCodesDto, @Res() res: Response) {
         const userId = req.user.userId;
         const result = await this.signatureService.generateCodes(userId, dto);
@@ -43,7 +44,7 @@ export class SignatureController {
 
     @Post('generate-qr')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles('teacher', 'admin')
+    @Roles(UserRole.TEACHER, UserRole.ADMIN)
     async generateQR(@Req() req, @Body() dto: GenerateQRDto, @Res() res: Response) {
         const userId = req.user.userId;
         const result = await this.signatureService.generateQR(userId, dto);
@@ -56,7 +57,7 @@ export class SignatureController {
 
     @Post('add-balance-direct')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles('teacher', 'admin')
+    @Roles(UserRole.TEACHER, UserRole.ADMIN)
     async addBalanceDirect(@Req() req, @Body() dto: AddBalanceDirectDto) {
         const userId = req.user.userId;
         return this.signatureService.addBalanceDirect(userId, dto);
@@ -82,7 +83,7 @@ export class SignatureController {
 
     @Get('my-codes')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles('teacher', 'admin')
+    @Roles(UserRole.TEACHER, UserRole.ADMIN)
     async getMyCodes(@Req() req, @Query('webshopId') webshopId?: string) {
         const userId = req.user.userId;
         const shopId = webshopId ? parseInt(webshopId, 10) : undefined;
@@ -91,7 +92,7 @@ export class SignatureController {
 
     @Get('my-qrs')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles('teacher', 'admin')
+    @Roles(UserRole.TEACHER, UserRole.ADMIN)
     async getMyQRs(@Req() req, @Query('webshopId') webshopId?: string) {
         const userId = req.user.userId;
         const shopId = webshopId ? parseInt(webshopId, 10) : undefined;
@@ -100,7 +101,7 @@ export class SignatureController {
 
     @Get('students')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles('teacher', 'admin')
+    @Roles(UserRole.TEACHER, UserRole.ADMIN)
     async getAllStudents() {
         return this.signatureService.getAllStudents();
     }
@@ -109,7 +110,7 @@ export class SignatureController {
 
     @Delete('code/:codeId')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles('teacher', 'admin')
+    @Roles(UserRole.TEACHER, UserRole.ADMIN)
     async deleteCode(@Req() req, @Param('codeId') codeId: string) {
         const userId = req.user.userId;
         return this.signatureService.deleteCode(userId, parseInt(codeId, 10));
@@ -117,7 +118,7 @@ export class SignatureController {
 
     @Delete('qr/:qrId')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles('teacher', 'admin')
+    @Roles(UserRole.TEACHER, UserRole.ADMIN)
     async deleteQR(@Req() req, @Param('qrId') qrId: string) {
         const userId = req.user.userId;
         return this.signatureService.deleteQR(userId, parseInt(qrId, 10));

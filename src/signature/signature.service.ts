@@ -14,6 +14,7 @@ import { GenerateQRDto } from '../dto/generate-qr.dto';
 import { AddBalanceDirectDto } from '../dto/add-balance-direct.dto';
 import { RedeemCodeDto } from '../dto/redeem-code.dto';
 import { RedeemQRDto } from '../dto/redeem-qr.dto';
+import { UserRole } from '../entity/user.entity';
 import * as crypto from 'crypto';
 import * as PDFDocument from 'pdfkit';
 import * as QRCode from 'qrcode';
@@ -398,7 +399,7 @@ export class SignatureService {
             // Egyenleg frissítés
             let balance = await queryRunner.manager.findOne(UserBalance, {
                 where: {
-                    user: { user_id: targetUserId },
+                    user: { user_id: userId },
                     webshop: { webshop_id: dto.webshopId },
                 },
             });
@@ -484,7 +485,7 @@ export class SignatureService {
             // Egyenleg frissítés
             let balance = await queryRunner.manager.findOne(UserBalance, {
                 where: {
-                    user: { user_id: targetUserId },
+                    user: { user_id: userId },
                     webshop: { webshop_id: dto.webshopId },
                 },
             });
