@@ -1,64 +1,174 @@
 .signature-generator {
-  padding: 20px;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
+  padding: 40px 20px;
+  background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+  min-height: 100vh;
+}
+
+.signature-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.signature-header h1 {
+  font-size: 36px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 10px 0;
+}
+
+.signature-subtitle {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
 }
 
 .success-message {
-  background-color: #e8f5e9;
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
   color: #2e7d32;
-  padding: 10px;
-  border-radius: 4px;
-  margin-bottom: 20px;
+  padding: 16px 24px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: slideIn 0.3s ease;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+}
+
+.message-icon {
+  font-size: 24px;
+  background: #2e7d32;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .method-selector {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
 }
 
 .method-button {
-  padding: 10px 20px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 24px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 16px;
   background: white;
   cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
 }
 
-.method-button.active {
-  background: #04b0b8;
-  color: white;
-  border-color: #04b0b8;
+.method-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #2196F3, #1976D2);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
 }
 
 .method-button:hover {
-  background: #f0f0f0;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-color: #2196F3;
 }
 
-.method-button.active:hover {
-  background: #038e95;
+.method-button.active {
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+  border-color: #2196F3;
+  box-shadow: 0 4px 16px rgba(33, 150, 243, 0.3);
+}
+
+.method-button.active::before {
+  transform: scaleX(1);
+}
+
+.method-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.method-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.method-desc {
+  font-size: 13px;
+  color: #666;
 }
 
 .generator-content {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.code-generator-section,
-.qr-generator-section,
-.instant-generator-section {
-  padding: 20px;
-}
-
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .method-selector {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .method-button {
-    width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 20px;
+  }
+
+  .method-icon {
+    font-size: 40px;
+    margin-bottom: 0;
+  }
+
+  .method-title,
+  .method-desc {
+    text-align: left;
+  }
+}
+
+@media (max-width: 600px) {
+  .signature-generator {
+    padding: 20px 10px;
+  }
+
+  .signature-header h1 {
+    font-size: 28px;
+  }
+
+  .generator-content {
+    padding: 20px;
   }
 }

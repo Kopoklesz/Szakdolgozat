@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import CodeGenerator from './generators/CodeGenerator';
-//import QRGenerator from './generators/QRGenerator';
-import GeneratedCodesList from './lists/GeneratedCodesList';
-//import InstantGenerator from './generators/InstantGenerator';
-
+import QRGenerator from './generators/QRGenerator';
+import DirectAdd from './generators/DirectAdd';
 import '../css/SignatureGenerated.css';
 
 export default function SignatureGenerated() {
@@ -14,59 +12,62 @@ export default function SignatureGenerated() {
 
   const handleSuccess = (message) => {
     setSuccess(message);
-    setTimeout(() => setSuccess(''), 3000);
+    setTimeout(() => setSuccess(''), 5000);
   };
 
   return (
     <div className="signature-generator">
-      <h2>{t('Aláírás Generálás')}</h2>
+      <div className="signature-header">
+        <h1>{t('Aláírás Generálás')}</h1>
+        <p className="signature-subtitle">{t('Válassz módszert az egyenleg hozzáadásához')}</p>
+      </div>
       
-      {success && <div className="success-message">{success}</div>}
+      {success && (
+        <div className="success-message">
+          <span className="message-icon">✓</span>
+          {success}
+        </div>
+      )}
       
       <div className="method-selector">
         <button 
           className={`method-button ${selectedMethod === 'code' ? 'active' : ''}`}
           onClick={() => setSelectedMethod('code')}
         >
-          {t('Kód Generálás')}
+          <span className="method-icon">🎫</span>
+          <span className="method-title">{t('Kód Generálás')}</span>
+          <span className="method-desc">{t('Nyomtatható kódok')}</span>
         </button>
         <button 
           className={`method-button ${selectedMethod === 'qr' ? 'active' : ''}`}
           onClick={() => setSelectedMethod('qr')}
         >
-          {t('QR Kód')}
+          <span className="method-icon">📱</span>
+          <span className="method-title">{t('QR Kód')}</span>
+          <span className="method-desc">{t('Mobilra optimalizált')}</span>
         </button>
         <button 
-          className={`method-button ${selectedMethod === 'instant' ? 'active' : ''}`}
-          onClick={() => setSelectedMethod('instant')}
+          className={`method-button ${selectedMethod === 'direct' ? 'active' : ''}`}
+          onClick={() => setSelectedMethod('direct')}
         >
-          {t('Azonnali Hozzáadás')}
+          <span className="method-icon">💰</span>
+          <span className="method-title">{t('Direkt Hozzáadás')}</span>
+          <span className="method-desc">{t('Azonnali egyenleg')}</span>
         </button>
       </div>
 
       <div className="generator-content">
         {selectedMethod === 'code' && (
-          <>
-            <div className="code-generator-section">
-              <CodeGenerator onSuccess={handleSuccess} />
-              <GeneratedCodesList />
-            </div>
-          </>
+          <CodeGenerator onSuccess={handleSuccess} />
         )}
 
-{/*
-  {selectedMethod === 'qr' && (
-    <div className="qr-generator-section">
-      <QRGenerator onSuccess={handleSuccess} />
-    </div>
-  )}
+        {selectedMethod === 'qr' && (
+          <QRGenerator onSuccess={handleSuccess} />
+        )}
 
-  {selectedMethod === 'instant' && (
-    <div className="instant-generator-section">
-      <InstantGenerator onSuccess={handleSuccess} />
-    </div>
-  )}
-*/}
+        {selectedMethod === 'direct' && (
+          <DirectAdd onSuccess={handleSuccess} />
+        )}
       </div>
     </div>
   );
