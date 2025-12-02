@@ -10,6 +10,10 @@ import { UserBalance } from './entity/user-balance.entity';
 import { Cart } from './entity/cart.entity';
 import { CartItem } from './entity/cart-item.entity';
 import { Purchase } from './entity/purchase.entity';
+import { SignatureGenerationEvent } from './entity/signature-generation-event.entity';
+import { SignatureCode } from './entity/signature-code.entity';
+import { SignatureQR } from './entity/signature-qr.entity';
+import { SignatureQRActivation } from './entity/signature-qr-activation.entity';
 
 config();
 
@@ -22,7 +26,20 @@ export default new DataSource({
   username: configService.get('DB_USERNAME'),
   password: configService.get('DB_PASSWORD'),
   database: configService.get('DB_NAME'),
-  entities: [User, Webshop, WebshopPartner, Product, UserBalance, Cart, CartItem, Purchase],
+  entities: [
+    User,
+    Webshop,
+    WebshopPartner,
+    Product,
+    UserBalance,
+    Cart,
+    CartItem,
+    Purchase,
+    SignatureGenerationEvent,
+    SignatureCode,
+    SignatureQR,
+    SignatureQRActivation,
+  ],
   migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
   synchronize: false,
 });

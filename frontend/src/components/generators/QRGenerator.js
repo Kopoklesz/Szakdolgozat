@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import apiClient from '../../config/axios';
 import { API_ENDPOINTS } from '../../config/api';
-import GeneratedCodesList from '../lists/GeneratedCodesList';
-import '../../css/generators/CodeGenerator.css';
+import GeneratedQRsList from '../lists/GeneratedQRsList';
+import '../../css/generators/QRGenerator.css';
 
-export default function CodeGenerator({ onSuccess }) {
+export default function QRGenerator({ onSuccess }) {
   const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [webshops, setWebshops] = useState([]);
   const [formData, setFormData] = useState({
     webshop: null,
-    codeCount: 1,
+    maxActivations: 50,
     codeValue: '',
     expiryDate: ''
   });
@@ -61,8 +61,8 @@ export default function CodeGenerator({ onSuccess }) {
   const validateStep = () => {
     switch (step) {
       case 2:
-        if (formData.codeCount < 1 || formData.codeCount > 1000) {
-          setError(t('A kódok száma 1 és 1000 között lehet.'));
+        if (formData.maxActivations < 1 || formData.maxActivations > 10000) {
+          setError(t('Az aktiválások száma 1 és 10000 között lehet.'));
           return false;
         }
         break;
@@ -107,35 +107,35 @@ export default function CodeGenerator({ onSuccess }) {
     try {
       const generationData = {
         webshopId: formData.webshop.webshop_id,
-        codeCount: parseInt(formData.codeCount),
+        maxActivations: parseInt(formData.maxActivations),
         codeValue: parseFloat(formData.codeValue),
         expiryDate: formData.expiryDate
       };
 
       const response = await apiClient.post(
-        `${API_ENDPOINTS.BASE}/signature/generate-codes`,
+        `${API_ENDPOINTS.BASE}/signature/generate-qr`,
         generationData,
         {
           responseType: 'blob'
         }
       );
 
-      // PDF letöltés
+      // PNG letöltés
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `codes_${Date.now()}.pdf`);
+      link.setAttribute('download', `qr_code_${Date.now()}.png`);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
 
-      onSuccess(t('Kódok sikeresen generálva és letöltve!'));
+      onSuccess(t('QR kód sikeresen generálva és letöltve!'));
       
       // Reset form
       setFormData({
         webshop: null,
-        codeCount: 1,
+        maxActivations: 50,
         codeValue: '',
         expiryDate: ''
       });
@@ -143,8 +143,8 @@ export default function CodeGenerator({ onSuccess }) {
       setRefreshList(prev => prev + 1);
       
     } catch (error) {
-      console.error('Error generating codes:', error);
-      setError(error.response?.data?.message || t('Hiba történt a kódok generálása közben.'));
+      console.error('Error generating QR:', error);
+      setError(error.response?.data?.message || t('Hiba történt a QR kód generálása közben.'));
     } finally {
       setLoading(false);
     }
@@ -157,7 +157,7 @@ export default function CodeGenerator({ onSuccess }) {
           <div className="step-container">
             <div className="step-header">
               <h2>{t('1. Webshop kiválasztása')}</h2>
-              <p>{t('Válaszd ki a webshopot, amelyhez kódokat szeretnél generálni')}</p>
+              <p>{t('Válaszd ki a webshopot, amelyhez QR kódot szeretnél generálni')}</p>
             </div>
             
             {webshops.length === 0 ? (
@@ -193,23 +193,25 @@ export default function CodeGenerator({ onSuccess }) {
         return (
           <div className="step-container">
             <div className="step-header">
-              <h2>{t('2. Kódok száma')}</h2>
-              <p>{t('Hány kódot szeretnél generálni? (1-1000)')}</p>
+              <h2>{t('2. Maximális aktiválások')}</h2>
+              <p>{t('Hányan tudják aktiválni a QR kódot? (1-10000)')}</p>
             </div>
             
             <div className="form-group-large">
-              <label htmlFor="codeCount">{t('Kódok száma')}</label>
+              <label htmlFor="maxActivations">{t('Maximális aktiválások száma')}</label>
               <input
                 type="number"
-                id="codeCount"
-                name="codeCount"
+                id="maxActivations"
+                name="maxActivations"
                 min="1"
-                max="1000"
-                value={formData.codeCount}
+                max="10000"
+                value={formData.maxActivations}
                 onChange={handleInputChange}
                 className="input-large"
               />
-              <span className="input-hint">{t('Generált kódok PDF formátumban lesznek letölthetők')}</span>
+              <span className="input-hint">
+                {t('Az első N fő aktiválhatja, az N+1. személy már nem tudja használni')}
+              </span>
             </div>
 
             <div className="step-actions">
@@ -227,12 +229,12 @@ export default function CodeGenerator({ onSuccess }) {
         return (
           <div className="step-container">
             <div className="step-header">
-              <h2>{t('3. Kód értéke')}</h2>
-              <p>{t('Mennyi egyenleget adjanak a kódok?')}</p>
+              <h2>{t('3. QR kód értéke')}</h2>
+              <p>{t('Mennyi egyenleget adjon minden aktiválás?')}</p>
             </div>
             
             <div className="form-group-large">
-              <label htmlFor="codeValue">{t('Érték')}</label>
+              <label htmlFor="codeValue">{t('Érték aktiválásonként')}</label>
               <div className="input-with-currency">
                 <input
                   type="number"
@@ -247,7 +249,7 @@ export default function CodeGenerator({ onSuccess }) {
                 <span className="currency-label">{formData.webshop?.paying_instrument}</span>
               </div>
               <span className="input-hint">
-                {t('Minden kód ezt az értéket adja hozzá a beváltó egyenlegéhez')}
+                {t('Minden aktiválás ezt az értéket adja hozzá a felhasználó egyenlegéhez')}
               </span>
             </div>
 
@@ -267,7 +269,7 @@ export default function CodeGenerator({ onSuccess }) {
           <div className="step-container">
             <div className="step-header">
               <h2>{t('4. Lejárati dátum')}</h2>
-              <p>{t('Meddig legyenek érvényesek a kódok?')}</p>
+              <p>{t('Meddig legyen érvényes a QR kód?')}</p>
             </div>
             
             <div className="form-group-large">
@@ -282,7 +284,7 @@ export default function CodeGenerator({ onSuccess }) {
                 className="input-large"
               />
               <span className="input-hint">
-                {t('A lejárt kódok automatikusan törlődnek éjfélkor')}
+                {t('A lejárt QR kód automatikusan inaktiválódik')}
               </span>
             </div>
 
@@ -293,11 +295,11 @@ export default function CodeGenerator({ onSuccess }) {
                 <span className="summary-value">{formData.webshop?.subject_name}</span>
               </div>
               <div className="summary-item">
-                <span className="summary-label">{t('Kódok száma')}:</span>
-                <span className="summary-value">{formData.codeCount} db</span>
+                <span className="summary-label">{t('Max aktiválások')}:</span>
+                <span className="summary-value">{formData.maxActivations} fő</span>
               </div>
               <div className="summary-item">
-                <span className="summary-label">{t('Kód értéke')}:</span>
+                <span className="summary-label">{t('Érték/aktiválás')}:</span>
                 <span className="summary-value">
                   {formData.codeValue} {formData.webshop?.paying_instrument}
                 </span>
@@ -309,9 +311,9 @@ export default function CodeGenerator({ onSuccess }) {
                 </span>
               </div>
               <div className="summary-total">
-                <span className="summary-label">{t('Teljes érték')}:</span>
+                <span className="summary-label">{t('Maximális teljes érték')}:</span>
                 <span className="summary-value-large">
-                  {(formData.codeCount * formData.codeValue).toFixed(2)} {formData.webshop?.paying_instrument}
+                  {(formData.maxActivations * formData.codeValue).toFixed(2)} {formData.webshop?.paying_instrument}
                 </span>
               </div>
             </div>
@@ -321,7 +323,7 @@ export default function CodeGenerator({ onSuccess }) {
                 {t('Vissza')}
               </button>
               <button onClick={handleGenerate} className="btn-success" disabled={loading}>
-                {loading ? t('Generálás...') : t('Kódok Generálása')}
+                {loading ? t('Generálás...') : t('QR Kód Generálása')}
               </button>
             </div>
           </div>
@@ -333,7 +335,7 @@ export default function CodeGenerator({ onSuccess }) {
   };
 
   return (
-    <div className="code-generator">
+    <div className="qr-generator">
       {error && (
         <div className="error-message">
           <span className="error-icon">⚠</span>
@@ -350,7 +352,7 @@ export default function CodeGenerator({ onSuccess }) {
             <div className="progress-circle">{num}</div>
             <span className="progress-label">
               {num === 1 && t('Webshop')}
-              {num === 2 && t('Mennyiség')}
+              {num === 2 && t('Limit')}
               {num === 3 && t('Érték')}
               {num === 4 && t('Lejárat')}
             </span>
@@ -361,10 +363,10 @@ export default function CodeGenerator({ onSuccess }) {
       {renderStep()}
 
       <div className="separator">
-        <span>{t('Generált Kódok')}</span>
+        <span>{t('Generált QR Kódok')}</span>
       </div>
 
-      <GeneratedCodesList key={refreshList} />
+      <GeneratedQRsList key={refreshList} />
     </div>
   );
 }
