@@ -1,0 +1,35 @@
+version: 2
+updates:
+  # Backend függőségek (root könyvtár)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    auto-merge: true
+    rebase-strategy: "auto"
+    allow:
+      - dependency-type: "production"
+    commit-message:
+      prefix: "[security]"
+      include: "scope"
+    pull-request-branch-name:
+      separator: "/"
+    
+  # Frontend függőségek
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "03:00"
+    auto-merge: true
+    rebase-strategy: "auto"
+    allow:
+      - dependency-type: "production"
+    commit-message:
+      prefix: "[security]"
+      include: "scope"
+    pull-request-branch-name:
+      separator: "/"
